@@ -1,0 +1,52 @@
+package com.sendo.app;
+
+import android.app.Activity;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+
+/** SENDO: app de solo lectura. Muestra la web empaquetada en assets/www y lee los planes cifrados de GitHub. */
+public class MainActivity extends Activity {
+    static final String HOST = "appassets.androidplatform.net";
+    private static final String START = "https://" + HOST + "/www/index.html";
+    private WebView web;
+
+    @Override
+    protected void onCreate(Bundle state) {
+        super.onCreate(state);
+        web = new WebView(this);
+        web.setBackgroundColor(Color.BLACK);
+        WebSettings s = web.getSettings();
+        s.setJavaScriptEnabled(true);
+        s.setDomStorageEnabled(true);
+        s.setAllowFileAccess(false);
+        s.setAllowContentAccess(false);
+        s.setSupportMultipleWindows(false);
+        s.setMediaPlaybackRequiresUserGesture(true);
+        web.setWebViewClient(new Client(this));
+        setContentView(web);
+        if (state != null) web.restoreState(state);
+        else web.loadUrl(START);
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle out) {
+        super.onSaveInstanceState(out);
+        web.saveState(out);
+    }
+
+    @Override
+    public void onBackPressed() {
+        web.evaluateJavascript("(window.sendoBack&&window.sendoBack())?'1':'0'", new Back(this));
+    }
+
+    void exit() { super.onBackPressed(); }
+
+    @Override
+    protected void onDestroy() {
+        if (web != null) web.destroy();
+        super.onDestroy();
+    }
+}
