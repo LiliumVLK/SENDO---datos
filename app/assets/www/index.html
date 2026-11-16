@@ -278,6 +278,17 @@ html.tswap::view-transition-new(root){animation:vtHold 1.75s linear both;-webkit
 .tswipe{position:fixed;inset:-60vh 0 0 0;z-index:90;pointer-events:none;background:linear-gradient(to bottom,var(--to) 0,var(--to) 62%,transparent 100%);transform:translateY(-100%);animation:tsDown .7s cubic-bezier(.55,0,.2,1) forwards;transition:opacity .5s}
 .tswipe.out{opacity:0}
 @keyframes tsDown{to{transform:translateY(0)}}
+/* ===== inicio de sesión y portada: una sola pantalla, sin scroll ===== */
+html:has(body.home:not(.dev):not(.typing)),body.home:not(.dev):not(.typing){overflow:hidden;overscroll-behavior:none}
+body.home:not(.dev) .wrap{padding-block:16px;min-height:0}
+body.home:not(.dev) .cover,body.home:not(.dev) .acc{height:calc(100svh - 32px);min-height:0;overflow:hidden}
+body.home:not(.dev).typing .acc{height:auto;min-height:calc(100svh - 32px);overflow:visible}
+.cover{padding-top:clamp(56px,9svh,76px);padding-bottom:clamp(76px,12svh,104px);gap:clamp(12px,3svh,40px)}
+.cover h1{width:min(86vw,600px,62svh)}
+.acc{padding-top:clamp(56px,8svh,76px);padding-bottom:clamp(80px,12svh,104px);gap:clamp(8px,1.8svh,16px)}
+.acc .mini{width:min(50vw,270px,26svh);margin-bottom:clamp(0px,1svh,10px)}
+.acc-body{gap:clamp(8px,1.6svh,14px)}
+@media (max-height:640px){.acc-p{font-size:.84rem}.acc-f input{padding:6px 2px}.acc-go{min-height:44px}}
 /* ===== secciones ===== */
 .sec{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--lift);overflow:hidden}
 .sechead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 16px 12px}
@@ -1077,6 +1088,8 @@ function doLogin(){
   if(!hit){toast(t("badLogin"));$("accPass").select();return}
   LS.set("sendo.sess",hit[0]);editing=false;watchPlan(hit[0]);$("accPass").value="";show("app")}
 $("btnOut").onclick=()=>{if(APP){LS.set("sendo.app","");LS.set("sendo.cache","");appData=null}LS.set("sendo.sess","");watchPlan(null);show("login");toast(t("loggedOut"))};
+$("acc").addEventListener("focusin",e=>{if(e.target.matches("input")){document.body.classList.add("typing");setTimeout(()=>e.target.scrollIntoView({block:"center",behavior:"smooth"}),300)}});
+$("acc").addEventListener("focusout",()=>setTimeout(()=>{if(!$("acc").contains(document.activeElement)){document.body.classList.remove("typing");scrollTo(0,0)}},120));
 $("btnDev").onclick=()=>{if(isDev)show("dev");else toast(t("devOnly"))};
 
 /* ---------- página de cuentas ---------- */
