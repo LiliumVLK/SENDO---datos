@@ -1003,7 +1003,8 @@ Cómo leer el PDF:
 - Si hay una tabla aparte de entrenamiento, úsala para el entreno de cada día; si hay una tabla de lo que se toma durante el entreno (intra-entreno) por minutos, resúmela en "intra" con una línea por tiempo (por ejemplo «20': trago de isotónico») y una línea final con los gramos de hidratos si aparecen.
 - Si las filas de durante y post-entreno están antes de la comida, el entreno es por la mañana ("when":"am"); si están después de la merienda, por la tarde ("pm").
 - Ignora la información general (presentación, recomendaciones, tablas de equivalencias, grupos de fruta): solo interesa lo de cada día.
-- Escribe en castellano. Si el PDF está en euskera u otro idioma, tradúcelo fielmente (cantidades, alimentos y tiempos exactos).
+- Escribe los campos en castellano. Si el PDF está en euskera u otro idioma, tradúcelo fielmente (cantidades, alimentos y tiempos exactos).
+- Además, cada día lleva "eu": los mismos textos en euskera (title, detail, zone, desayuno, mediamanana, comida, merienda, cena, intra, post; solo los que tenga el día). Si el PDF está en euskera, copia el texto original tal cual; si no, tradúcelo al euskera. Las comidas que sean solo «Opciones <color>» no hace falta ponerlas en "eu".
 
 Fechas: hoy es ${today} y el lunes de esta semana es ${mon}.
 - Si el PDF indica fechas, usa esas semanas: "monday" es el lunes de cada semana (AAAA-MM-DD).
@@ -1042,6 +1043,7 @@ function cleanWeeks(res){
       const m=Math.round(Number(d.min));if(m>0&&m<=600)o.min=m;
       if(d.when==="am"||d.when==="pm")o.when=d.when;
       for(const m of MEALS)if(COL_OK.has(d[m+"Col"]))o[m+"Col"]=d[m+"Col"];
+      if(d.eu&&typeof d.eu==="object"){const e={};for(const[f,n]of [["title",60],["detail",1500],["zone",40],...["desayuno","mediamanana","comida","merienda","cena","intra","post"].map(x=>[x,600])])if(S(d.eu[f],n))e[f]=S(d.eu[f],n);if(Object.keys(e).length)o.eu=e}
       P.days[i]=o}}
   return Object.entries(M).sort((a,b)=>a[0].localeCompare(b[0])).filter(([,P])=>Object.keys(P.days).length).map(([key,P])=>{
     const plan={days:Object.values(P.days).sort((a,b)=>a.d-b.d),updatedAt:new Date().toISOString(),fuente:"pdf"};return{key,plan}})}
