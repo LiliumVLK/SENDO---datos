@@ -305,7 +305,18 @@ body.home:not(.dev).typing .acc{height:auto;min-height:calc(100svh - 32px);overf
 .nav button:disabled{opacity:.35;cursor:default}
 .nav .today{width:auto;padding:0 12px;border-radius:999px;font:600 .78rem var(--body)}
 /* dentro: los botones de arriba (inicio y modo) quedan encima, separados del recuadro de la semana */
-body.inside .wrap{padding-top:calc(env(safe-area-inset-top,0px) + 66px)}
+body.inside .wrap{padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
+/* menú de arriba: Plan semanal / Nutrición */
+.tabs{display:none}
+body.inside .tabs{display:flex;position:relative;align-self:flex-start;max-width:calc(100% - 100px);padding:4px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--lift);margin-bottom:2px}
+.tabs button{position:relative;z-index:1;border:0;background:none;padding:8px 15px;border-radius:999px;font:600 .84rem/1.15 var(--body);color:var(--muted);white-space:nowrap;transition:color .3s var(--ease)}
+.tabs button[aria-selected=true]{color:var(--accent-ink)}
+.tabs-ind{position:absolute;top:4px;bottom:4px;left:0;width:0;border-radius:999px;background:var(--accent);transition:transform .4s var(--ease),width .4s var(--ease)}
+@media(max-width:360px){.tabs button{padding:8px 11px;font-size:.8rem}}
+body.inside[data-tab=nut] #devSec,body.inside[data-tab=nut] #docSec,body.inside[data-tab=nut] #weekSec,body.inside:not([data-tab=nut]) #nutSec{display:none}
+body.swap .sec{animation:tabIn .45s var(--ease) both}
+@keyframes tabIn{from{opacity:0;transform:translateY(12px)}}
+@media(prefers-reduced-motion:reduce){body.swap .sec{animation:none}.tabs-ind{transition:none}}
 body.inside .corner{position:absolute}
 .empty{padding:26px 18px 30px;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:8px}
 .empty strong{color:var(--fg);font:700 1.1rem var(--display)}
@@ -516,6 +527,9 @@ body.inside .corner{position:absolute}
     <button type="button" class="enter" id="btnEnter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     <button type="button" class="acc-dev" id="btnOut" data-t="logout"></button>
   </header>
+<script>window.SENDO_APP={base:"https://raw.githubusercontent.com/LiliumVLK/SENDO---datos/main/",iter:150000};</script>
+
+  <nav class="tabs" id="tabs" role="tablist"><i class="tabs-ind" aria-hidden="true"></i><button type="button" role="tab" data-tab="plan" data-t="tabPlan" aria-selected="true"></button><button type="button" role="tab" data-tab="nut" data-t="tabNut" aria-selected="false"></button></nav>
 
   <section class="sec" id="devSec" hidden><div id="devBox"></div></section>
 
@@ -527,7 +541,6 @@ body.inside .corner{position:absolute}
       <div class="nav"><button type="button" id="wkPrev">‹</button><button type="button" id="wkNext">›</button></div>
     </div>
     <div id="wkBox"></div>
-<script>window.SENDO_APP={base:"https://raw.githubusercontent.com/LiliumVLK/SENDO---datos/main/",iter:150000};</script>
   </section>
 
   <section class="sec" id="nutSec" hidden>
@@ -559,7 +572,7 @@ const S={
   minutes:["Minutos","Minutuak"],zone:["Zona de pulso","Pultsu-zona"],when:["Entreno","Entrenamendua"],am:["Por la mañana","Goizean"],pm:["Por la tarde","Arratsaldean"],
   food:["Nutrición","Elikadura"],color:["Color","Kolorea"],noColor:["Sin color","Kolorerik ez"],save:["Guardar","Gorde"],cancel:["Cancelar","Utzi"],clear:["Vaciar el día","Eguna hustu"],
   saved:["Guardado","Gordeta"],saveErr:["No se ha podido guardar","Ezin izan da gorde"],note:["Nota","Oharra"],notePh:["Algo a tener en cuenta esta semana","Aste honetan kontuan hartzeko zerbait"],
-  nutTitle:["Menús por colores","Koloreen araberako menuak"],nutSub:["Cada comida y cena lleva un color según los hidratos que tiene.","Bazkari eta afari bakoitzak kolore bat du, dituen karbohidratoen arabera."],
+  tabPlan:["Plan semanal","Asteko plana"],tabNut:["Nutrición","Elikadura"],nutTitle:["Menús por colores","Koloreen araberako menuak"],nutSub:["Cada comida y cena lleva un color según los hidratos que tiene.","Bazkari eta afari bakoitzak kolore bat du, dituen karbohidratoen arabera."],
   noDb:["Esta vista es de solo lectura: no se pueden guardar cambios aquí.","Ikuspegi hau irakurtzeko soilik da: ezin da aldaketarik gorde hemen."],
   welcome:["Te damos la bienvenida","Ongi etorri"],
   welcomeTxt:["Es tu primera vez en SENDO. Escribe tu nombre y tu entrenador te dará acceso a tu plan.","Lehen aldia duzu SENDOn. Idatzi zure izena eta zure entrenatzaileak zure planerako sarbidea emango dizu."],
@@ -822,7 +835,15 @@ async function copyPrev(key,prev){const p={days:JSON.parse(JSON.stringify(prev.d
 function renderLegend(){$("legend").innerHTML=NUT.map(n=>`<div class="lg" style="--c:${n.c}"><h3><i></i>${esc(n.n[LANG==="eu"?1:0])}</h3><p>${esc(n.f[LANG==="eu"?1:0])}</p><small>${esc(n.w[LANG==="eu"?1:0])}</small></div>`).join("");revealLegend()}
 
 /* ---------- navegación ---------- */
+let tab="plan";
+function placeInd(){const b=document.querySelector('#tabs [aria-selected="true"]'),i=document.querySelector("#tabs .tabs-ind");if(!b||!i||!b.offsetWidth)return;i.style.width=b.offsetWidth+"px";i.style.transform=`translateX(${b.offsetLeft-4}px)`}
+function setTab(x,anim){tab=x;document.body.dataset.tab=x;document.querySelectorAll("#tabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===x)));placeInd();
+  if(anim){document.body.classList.remove("swap");void document.body.offsetWidth;document.body.classList.add("swap");clearTimeout(setTab.t);setTab.t=setTimeout(()=>document.body.classList.remove("swap"),600);scrollTo(0,0)}
+  if(x==="nut"&&anim)renderLegend()}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b&&b.dataset.tab!==tab)setTab(b.dataset.tab,true)});
+addEventListener("resize",()=>placeInd());
 function showInside(anim){
+  setTab("plan");requestAnimationFrame(placeInd);
   document.body.classList.remove("home");document.body.classList.add("inside");$("devSec").hidden=!editing;renderDev();renderDocs();$("weekSec").hidden=false;$("nutSec").hidden=false;renderWeek();scrollTo(0,0);
   if(anim){document.body.classList.add("arrive");$("wkBox").querySelectorAll(".wkrow,.empty").forEach((r,i)=>r.style.setProperty("--i",i));
     clearTimeout(showInside.t);showInside.t=setTimeout(()=>document.body.classList.remove("arrive"),2800)}}
@@ -890,7 +911,7 @@ $("btnTheme").onclick=()=>{
   swiping=true;const ov=document.createElement("div");ov.className="tswipe";
   ov.style.setProperty("--to",next==="dark"?"#0f1513":"#f3f5f4");document.body.append(ov);
   ov.addEventListener("animationend",()=>{apply();ov.classList.add("out");setTimeout(()=>{ov.remove();swiping=false},520)},{once:true})};
-function renderAll(){renderCover();renderLegend();renderAcc();renderDevPage();renderPdfPage();if(document.body.classList.contains("inside")){renderDev();renderDocs();renderWeek()}}
+function renderAll(){requestAnimationFrame(placeInd);renderCover();renderLegend();renderAcc();renderDevPage();renderPdfPage();if(document.body.classList.contains("inside")){renderDev();renderDocs();renderWeek()}}
 document.body.classList.add("home","waiting");buildLogo();$("miniLogo").innerHTML=LOGO_T.map(p=>`<path d="${p}"/>`).join("")+`<path d="${LOGO_M}"/>`;$("dpLogo").innerHTML=`<path d="${LOGO_M}"/>`;renderAll();
 
 /* ---------- acceso y cuentas ---------- */
@@ -1220,6 +1241,7 @@ async function appRefresh(first){
 window.sendoBack=()=>{const sh=document.querySelector(".sheet");if(sh){const c=sh.querySelector("[data-cancel]");if(c)c.click();return true}
   if(access==="edit"||access==="pdfs"){show("dev");return true}
   if(DEVAPP&&access==="dev"){const rb=$("rootsBg");if(rb)rb.remove();show("app");return true}
+  if(inside()&&tab==="nut"){setTab("plan",true);return true}
   if(inside()){goHome();return true}return false};
 if(APP){document.addEventListener("visibilitychange",()=>{if(!document.hidden&&appData)appRefresh(false)});setInterval(()=>{if(!document.hidden&&appData)appRefresh(false)},5*60e3)}
 (async()=>{
