@@ -24,7 +24,7 @@ import java.util.Set;
  * Avisos de plan nuevo. La página le pasa la cuenta abierta (archivo y clave) y las semanas que ya ve;
  * cada media hora, con conexión, Comprobador mira en GitHub si ha aparecido una semana nueva y avisa.
  */
-class Avisos {
+public class Avisos {
     static final String PREFS = "sendo.avisos";
     static final int JOB = 1;
     static final String CANAL = "planes";
@@ -94,8 +94,10 @@ class Permiso implements Runnable {
     public void run() {
         if (Build.VERSION.SDK_INT >= 33 && act.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             SharedPreferences p = act.getSharedPreferences(Avisos.PREFS, Context.MODE_PRIVATE);
-            if (p.getBoolean("asked", false)) return;
-            p.edit().putBoolean("asked", true).apply();
+            if (p.getString("id", "").isEmpty()) return;
+            int n = p.getInt("asks", 0);
+            if (n >= 2) return;
+            p.edit().putInt("asks", n + 1).apply();
             act.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 9);
         }
     }

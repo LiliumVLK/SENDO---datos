@@ -33,6 +33,16 @@ public class MainActivity extends Activity {
 
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // si ya hay una cuenta abierta, pide permiso para avisar (Android 13+) y deja programada la comprobación
+        if (!getSharedPreferences(Avisos.PREFS, MODE_PRIVATE).getString("id", "").isEmpty()) {
+            Avisos.programar(this);
+            web.postDelayed(new Permiso(this), 1200);
+        }
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle out) {
         super.onSaveInstanceState(out);
         web.saveState(out);
