@@ -43,7 +43,7 @@ public class Avisos {
         } catch (Exception ignored) { }
         p.edit().putString("base", base).putString("id", id).putString("key", key)
                 .putString("lang", lang == null ? "es" : lang).putStringSet("weeks", known).apply();
-        programar(act);
+        try { programar(act); } catch (Throwable ignored) { }
         act.runOnUiThread(new Permiso(act));
     }
 
@@ -56,13 +56,13 @@ public class Avisos {
 
     static void programar(Context c) {
         JobScheduler js = (JobScheduler) c.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        if (js == null || js.getPendingJob(JOB) != null) return;
+        try { if (js == null || js.getPendingJob(JOB) != null) return; } catch (RuntimeException e) { return; }
         JobInfo job = new JobInfo.Builder(JOB, new ComponentName(c, Comprobador.class))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .setPeriodic(30L * 60L * 1000L)
                 .setPersisted(true)
                 .build();
-        js.schedule(job);
+        try { js.schedule(job); } catch (RuntimeException ignored) { }
     }
 
     static void avisar(Context c, int nuevas, String lang) {
@@ -92,6 +92,10 @@ class Permiso implements Runnable {
 
     @Override
     public void run() {
+        try { pedir(); } catch (Throwable ignored) { }
+    }
+
+    private void pedir() {
         if (Build.VERSION.SDK_INT >= 33 && act.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             SharedPreferences p = act.getSharedPreferences(Avisos.PREFS, Context.MODE_PRIVATE);
             if (p.getString("id", "").isEmpty()) return;

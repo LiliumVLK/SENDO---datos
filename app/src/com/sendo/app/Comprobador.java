@@ -72,7 +72,7 @@ class Tarea implements Runnable {
 
     @Override
     public void run() {
-        try { Comprobador.comprobar(svc); } catch (Exception ignored) { }
+        try { Comprobador.comprobar(svc); } catch (Throwable ignored) { }
         svc.jobFinished(params, false);
     }
 }
