@@ -329,13 +329,14 @@ body.inside .tabs{display:flex;position:sticky;top:0;z-index:15;gap:6px;
 .tabs .go .ic{animation:tabPop .55s cubic-bezier(.3,1.6,.5,1)}
 .tabs .go .cal-dot{animation:calDot .5s var(--ease) both;animation-delay:calc(var(--d) * 55ms + .12s)}
 .tabs .go .cal-pin{animation:calPin .5s var(--ease) .05s}
-.tabs .go .leaf{transform-box:fill-box;transform-origin:0% 100%;animation:leaf .8s cubic-bezier(.3,1.5,.5,1) .08s}
-.tabs .go .shine{animation:shine .7s var(--ease) .15s both}
+.tabs [data-tab=nut].go .ic{animation:apple .6s cubic-bezier(.3,1.4,.5,1)}
+.tabs .leaf{transform-box:view-box;transform-origin:12.4px 7px}
+.tabs .go .leaf{animation:leaf .55s cubic-bezier(.3,1.5,.5,1) .12s both}
 @keyframes tabPop{0%{transform:scale(.7) translateY(3px)}60%{transform:scale(1.14) translateY(-2px)}100%{transform:none}}
 @keyframes calDot{from{opacity:0;transform:scale(0)}}
 @keyframes calPin{40%{transform:translateY(-2.5px)}}
-@keyframes leaf{0%{transform:rotate(-40deg) scale(.4)}55%{transform:rotate(14deg)}80%{transform:rotate(-5deg)}100%{transform:none}}
-@keyframes shine{from{stroke-dasharray:0 20}to{stroke-dasharray:20 0}}
+@keyframes apple{0%{transform:scale(.82)}55%{transform:scale(1.1)}100%{transform:none}}
+@keyframes leaf{from{transform:scale(0)}}
 .tabs .ic,.tabs .cal-dot,.tabs .cal-pin{transform-box:fill-box;transform-origin:center}
 body.inside .corner{top:calc(env(safe-area-inset-top,0px) + 14px)}
 body.inside[data-tab=nut] #devSec,body.inside[data-tab=nut] #docSec,body.inside[data-tab=nut] #weekSec,body.inside:not([data-tab=nut]) #nutSec{display:none}
@@ -526,8 +527,8 @@ body.swap .sec+.sec{animation-delay:.06s}
   <section class="dpage" id="devPage" hidden aria-labelledby="dpH">
     <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
     <header class="dv-head" style="--i:0">
-      <svg class="dv-mark" id="dpLogo" viewBox="-5 136 773 426" aria-hidden="true"></svg>
 <script>window.SENDO_APP={base:"https://raw.githubusercontent.com/LiliumVLK/SENDO---datos/main/",iter:150000};</script>
+      <svg class="dv-mark" id="dpLogo" viewBox="-5 136 773 426" aria-hidden="true"></svg>
       <div class="dv-tt"><p class="dv-kick" data-t="devAcc"></p><h1 id="dpH"><span id="dpNum">0</span><span id="dpWord"></span></h1></div>
       <button type="button" class="dv-add dv-sync rp" id="dpSync" hidden><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></button>
       <button type="button" class="dv-add rp" id="dpNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
