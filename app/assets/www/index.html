@@ -739,6 +739,13 @@ function renderCover(){
 
 /* ---------- semana ---------- */
 function curMon(){return addDays(mondayOf(new Date()),wkOffset*7)}
+/* en euskera, cada día usa sus textos "eu" (leídos del PDF original); las «Opciones <color>» ya se traducen solas */
+const LOC_MEALS=["desayuno","mediamanana","comida","merienda","cena"];
+/* los PDFs suelen poner los títulos EN MAYÚSCULAS: se dejan como frase normal */
+function calm(v){const L=v.match(/\p{L}/gu)||[],U=v.match(/\p{Lu}/gu)||[];if(L.length<4||U.length/L.length<.5)return v;
+  const l=v.replace(/[\p{L}\d'´`-]+/gu,w=>/\d/.test(w)?w:w.toLocaleLowerCase("eu"));return l.replace(/\p{L}/u,c=>c.toLocaleUpperCase("eu"))}
+function locDay(d){if(LANG!=="eu"||!d||!d.eu||typeof d.eu!=="object")return d;const o=Object.assign({},d);
+  for(const[k,v]of Object.entries(d.eu)){if(typeof v!=="string"||!v.trim())continue;if(LOC_MEALS.includes(k)&&OPT_RE.test(String(d[k]||"")))continue;o[k]=k==="title"||k==="zone"?calm(v):v}return o}
 function renderWeek(){
   const mon=curMon(),sun=addDays(mon,6),key=dk(mon),today=dk(new Date()),plan=plans[key];
   $("wkTitle").textContent=wkOffset===0?t("thisWeek"):wkOffset===-1?t("lastWeek"):wkOffset===1?t("nextWeek"):t("weekOf")+" "+fmtDM(mon);
@@ -750,7 +757,7 @@ function renderWeek(){
       const prev=plans[dk(addDays(mon,-7))];if(prev){const c=document.createElement("button");c.type="button";c.className="ghost";c.textContent=t("copyPrev");c.onclick=()=>copyPrev(key,prev);e.append(c)}}
     box.append(e);return}
   const wk=document.createElement("div");wk.className="wk";
-  for(let i=0;i<7;i++){const date=addDays(mon,i),k=dk(date),day=(plan.days||[]).find(x=>x.d===i)||{d:i};
+  for(let i=0;i<7;i++){const date=addDays(mon,i),k=dk(date),day=locDay((plan.days||[]).find(x=>x.d===i)||{d:i});
     const kinds=day.kinds&&day.kinds.length?day.kinds:["rest"],isRest=kinds.includes("rest");
     const row=document.createElement("button");row.type="button";row.className="wkrow rp"+(k===today?" today":k<today?" past":"")+(open.has(k)?" open":"");
     row.setAttribute("aria-expanded",String(open.has(k)));
