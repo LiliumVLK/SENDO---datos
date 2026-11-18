@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
         s.setSupportMultipleWindows(false);
         s.setMediaPlaybackRequiresUserGesture(true);
         web.setWebViewClient(new Client(this));
+        web.addJavascriptInterface(new Avisos(this), "SendoNative");
         setContentView(web);
         if (state != null) web.restoreState(state);
         else web.loadUrl(START);

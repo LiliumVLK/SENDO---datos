@@ -1181,7 +1181,7 @@ function doLogin(){
   const hit=Object.entries(accounts).find(([,a])=>norm(a.nombre)===n&&String(a.clave)===pw);
   if(!hit){toast(t("badLogin"));$("accPass").select();return}
   LS.set("sendo.sess",hit[0]);editing=false;watchPlan(hit[0]);$("accPass").value="";show("app")}
-$("btnOut").onclick=()=>{if(APP){LS.set("sendo.app","");LS.set("sendo.cache","");appData=null}LS.set("sendo.sess","");watchPlan(null);show("login");toast(t("loggedOut"))};
+$("btnOut").onclick=()=>{if(APP){LS.set("sendo.app","");LS.set("sendo.cache","");appData=null;avisos(null)}LS.set("sendo.sess","");watchPlan(null);show("login");toast(t("loggedOut"))};
 $("acc").addEventListener("focusin",e=>{if(e.target.matches("input")){document.body.classList.add("typing");setTimeout(()=>e.target.scrollIntoView({block:"center",behavior:"smooth"}),300)}});
 $("acc").addEventListener("focusout",()=>setTimeout(()=>{if(!$("acc").contains(document.activeElement)){document.body.classList.remove("typing");scrollTo(0,0)}},120));
 $("btnDev").onclick=()=>{if(isDev)show("dev");else toast(t("devOnly"))};
@@ -1264,7 +1264,9 @@ async function appFetch(id){const r=await fetch(`${APP.base}c/${id}.json?t=${Dat
 async function appOpen(raw,box){const k=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);
   return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(box.iv)},k,b64d(box.ct))))}
 function b64big(u){let s="";for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
-function appApply(d){appData=d;const id=d.id||"yo";accounts={[id]:{nombre:d.nombre||""}};gens={};watchPlan(id);if(inside()){renderDocs();renderWeek()}}
+function avisos(d){const N=window.SendoNative;if(!APP||!N)return;try{if(!d){if(N.unregister)N.unregister();return}
+  const s=JSON.parse(LS.get("sendo.app")||"null");if(s&&N.register)N.register(APP.base,s.id,s.k,JSON.stringify(Object.keys(d.semanas||{})),LANG)}catch(e){}}
+function appApply(d){appData=d;avisos(d);const id=d.id||"yo";accounts={[id]:{nombre:d.nombre||""}};gens={};watchPlan(id);if(inside()){renderDocs();renderWeek()}}
 async function appLogin(){
   const n=$("accName").value,pw=$("accPass").value;loginName=n;if(!norm(n)||!pw){toast(t("badLogin"));return}
   const g=$("accGo");g.disabled=true;
@@ -1279,7 +1281,7 @@ async function appRefresh(first){
   const raw=b64d(s.k);
   if(first){try{const c=JSON.parse(LS.get("sendo.cache")||"null");if(c){appApply(await appOpen(raw,c));show("app")}}catch(e){}}
   try{const box=await appFetch(s.id);
-    if(!box){LS.set("sendo.app","");LS.set("sendo.cache","");appData=null;show("login");return}
+    if(!box){LS.set("sendo.app","");LS.set("sendo.cache","");appData=null;avisos(null);show("login");return}
     LS.set("sendo.cache",JSON.stringify(box));appApply(await appOpen(raw,box));if(access==="loading")show("app")}
   catch(e){if(access==="loading")show(appData?"app":"login")}}
 window.sendoBack=()=>{const sh=document.querySelector(".sheet");if(sh){const c=sh.querySelector("[data-cancel]");if(c)c.click();return true}
