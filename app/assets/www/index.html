@@ -120,6 +120,15 @@ body.dev .cover{display:none}
 .dp-sub{font:700 1.45rem/1.05 var(--display);margin:8px 2px -2px}
 .plist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .prow{display:flex;align-items:center;gap:8px}
+.pvbar{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:8px;max-width:calc(100% - 24px);
+  padding:6px 6px 6px 14px;border-radius:999px;background:color-mix(in srgb,var(--fg) 90%,transparent);color:var(--bg);box-shadow:0 12px 32px -6px rgba(0,0,0,.45);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);animation:pvIn .5s var(--ease) both}
+.pv-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 30%,transparent);animation:pvDot 1.8s ease-in-out infinite}
+.pv-t{display:flex;flex-direction:column;line-height:1.15;min-width:0}.pv-t small{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;opacity:.7}.pv-t b{font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-b{flex:none;border:0;border-radius:999px;padding:9px 14px;font:600 .8rem var(--body);background:color-mix(in srgb,var(--bg) 14%,transparent);color:inherit;cursor:pointer}
+.pv-b:hover{background:color-mix(in srgb,var(--bg) 24%,transparent)}.pv-x{padding:9px 12px}
+@keyframes pvIn{from{opacity:0;transform:translate(-50%,20px)}}@keyframes pvDot{50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--accent) 0%,transparent)}}
+@media(prefers-reduced-motion:reduce){.pvbar,.pv-dot{animation:none}}
 .ib.dl{color:var(--fg)}.ib.dl.busy{opacity:.45;pointer-events:none;animation:ghpulse 1s ease-in-out infinite}
 .pdfchip{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:8px 12px 8px 8px;border-radius:14px;background:var(--sunk);color:var(--fg);text-decoration:none;border:1px solid transparent}
 .pdfchip:hover{border-color:var(--line)}
@@ -518,6 +527,7 @@ body.swap .sec+.sec{animation-delay:.06s}
   <button type="button" id="btnTheme" aria-label="Claro / oscuro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
 </div>
 
+<script>window.SENDO_APP={base:"https://raw.githubusercontent.com/LiliumVLK/SENDO---datos/main/",iter:150000};</script>
 <div class="wrap">
   <section class="acc" id="acc" hidden aria-labelledby="accH">
     <div class="langsw" role="group" aria-label="Hizkuntza · Idioma"><button type="button" data-lang="eu">EU</button><button type="button" data-lang="es">ES</button></div>
@@ -527,7 +537,6 @@ body.swap .sec+.sec{animation-delay:.06s}
   </section>
   <section class="dpage" id="devPage" hidden aria-labelledby="dpH">
     <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
-<script>window.SENDO_APP={base:"https://raw.githubusercontent.com/LiliumVLK/SENDO---datos/main/",iter:150000};</script>
     <header class="dv-head" style="--i:0">
       <svg class="dv-mark" id="dpLogo" viewBox="-5 136 773 426" aria-hidden="true"></svg>
       <div class="dv-tt"><p class="dv-kick" data-t="devAcc"></p><h1 id="dpH"><span id="dpNum">0</span><span id="dpWord"></span></h1></div>
@@ -639,7 +648,7 @@ const S={
   upPlan:["Subir el PDF del plan","Planaren PDFa igo"],upGen:["Subir un PDF de información general","Informazio orokorreko PDF bat igo"],
   noPdf:["Sin PDF del plan todavía","Oraindik ez dago planaren PDFrik"],uploading:["Subiendo PDF…","PDFa igotzen…"],uploaded:["PDF subido","PDFa igota"],
   upErr:["No se ha podido subir el PDF","Ezin izan da PDFa igo"],onlyPdf:["Solo se pueden subir archivos PDF","PDF fitxategiak bakarrik igo daitezke"],tooBig:["El PDF supera los 20 MB","PDFak 20 MB gainditzen ditu"],
-  rmPdf:["Quitar PDF","PDFa kendu"],dlPdf:["Descargar PDF","PDFa deskargatu"],docErr:["No se pudo abrir el PDF. Revisa la conexión","Ezin izan da PDFa ireki. Egiaztatu konexioa"],docSaved:["Guardado en Descargas","Deskargetan gordeta"],rmPdfTxt:["¿Quitar «{n}»? El archivo se borrará.","«{n}» kendu? Fitxategia ezabatuko da."],rmPlanTxt:["¿Quitar «{n}»? El archivo se borrará y el plan que salió de él desaparecerá también de la cuenta del cliente.","«{n}» kendu? Fitxategia ezabatuko da, eta bertatik ateratako plana bezeroaren kontutik ere desagertuko da."],pdfRemoved:["PDF quitado","PDFa kenduta"],
+  rmPdf:["Quitar PDF","PDFa kendu"],pvLabel:["Vista previa","Aurrebista"],pvEdit:["Editar","Editatu"],dlPdf:["Descargar PDF","PDFa deskargatu"],docErr:["No se pudo abrir el PDF. Revisa la conexión","Ezin izan da PDFa ireki. Egiaztatu konexioa"],docSaved:["Guardado en Descargas","Deskargetan gordeta"],rmPdfTxt:["¿Quitar «{n}»? El archivo se borrará.","«{n}» kendu? Fitxategia ezabatuko da."],rmPlanTxt:["¿Quitar «{n}»? El archivo se borrará y el plan que salió de él desaparecerá también de la cuenta del cliente.","«{n}» kendu? Fitxategia ezabatuko da, eta bertatik ateratako plana bezeroaren kontutik ere desagertuko da."],pdfRemoved:["PDF quitado","PDFa kenduta"],
   genTitle:["Información general","Informazio orokorra"],genSub:["PDFs para todas las cuentas.","Kontu guztientzako PDFak."],genEmpty:["Todavía no hay PDFs de información general.","Oraindik ez dago informazio orokorreko PDFrik."],
   open:["Abrir","Ireki"],myPlan:["Tu plan","Zure plana"],myPlanEmpty:["Tu entrenador todavía no ha subido tu plan.","Zure entrenatzaileak oraindik ez du zure plana igo."],
   readUnavail:["Claude no puede leer el PDF desde aquí","Claudek ezin du PDFa hemendik irakurri"],
@@ -693,7 +702,7 @@ const fmtDM=d=>`${d.getDate()} ${MONTHS[LANG][d.getMonth()]}`;
 
 /* ---------- estado ---------- */
 const APP=window.SENDO_APP||null,DEVAPP=window.SENDO_DEV||null;let appData=null;
-let db=null,canEdit=false,isDev=false,editing=false,accounts={},client=null,access="loading",plans={},wkOffset=0;const open=new Set();
+let db=null,canEdit=false,isDev=false,editing=false,preview=false,accounts={},client=null,access="loading",plans={},wkOffset=0;const open=new Set();
 const toast=m=>{const el=$("toast");el.textContent=m;el.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("on"),2400)};
 
 /* ---------- portada ---------- */
@@ -749,7 +758,7 @@ function locDay(d){if(LANG!=="eu"||!d||!d.eu||typeof d.eu!=="object")return d;co
 function renderWeek(){
   const mon=curMon(),sun=addDays(mon,6),key=dk(mon),today=dk(new Date()),plan=plans[key];
   $("wkTitle").textContent=wkOffset===0?t("thisWeek"):wkOffset===-1?t("lastWeek"):wkOffset===1?t("nextWeek"):t("weekOf")+" "+fmtDM(mon);
-  $("wkSub").textContent=(editing&&client&&accounts[client]?accounts[client].nombre+" · ":"")+`${fmtDM(mon)} – ${fmtDM(sun)}`;
+  $("wkSub").textContent=(editing&&!preview&&client&&accounts[client]?accounts[client].nombre+" · ":"")+`${fmtDM(mon)} – ${fmtDM(sun)}`;
   const box=$("wkBox");box.innerHTML="";
   if(!plan){const e=document.createElement("div");e.className="empty";
     e.innerHTML=`<strong>${t("noPlan")}</strong><span>${canEdit?t("noPlanTxt"):t("noPlanRo")}</span>`;
@@ -895,7 +904,7 @@ $("tabs").addEventListener("keydown",e=>{if(e.key!=="ArrowLeft"&&e.key!=="ArrowR
 addEventListener("resize",()=>placeInd());
 function showInside(anim){
   setTab("plan");requestAnimationFrame(placeInd);
-  document.body.classList.remove("home");document.body.classList.add("inside");$("devSec").hidden=!editing;renderDev();renderDocs();$("weekSec").hidden=false;$("nutSec").hidden=false;renderWeek();scrollTo(0,0);
+  document.body.classList.remove("home");document.body.classList.add("inside");$("devSec").hidden=!editing||preview;renderDev();renderDocs();$("weekSec").hidden=false;$("nutSec").hidden=false;renderWeek();scrollTo(0,0);
   if(anim){document.body.classList.add("arrive");$("wkBox").querySelectorAll(".wkrow,.empty").forEach((r,i)=>r.style.setProperty("--i",i));
     clearTimeout(showInside.t);showInside.t=setTimeout(()=>document.body.classList.remove("arrive"),2800)}}
 function newRoots(ox,oy,D){const r=[],N=12;for(let i=0;i<N;i++)r.push({x:ox,y:oy,a:i/N*Math.PI*2+Math.random()*.45,w:4.5+Math.random()*3,s:D/52*(.8+Math.random()*.45)});return r}
@@ -962,7 +971,7 @@ $("btnTheme").onclick=()=>{
   swiping=true;const ov=document.createElement("div");ov.className="tswipe";
   ov.style.setProperty("--to",next==="dark"?"#0f1513":"#f3f5f4");document.body.append(ov);
   ov.addEventListener("animationend",()=>{apply();ov.classList.add("out");setTimeout(()=>{ov.remove();swiping=false},520)},{once:true})};
-function renderAll(){requestAnimationFrame(placeInd);renderCover();renderLegend();renderAcc();renderDevPage();renderPdfPage();if(document.body.classList.contains("inside")){renderDev();renderDocs();renderWeek()}}
+function renderAll(){requestAnimationFrame(placeInd);renderPv();renderCover();renderLegend();renderAcc();renderDevPage();renderPdfPage();if(document.body.classList.contains("inside")){renderDev();renderDocs();renderWeek()}}
 document.body.classList.add("home","waiting");buildLogo();$("miniLogo").innerHTML=LOGO_T.map(p=>`<path d="${p}"/>`).join("")+`<path d="${LOGO_M}"/>`;$("dpLogo").innerHTML=`<path d="${LOGO_M}"/>`;renderAll();
 
 /* ---------- acceso y cuentas ---------- */
@@ -1143,7 +1152,7 @@ function renderDocs(){
 function watchPlan(uid){
   if(APP){plans=(appData&&appData.semanas)||{};client=uid||null;canEdit=false;if(inside())renderWeek();return}
   if(unsubPlan){try{unsubPlan()}catch(e){}unsubPlan=null}
-  plans={};client=uid||null;canEdit=editing&&!!client;if(inside())renderWeek();
+  plans={};client=uid||null;canEdit=editing&&!preview&&!!client;if(inside())renderWeek();
   if(!db||!client)return;
   const u=db.collection(`planes/${client}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});plans=o;if(inside())renderWeek()},()=>{});
   unsubPlan=typeof u==="function"?u:null}
@@ -1151,10 +1160,10 @@ function leaveInside(){document.body.classList.remove("inside","arrive");documen
 function show(a){
   if(a==="pdfs"&&!pdfView)a="dev";
   const prev=access;access=a;document.body.classList.remove("waiting");
-  if(a!=="edit"&&editing){editing=false;watchPlan(null)}
+  if(a!=="edit"&&editing){editing=false;preview=false;watchPlan(null)}
   if(a!=="app"&&a!=="edit"&&inside())leaveInside();
   $("acc").hidden=!["login","nodb","blocked","ghsetup"].includes(a);$("devPage").hidden=a!=="dev";$("pdfPage").hidden=a!=="pdfs";
-  document.body.classList.toggle("locked",a!=="app");document.body.classList.toggle("dev",a==="dev"||a==="edit"||a==="pdfs");
+  document.body.classList.toggle("locked",a!=="app");document.body.classList.toggle("dev",a==="dev"||(a==="edit"&&!preview)||a==="pdfs");renderPv();
   LS.set("sendo.dev",a==="dev"||a==="edit"||a==="pdfs"?"1":"");
   renderAcc();renderDevPage();renderPdfPage();
   if(a==="app"&&prev!=="app"){scrollTo(0,0);intro()}
@@ -1234,7 +1243,7 @@ $("dpList").addEventListener("click",async e=>{
   if(b.dataset.rmpdf){removePdf("acc",b.dataset.rmpdf);return}
   if(b.dataset.pdfs){pdfView={kind:"acc",id:b.dataset.pdfs};show("pdfs");return}
   if(b.dataset.reread){readPlanPdf(b.dataset.reread,null);return}
-  if(b.dataset.diary){editing=true;watchPlan(b.dataset.diary);wkOffset=0;show("edit");return}
+  if(b.dataset.diary){editing=true;preview=true;watchPlan(b.dataset.diary);wkOffset=0;show("edit");return}
   if(b.dataset.edit)editAccount(b.dataset.edit)});
 function genPass(){const S="ba be bi bo bu da de di do ka ke ki ko ku la le li lo lu ma me mi mo mu na ne ni no pa pe pi po ra re ri ro sa se si so ta te ti to za zo".split(" "),r=n=>Math.floor(Math.random()*n);
   let s="";for(let i=0;i<3;i++)s+=S[r(S.length)];return s+String(10+r(90))}
@@ -1255,8 +1264,16 @@ function editAccount(id){
   card.querySelector("#aG").onclick=()=>{card.querySelector("#aP").value=genPass()}}
 
 /* ---------- barra de edición (desarrollador) ---------- */
+/* «Ver diario»: la cuenta tal como la ve el cliente, con una barrita para editar o salir */
+function renderPv(){let b=$("pvBar");const on=access==="edit"&&preview&&!!client;
+  if(!on){if(b)b.remove();return}
+  if(!b){b=document.createElement("div");b.id="pvBar";b.className="pvbar";document.body.append(b)}
+  const a=accounts[client];
+  b.innerHTML=`<span class="pv-dot" aria-hidden="true"></span><span class="pv-t"><small>${esc(t("pvLabel"))}</small><b>${esc(a?a.nombre:"—")}</b></span><button type="button" class="pv-b" id="pvEdit">${esc(t("pvEdit"))}</button><button type="button" class="pv-b pv-x" id="pvClose" aria-label="${esc(t("backAcc"))}">✕</button>`;
+  $("pvEdit").onclick=()=>{preview=false;canEdit=!!client;document.body.classList.add("dev");renderPv();$("devSec").hidden=false;renderDev();renderWeek()};
+  $("pvClose").onclick=()=>show("dev")}
 function renderDev(){
-  const box=$("devBox");if(!box)return;if(!editing){$("devSec").hidden=true;return}
+  const box=$("devBox");if(!box)return;if(!editing||preview){$("devSec").hidden=true;return}
   const a=accounts[client];
   box.innerHTML=`<div class="sechead"><div><div class="sub">${esc(t("editing"))}</div><h2>${esc(a?a.nombre:"—")}</h2></div></div>
     <div class="wkfoot"><button type="button" class="ghost" id="backAcc">← ${esc(t("backAcc"))}</button></div>`;
