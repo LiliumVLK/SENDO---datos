@@ -34,7 +34,7 @@ body.sapping .wrap>*:not(.cover),body.sapping .corner{opacity:0}
 body.sapped .corner{transition:opacity .6s .3s var(--ease)}
 /* la portada se queda un instante con el logotipo brillando antes de irse */
 .cover.sv-out{opacity:0;transition:opacity .45s .3s var(--ease)}
-.cover.sv-out .logo{transform:scale(1.05);transform-origin:48.8% 38.3%;transition:transform .8s var(--ease)}
+.cover.sv-out .logo{transform-origin:48.8% 38.3%}
 .cover.sv-out .tag,.cover.sv-out .enter,.cover.sv-out .acc-dev,.cover.sv-out .langsw{opacity:0;transition:opacity .25s}
 body.sapped .wrap>*:not(.cover){transition:opacity .6s var(--ease)}
 .saviafx{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none}
@@ -947,9 +947,9 @@ function growRoots(roots,ctxs,dt,W,H){
     if(r.w<.45||r.x<-60||r.x>W+60||r.y<-60||r.y>H+60)roots.splice(k,1)}}
 function mkCanvas(W,H,dpr,ink){const cv=document.createElement("canvas");cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   const g=cv.getContext("2d");g.scale(dpr,dpr);g.strokeStyle=ink;g.lineCap="round";g.lineJoin="round";return[cv,g]}
-/* ===== Entrada al diario: «Savia que escribe» =====
-   Una ola de luz recorre el logotipo; la savia sale de su raíz (parte de ella por raicillas finas que crecen hasta el diario)
-   y se posa formando las letras reales del diario, que después aparece en su lugar. Las raicillas se quedan de fondo. */
+/* ===== Entrada al diario: «Semillas» =====
+   El logotipo se carga y estalla en gotas de savia; las gotas vuelan como semillas hasta su sitio en el diario
+   y, al posarse, germinan: brota un tallo con dos hojas, echa raicillas y cada pieza del diario crece desde ese punto. */
 const SV={
   R:(a,b)=>a+Math.random()*(b-a),cl:(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),lerp:(a,b,t)=>a+(b-a)*t,
   eOut:t=>1-Math.pow(1-Math.max(0,Math.min(1,t)),3),eIO:t=>{t=Math.max(0,Math.min(1,t));return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2},
@@ -957,54 +957,87 @@ const SV={
   grow(c,segs,t,col){c.lineCap="round";c.lineJoin="round";c.strokeStyle=col;
     for(const g of segs){const N=g.pts.length-1,tg=SV.cl((t-g.t0)/g.dur)*N;if(tg<=g.done)continue;let u=g.done,p=SV.at(g,u);
       while(u<tg){const nu=Math.min(tg,Math.floor(u)+1),q=SV.at(g,nu);c.lineWidth=SV.lerp(g.w0,g.w1,u/N);c.beginPath();c.moveTo(p[0],p[1]);c.lineTo(q[0],q[1]);c.stroke();p=q;u=nu}g.done=tg}},
-  vein(x,y,tx,ty){const pts=[[x,y]],L=Math.hypot(tx-x,ty-y),n=Math.max(6,Math.round(L/8)),st=L/n;let a=Math.atan2(ty-y,tx-x)+SV.R(-.5,.5);
-    for(let i=0;i<n;i++){let d=Math.atan2(ty-y,tx-x)-a;d=Math.atan2(Math.sin(d),Math.cos(d));a+=d*.32+SV.R(-.32,.32);x+=Math.cos(a)*st;y+=Math.sin(a)*st;pts.push([x,y])}return pts},
-  twig(x,y,a,len,t0){const pts=[[x,y]],n=4;for(let i=0;i<n;i++){a+=SV.R(-.3,.3);x+=Math.cos(a)*len/n;y+=Math.sin(a)*len/n;pts.push([x,y])}return{pts,w0:.7,w1:.3,t0,dur:len/.12,done:0}},
-  /* destinos: las letras del diario que se ven en pantalla, dibujadas con su misma fuente */
-  targets(W,H){const oc=document.createElement("canvas");oc.width=W;oc.height=H;const o=oc.getContext("2d");o.fillStyle="#fff";o.textBaseline="top";
-    const els=document.querySelectorAll("#tabs button span,#weekSec .sechead h2,#weekSec .sechead p,#wkBox .wkrow *");
-    els.forEach(el=>{for(const n of el.childNodes){if(n.nodeType!==3||!n.textContent.trim())continue;const r=document.createRange();r.selectNodeContents(n);const b=r.getBoundingClientRect();
-      if(b.bottom<0||b.top>H||!b.width)continue;const cs=getComputedStyle(el);o.font=`${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-      try{o.letterSpacing=cs.letterSpacing==="normal"?"0px":cs.letterSpacing}catch(e){}
-      let tx=n.textContent.replace(/\s+/g," ").trim();if(cs.textTransform==="uppercase")tx=tx.toUpperCase();o.fillText(tx,b.left,b.top+1)}});
-    const px=o.getImageData(0,0,W,H).data,T=[],step=W*H>500000?2:1.5;
-    for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=step){const xi=x|0;if(px[(y*W+xi)*4+3]>140)T.push([xi,y])}
-    for(let i=T.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[T[i],T[j]]=[T[j],T[i]]}
-    const out=T.slice(0,W*H>500000?720:560);
-    document.querySelectorAll("#wkBox .wkrow").forEach(r=>{const b=r.getBoundingClientRect();if(b.top<0||b.top>H)return;for(let k=0;k<10;k++)out.push([SV.R(b.left,b.right),b.top])});
-    return out},
+  vein(x,y,tx,ty){const pts=[[x,y]],L=Math.hypot(tx-x,ty-y),n=Math.max(6,Math.round(L/10)),st=L/n;let a=Math.atan2(ty-y,tx-x)+SV.R(-.5,.5);
+    for(let i=0;i<n;i++){let d=Math.atan2(ty-y,tx-x)-a;d=Math.atan2(Math.sin(d),Math.cos(d));a+=d*.3+SV.R(-.34,.34);x+=Math.cos(a)*st;y+=Math.sin(a)*st;pts.push([x,y])}return pts},
+  twig(x,y,a,len){const pts=[[x,y]],n=4;for(let i=0;i<n;i++){a+=SV.R(-.35,.35);x+=Math.cos(a)*len/n;y+=Math.sin(a)*len/n;pts.push([x,y])}return pts},
+  /* puntos del logotipo tal y como se ve: se dibujan sus trazos reales y se muestrean los píxeles */
+  logoPts(lr,N){const s=lr.width/823,W=Math.max(1,Math.ceil(lr.width)),H=Math.max(1,Math.ceil(lr.height)),oc=document.createElement("canvas");oc.width=W;oc.height=H;const o=oc.getContext("2d");
+    const off=g=>{try{const t=g&&g.transform.baseVal.consolidate();return t?[t.matrix.e,t.matrix.f]:[0,0]}catch(e){return[0,0]}};
+    const draw=(ps,g)=>{const[e,f]=off(g);o.setTransform(s,0,0,s,(30+e)*s,(30+f)*s);ps.forEach(p=>o.fill(new Path2D(p)))};
+    draw(LOGO_T,$("lgT"));draw([LOGO_M],$("lgM"));
+    const d=o.getImageData(0,0,W,H).data,T=[];for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=2)if(d[(y*W+x)*4+3]>120)T.push([lr.left+x,lr.top+y]);
+    for(let i=T.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[T[i],T[j]]=[T[j],T[i]]}return T.slice(0,N)},
+  /* piezas del diario que van a germinar, cada una con su semilla */
+  units(H){const U=[],vis=b=>b.width&&b.bottom>0&&b.top<H;
+    const add=(el,k,fx,fy)=>{const b=el.getBoundingClientRect();if(!vis(b))return false;U.push({el,k,b,x:fx(b),y:fy(b)});return true};
+    document.querySelectorAll(".corner button").forEach(e=>{if(getComputedStyle(e).display!=="none")add(e,"btn",b=>b.left+b.width/2,b=>b.top+b.height/2)});
+    add($("tabs"),"tabs",b=>b.left+b.width/2,b=>b.top+b.height/2);
+    document.querySelectorAll(".wrap>.sec:not([hidden])").forEach(sec=>{if(!add(sec,"card",b=>b.left+b.width/2,b=>b.top+22))return;
+      sec.querySelectorAll(".sechead,.wkrow,.empty,.legend").forEach(e=>add(e,"row",b=>b.left+Math.min(38,b.width/2),b=>b.top+Math.min(b.height/2,30)))});
+    return U.sort((a,b)=>a.y-b.y||(a.k==="card"?-1:1))},
   run(done){
     const W=innerWidth,H=innerHeight,dpr=Math.min(2,devicePixelRatio||1),css=getComputedStyle(document.documentElement),ACC=css.getPropertyValue("--accent").trim()||"#5cc2a6";
-    const lr=$("logo").getBoundingClientRect(),ox=lr.left+lr.width*402/823,oy=lr.top+lr.height*236/616,rx=lr.width*.42,ry=lr.height*.5;
-    // lienzo de raíces de fondo (el mismo que usa la app) y lienzo de la savia, encima de todo
+    const logo=$("logo"),lr=logo.getBoundingClientRect(),INK=getComputedStyle($("cover")).getPropertyValue("--cink").trim()||"#000";
+    const ox=lr.left+lr.width*402/823,oy=lr.top+lr.height*236/616,BIG=W*H>500000;
     const old=$("rootsBg");if(old)old.remove();const[cv,bg]=mkCanvas(W,H,Math.min(1.5,dpr),"#000");cv.id="rootsBg";cv.className="rootsbg";document.body.prepend(cv);
     const fxc=document.createElement("canvas");fxc.className="saviafx";fxc.width=W;fxc.height=H;document.body.append(fxc);const fx=fxc.getContext("2d",{alpha:true,desynchronized:true});
-    const logo=$("logo");logo.style.transition="filter .6s";logo.style.filter=`drop-shadow(0 0 10px ${ACC}) drop-shadow(0 0 22px ${ACC})`;
-    let P=null,veins=[];const S=2150,END=3250,t0=performance.now();
-    // a los 640 ms (la portada ya se ha ido) se coloca el diario, invisible, y se mide dónde va cada letra
+    const LP=SV.logoPts(lr,BIG?680:520);
+    // el logotipo coge aire (se encoge y brilla) antes de estallar
+    const BOOM=380;let pre=null;try{pre=logo.animate([{transform:"scale(1)",filter:"none"},{transform:"scale(.92)",offset:.6},{transform:"scale(1.07)",filter:`drop-shadow(0 0 16px ${ACC})`}],{duration:BOOM,easing:"cubic-bezier(.5,0,.8,.4)",fill:"forwards"})}catch(e){}
+    const TAU=240,P=LP.map(([x,y])=>{let a=Math.atan2(y-oy,x-ox)+SV.R(-.55,.55);const sp=SV.R(.3,1.35);
+      return{sx:x,sy:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-.12,r:SV.R(.8,1.9),ct:BOOM+SV.R(120,650),tl:0}});
+    const ex=(p,t)=>{const d=Math.max(0,t-BOOM),k=TAU*(1-Math.exp(-d/TAU))+d*.06;return[p.sx+p.vx*k,p.sy+p.vy*k+d*d*.00004]};
+    let U=null,veins=[],END=1e9,dimmed=0;const t0=performance.now();
+    // raíces de fondo: salen de donde estaba el logotipo hacia los bordes, muy finas
+    for(let i=0;i<12;i++){const a=i/12*Math.PI*2+SV.R(0,.4),L=Math.hypot(W,H)*.6;veins.push({pts:SV.vein(ox,oy,ox+Math.cos(a)*L,oy+Math.sin(a)*L),w0:.9,w1:.25,t0:BOOM+SV.R(0,220),dur:SV.R(1100,1600),done:0})}
     const build=()=>{
-      const tgt=SV.targets(W,H),n=tgt.length,tips=[];for(let i=0;i<15;i++){const a=Math.PI*(.06+.88*i/14);tips.push([ox+Math.cos(a)*rx,oy+Math.sin(a)*ry])}
-      const K=Math.min(34,Math.max(8,n>>5)),anc=[];for(let k=0;k<K;k++)anc.push(tgt[Math.floor(Math.random()*n)]);
-      const ch=anc.map(([ax,ay])=>{const tp=tips.reduce((b,q)=>Math.abs(q[0]-ax)<Math.abs(b[0]-ax)?q:b,tips[0]);return{pts:SV.vein(tp[0],tp[1],ax,ay),w0:1.1,w1:.35,t0:1e9,dur:1,done:0,first:1e9}});
-      const P=[];for(const g of tgt){let bi=0,bd=1e9;anc.forEach(([ax,ay],k)=>{const d=(ax-g[0])**2+(ay-g[1])**2;if(d<bd){bd=d;bi=k}});const c=ch[bi],e=c.pts[c.pts.length-1],use=Math.random()<.32;
-        const a=SV.R(.05,.95)*Math.PI,rr=Math.sqrt(Math.random()),sx=use?e[0]:ox+Math.cos(a)*rx*rr,sy=use?e[1]:oy+Math.sin(a)*ry*rr;
-        const p={c,tx:g[0],ty:g[1],sx,sy,F:use?.62:0,t0:use?SV.R(700,1200):660+((sy-oy)/ry)*380+SV.R(0,240),dur:SV.R(1150,1500),cx:SV.lerp(sx,g[0],.5)+SV.R(use?-30:-80,use?30:80),cy:SV.lerp(sy,g[1],.5)+SV.R(use?-30:-60,use?30:60),r:SV.R(.7,1.6),ph:SV.R(0,6.3),j:SV.R(-2.5,2.5)};
-        P.push(p);if(use&&p.t0<c.first){c.first=c.t0=p.t0;c.dur=p.dur*p.F}}
-      veins=[...ch];ch.forEach(c=>{if(c.first>1e8)return;for(let k=0;k<3;k++){const i=Math.max(1,Math.floor(SV.R(.2,.9)*(c.pts.length-1))),[x,y]=c.pts[i],[x0,y0]=c.pts[i-1],a=Math.atan2(y-y0,x-x0);
-        veins.push(SV.twig(x,y,a+SV.R(.5,1.1)*(Math.random()<.5?-1:1),SV.R(10,24),c.t0+c.dur*i/(c.pts.length-1)))}});
-      return P};
-    const frame=now=>{const t=now-t0;if(!frame.laid&&t>=560){frame.laid=1;document.body.classList.add("sapping");showInside(false)}else if(frame.laid&&!P&&t>=600)P=build();
-        fx.save();fx.globalCompositeOperation="destination-out";fx.fillStyle="rgba(0,0,0,.3)";fx.fillRect(0,0,W,H);fx.restore();
-        fx.fillStyle=ACC;const fade=t>S+250?1-SV.cl((t-S-250)/450):1;
-        const B=[[],[],[],[]];
-        if(fade>0&&P)for(const p of P){const u=(t-p.t0)/p.dur;if(u<0)continue;const uc=SV.cl(u);let x,y;
-          if(p.F&&uc<p.F){const q=SV.at(p.c,SV.eIO(uc/p.F)*(p.c.pts.length-1));x=q[0]+p.j;y=q[1]-p.j*.5}
-          else{const v=p.F?(uc-p.F)/(1-p.F):uc,k=p.F?SV.eOut(v):SV.eIO(v),a=1-k,s0=p.F?SV.at(p.c,p.c.pts.length-1):[p.sx,p.sy];x=a*a*s0[0]+2*a*k*p.cx+k*k*p.tx;y=a*a*s0[1]+2*a*k*p.cy+k*k*p.ty}
-          const lv=u>1?Math.min(3,Math.floor((.5+.5*Math.sin(t/90+p.ph))*4)):3;B[lv].push(x,y,p.r)}
-        if(fade>0)B.forEach((b,lv)=>{if(!b.length)return;fx.globalAlpha=fade*(.4+.2*lv);fx.beginPath();for(let i=0;i<b.length;i+=3){fx.moveTo(b[i]+b[i+2],b[i+1]);fx.arc(b[i],b[i+1],b[i+2],0,6.283)}fx.fill()});
-        fx.globalAlpha=1;SV.grow(bg,veins,t,"rgba(0,0,0,.42)");
-        if(t>=S&&!frame.rev){frame.rev=1;document.body.classList.add("sapped");document.body.classList.remove("sapping");cv.classList.add("dim");logo.style.filter=""}
-        if(t<END)requestAnimationFrame(frame);else{fxc.remove();document.body.classList.remove("sapped");logo.style.transition="";done&&done()}};
+      U=SV.units(H);const n=U.length;if(!n){END=BOOM+900;return}
+      const D=Math.min(120,1000/Math.max(1,n-1));
+      U.forEach((u,i)=>{u.tl=1300+i*D;u.L=u.k==="btn"?8:u.k==="tabs"?13:15;u.bend=SV.R(-4,4);u.sp=u.k!=="card";
+        u.roots=[0,1,2].map(()=>SV.twig(u.x,u.y,Math.PI/2+SV.R(-.8,.8),SV.R(8,u.k==="btn"?12:20)));
+        const lx=u.x-u.b.left,ly=u.y-u.b.top,R=Math.hypot(Math.max(lx,u.b.width-lx),Math.max(ly,u.b.height-ly))+30;u.c0=`circle(0px at ${lx}px ${ly}px)`;u.c1=`circle(${R}px at ${lx}px ${ly}px)`;
+        u.el.style.clipPath=u.c0});
+      document.body.classList.remove("sapping");
+      // cada gota elige su pieza: unas cuantas forman la semilla, el resto se siembra por la pieza
+      const area=U.map(u=>Math.max(1,(Math.min(H,u.b.bottom)-Math.max(0,u.b.top))*u.b.width*(u.k==="card"?.35:1))),tot=area.reduce((a,b)=>a+b,0);
+      let k=0;U.forEach(u=>{for(let j=0;j<6&&k<P.length;j++,k++){const p=P[k];p.u=u;p.seed=1;p.tx=u.x+SV.R(-3,3);p.ty=u.y+SV.R(-3,3)}});
+      for(;k<P.length;k++){const p=P[k];let r=Math.random()*tot,i=0;while(i<n-1&&(r-=area[i])>0)i++;const u=U[i],b=u.b;p.u=u;p.tx=SV.R(b.left+6,b.right-6);p.ty=SV.R(Math.max(0,b.top)+4,Math.min(H,b.bottom)-4)}
+      P.forEach(p=>{p.tl=p.u.tl+(p.seed?SV.R(-60,0):SV.R(-40,220));p.fd=SV.R(500,660);p.tf=p.tl-p.fd;const[x,y]=ex(p,p.tf);p.fx=x;p.fy=y;
+        p.cx=SV.lerp(x,p.tx,.5)+SV.R(-40,40);p.cy=Math.min(y,p.ty)-SV.R(40,130)});
+      END=U[n-1].tl+1050};
+    const part=(pts,f)=>{const N=pts.length-1,e=f*N;fx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<=Math.ceil(e);i++){const q=i<=e?pts[i]:SV.at({pts},e);fx.lineTo(q[0],q[1])}};
+    const frame=now=>{const t=now-t0;
+      if(!frame.laid&&t>=560){frame.laid=1;document.body.classList.add("sapping");showInside(false)}else if(frame.laid&&!U&&t>=600)build();
+      if(t>=BOOM&&!frame.boom){frame.boom=1;logo.style.opacity="0"}
+      fx.save();fx.globalCompositeOperation="destination-out";fx.fillStyle="rgba(0,0,0,.34)";fx.fillRect(0,0,W,H);fx.restore();
+      // destello del estallido
+      if(t>=BOOM&&t<BOOM+340){const k=(t-BOOM)/340,g=fx.createRadialGradient(ox,oy,0,ox,oy,60+lr.width*.7*k);g.addColorStop(0,ACC);g.addColorStop(1,"rgba(0,0,0,0)");fx.globalAlpha=(1-k)*.5;fx.fillStyle=g;fx.fillRect(0,0,W,H)}
+      // gotas: se agrupan por color y brillo y se pintan de una vez
+      if(t>=BOOM){const B=[[],[],[],[],[],[]];
+        for(const p of P){let x,y,lv=2,r=p.r;
+          if(!p.tl||t<p.tf){[x,y]=ex(p,t);if(t<BOOM+120)r*=1.6}
+          else if(t<p.tl){const k=SV.eIO((t-p.tf)/p.fd),a=1-k;x=a*a*p.fx+2*a*k*p.cx+k*k*p.tx;y=a*a*p.fy+2*a*k*p.cy+k*k*p.ty}
+          else{const f=(t-p.tl)/(p.seed?420:240);if(f>=1)continue;x=p.tx;y=p.ty;lv=f<.4?2:f<.75?1:0;if(p.seed)r*=1+.6*Math.sin(f*3.14)}
+          B[(t>p.ct?3:0)+lv].push(x,y,r)}
+        B.forEach((b,i)=>{if(!b.length)return;fx.fillStyle=i<3?INK:ACC;fx.globalAlpha=[.35,.65,.95][i%3];fx.beginPath();for(let j=0;j<b.length;j+=3){fx.moveTo(b[j]+b[j+2],b[j+1]);fx.arc(b[j],b[j+1],b[j+2],0,6.283)}fx.fill()})}
+      // germinación: anillo, tallo con dos hojas y raicillas; la pieza crece desde la semilla
+      if(U)for(const u of U){const d=t-u.tl;if(d<0)continue;
+        if(!u.go){u.go=1;try{const an=u.el.animate([{clipPath:u.c0},{clipPath:u.c1}],{duration:u.k==="card"?900:680,easing:"cubic-bezier(.2,.75,.25,1)",fill:"forwards"});
+          an.onfinish=()=>{u.el.style.clipPath="";an.cancel()};u.an=an}catch(e){u.el.style.clipPath=""}}
+        const a=1-SV.cl((d-560)/380);if(a<=0)continue;
+        const rg=SV.cl(d/520);if(rg<1){fx.globalAlpha=a*(1-rg)*.6;fx.strokeStyle=ACC;fx.lineWidth=1.2;fx.beginPath();fx.arc(u.x,u.y,4+22*SV.eOut(rg),0,6.283);fx.stroke()}
+        if(!u.sp)continue;
+        const g=SV.eOut(d/420),L=u.L*g,bx=u.x+u.bend*g,by=u.y-L;
+        fx.globalAlpha=a*.55;fx.strokeStyle=INK;fx.lineWidth=.9;fx.beginPath();u.roots.forEach(r=>part(r,SV.eOut(d/520)));fx.stroke();
+        fx.globalAlpha=a;fx.strokeStyle=ACC;fx.lineWidth=1.6;fx.lineCap="round";fx.beginPath();fx.moveTo(u.x,u.y);fx.quadraticCurveTo(u.x,u.y-L*.6,bx,by);fx.stroke();
+        const lf=SV.eOut((d-150)/300)*u.L*.55;if(lf>.5){fx.fillStyle=ACC;
+          fx.beginPath();fx.ellipse(bx-lf*.5,by-lf*.15,lf*.55,lf*.24,.5,0,6.283);fx.fill();
+          fx.beginPath();fx.ellipse(bx+lf*.5,by-lf*.15,lf*.55,lf*.24,-.5,0,6.283);fx.fill()}}
+      fx.globalAlpha=1;SV.grow(bg,veins,t,"rgba(0,0,0,.26)");
+      if(U&&!dimmed&&t>END-700){dimmed=1;cv.classList.add("dim")}
+      if(t<END)requestAnimationFrame(frame);
+      else{fxc.remove();if(U)U.forEach(u=>{u.el.style.clipPath="";u.an&&u.an.cancel()});document.body.classList.remove("sapping");
+        logo.style.opacity="";pre&&pre.cancel();done&&done()}};
     requestAnimationFrame(frame)}};
 function goInside(){
   const c=$("cover");if(c.classList.contains("exiting"))return;
