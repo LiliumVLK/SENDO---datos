@@ -216,6 +216,27 @@ body.pv #btnHome{display:none}
 .dv-sync.done{animation:ghdone .7s var(--ease)}@keyframes ghspin{to{transform:rotate(360deg)}}@keyframes ghpulse{50%{transform:scale(.82)}}@keyframes ghdone{40%{transform:scale(1.14)}}
 @media(prefers-reduced-motion:reduce){.dv-sync.busy::after,.dv-sync.busy svg,.dv-sync.done{animation:none}}.dv-add:active{transform:scale(.9)}
 .dv-add:focus-visible,.ib2:focus-visible,.pill-b:focus-visible,.arow-h:focus-visible,.tl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dv-grps{display:flex;flex-direction:column;gap:8px}
+.dv-gh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 0}
+.dv-gh h2{margin:0;font:700 .72rem var(--body);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.dv-gh .pill-b{min-height:36px;padding:0 13px;font-size:.82rem}
+.dv-glist{display:flex;flex-direction:column;gap:8px}
+.dv-glist .dp-empty{margin:0;padding:4px 2px;font-size:.85rem}
+.dv-grp{border-color:color-mix(in srgb,var(--gc) 35%,var(--line));background:linear-gradient(90deg,color-mix(in srgb,var(--gc) 9%,var(--surface)),var(--surface) 70%)}
+.dv-grp .gi{background:color-mix(in srgb,var(--gc) 18%,var(--surface));color:var(--gc);font:700 .9rem var(--body)}
+.dv-grp .ib2{width:38px;height:38px}
+.dv-grp .ib2 svg{width:17px;height:17px}
+.dp-filter{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:-2px -2px 0;padding:2px}
+.dp-filter::-webkit-scrollbar{display:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 .8rem var(--body);cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--gc)}
+.chip[aria-pressed=true]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.arow.has-g .av{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--gc)}
+.arow-t small .gname{color:var(--gc);font-weight:600}
+.gcols{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.gc{width:34px;height:34px;border-radius:50%;border:0;background:var(--gc);cursor:pointer;box-shadow:0 0 0 2px var(--surface),0 0 0 3px transparent;transition:box-shadow .2s,transform .2s var(--grow)}
+.gc[aria-pressed=true]{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--gc);transform:scale(1.06)}
+.f-hint{margin:2px 0 0;font-size:.8rem;color:var(--muted);font-weight:400}
 .dv-gen{display:flex;align-items:center;gap:12px;padding:10px 10px 10px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
 .dv-gi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
 .dv-gi svg{width:20px;height:20px}
@@ -590,9 +611,14 @@ body.swap .sec+.sec{animation-delay:.06s}
       <button type="button" class="ib2 rp" id="genPdfs"></button>
       <button type="button" class="ib2 hi rp" id="genUp"></button>
     </section>
-    <label class="dv-search" style="--i:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="sr" data-t="search"></span><input type="search" id="dpSearch" autocomplete="off"></label>
-    <div class="dp-list" id="dpList" style="--i:3"></div>
-    <button type="button" class="dp-exit2" id="dpExit" data-t="devExit" style="--i:4"></button>
+    <section class="dv-grps" id="dpGroups" aria-labelledby="grpH" style="--i:2">
+      <div class="dv-gh"><h2 id="grpH"></h2><button type="button" class="pill-b rp" id="grpNew"></button></div>
+      <div class="dv-glist" id="grpList"></div>
+    </section>
+    <label class="dv-search" style="--i:3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="sr" data-t="search"></span><input type="search" id="dpSearch" autocomplete="off"></label>
+    <div class="dp-filter" id="dpFilter" role="group" hidden style="--i:4"></div>
+    <div class="dp-list" id="dpList" style="--i:4"></div>
+    <button type="button" class="dp-exit2" id="dpExit" data-t="devExit" style="--i:5"></button>
   </section>
   <section class="dpage" id="pdfPage" hidden aria-labelledby="pfH">
     <div class="pf-top"><button type="button" class="ghost" id="pfBack"></button></div>
@@ -701,6 +727,14 @@ const S={
   noPlans:["Todavía no hay planes en PDF.","Oraindik ez dago PDF planik."],
   pdfsN:["PDFs subidos · {n}","Igotako PDFak · {n}"],current:["Plan actual","Uneko plana"],
   accWord1:["cuenta","kontu"],accWordN:["cuentas","kontu"],
+  groupsH:["Grupos","Taldeak"],newGrp:["Nuevo grupo","Talde berria"],editGrp:["Editar grupo","Taldea editatu"],grpName:["Nombre del grupo","Taldearen izena"],grpColor:["Color","Kolorea"],
+  grpNone:["Sin grupo","Talderik gabe"],grpField:["Grupo","Taldea"],allAcc:["Todas","Guztiak"],grpEmpty:["Todavía no hay grupos. Crea uno para dar el mismo plan a varias cuentas.","Oraindik ez dago talderik. Sortu bat hainbat konturi plan bera emateko."],
+  grpN1:["1 cuenta","Kontu 1"],grpN:["{n} cuentas","{n} kontu"],grpSub:["Sus PDFs dan el plan a todas las cuentas del grupo.","Bere PDFek taldeko kontu guztiei ematen diete plana."],upGrp:["Subir PDF de plan para el grupo","Taldearentzako plan PDFa igo"],
+  grpPdfs:["PDFs del grupo","Taldearen PDFak"],grpEditL:["Editar grupo","Taldea editatu"],delGrp:["Borrar grupo","Taldea ezabatu"],
+  delGrpConfirm:["¿Borrar el grupo «{n}»? Sus cuentas se quedan sin grupo y dejan de tener el plan de sus PDFs.","«{n}» taldea ezabatu? Bere kontuak talderik gabe geratuko dira eta ez dute bere PDFen plana izango."],
+  grpSaved:["Grupo guardado","Taldea gordeta"],grpDeleted:["Grupo borrado","Taldea ezabatuta"],dupGrp:["Ya hay un grupo con ese nombre","Badago izen hori duen talde bat"],needGrpName:["Escribe el nombre del grupo","Idatzi taldearen izena"],
+  metaGrp:["Plan del grupo","Taldearen plana"],grpHint:["La cuenta recibe el plan de los PDFs de su grupo. Si cambia de grupo, deja el plan del anterior y pasa a tener el del nuevo. Su plan propio manda sobre el del grupo.","Kontuak bere taldearen PDFen plana jasotzen du. Taldez aldatzen bada, aurrekoaren plana utzi eta berriarena izango du. Bere plan propioa taldearenaren gainetik dago."],
+  rmGrpTxt:["Se quitará «{n}» y el plan que venía de él desaparecerá de todas las cuentas del grupo.","«{n}» kenduko da, eta hortik zetorren plana taldeko kontu guztietatik desagertuko da."],
   metaOk:["Diario desde el {d}","Egunkaria: {d}(e)tik"],metaNone:["Sin plan todavía","Planik ez oraindik"],metaErr:["No se ha podido leer el PDF","Ezin izan da PDFa irakurri"],
   pdfN:["{n} PDF","{n} PDF"],upShort:["Subir plan","Plana igo"],pdfsShort:["PDFs · {n}","PDFak · {n}"],editShort:["Editar","Editatu"],diaryK:["Diario","Egunkaria"],
   infoBtn:["Info","Info"],upInfo:["Subir un PDF de información para todas las semanas de este cliente","Bezero honen aste guztietarako informazio PDF bat igo"],
@@ -912,6 +946,7 @@ function editNote(key){
 async function savePlanDay(key,nd,delIdx){
   const p={...(plans[key]||{days:[]})};let days=(p.days||[]).filter(x=>x.d!==(nd?nd.d:delIdx));if(nd)days.push(nd);days.sort((a,b)=>a.d-b.d);p.days=days;await putPlan(key,p)}
 async function putPlan(key,p){
+  if(p._g){delete p._g;delete p.pdf;delete p.fuente}
   p.updatedAt=new Date().toISOString();plans[key]=p;renderWeek();
   if(!db||!client)return;try{await db.doc(`planes/${client}/semanas/${key}`).set(p);toast(t("saved"))}catch(e){toast(t("saveErr"))}}
 async function copyPrev(key,prev){const p={days:JSON.parse(JSON.stringify(prev.days||[]))};if(prev.note)p.note=prev.note;await putPlan(key,p)}
@@ -988,7 +1023,7 @@ const SV={
     return U.sort((a,b)=>a.y-b.y||(a.k==="card"?-1:1))},
   /* las mismas piezas en la página de desarrollador de SENDO Dev */
   devUnits(H){const pg=$("devPage");try{pg.getAnimations({subtree:true}).forEach(a=>a.finish())}catch(e){}
-    const U=[];document.querySelectorAll(".corner button,#devPage .dv-head,#devPage .dv-gen,#devPage .dv-search,#dpList .arow,#dpExit").forEach(el=>{
+    const U=[];document.querySelectorAll(".corner button,#devPage .dv-head,#devPage .dv-gen,#devPage .dv-gh,#devPage .dp-empty,#devPage .dv-search,#dpFilter,#dpList .arow,#dpExit").forEach(el=>{
       if(getComputedStyle(el).display==="none")return;const b=el.getBoundingClientRect();if(!b.width||b.bottom<0||b.top>H)return;
       const btn=el.matches(".corner button");U.push({el,k:btn?"btn":"row",b,x:btn?b.left+b.width/2:b.left+Math.min(38,b.width/2),y:b.top+Math.min(b.height/2,30)})});
     return U.sort((a,b)=>a.y-b.y)},
@@ -1116,6 +1151,14 @@ const norm=s=>String(s||"").trim().replace(/\s+/g," ").toLowerCase();
 const EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 const COPY='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
 let unsubPlan=null,shown=new Set(),loginName="",gens={},assets=null,upTarget=null;
+/* grupos de cuentas: cada grupo tiene sus PDFs de plan, que valen para todas sus cuentas */
+let grps={},grpFilter="";
+const GCOL=["#6b5cf0","#f06b8a","#3fa8f0","#f2b33d","#12a08f","#e0703a"];
+const grpOf=a=>a&&a.grupo&&grps[a.grupo]?a.grupo:"",gcol=g=>(grps[g]&&grps[g].color)||GCOL[0];
+const grpCount=g=>Object.values(accounts).filter(a=>a.grupo===g).length,grpN=n=>n===1?t("grpN1"):t("grpN").replace("{n}",n);
+const grpOk=g=>!!g&&((grps[g]||{}).lectura||{}).estado==="ok";
+const PLUS='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+const PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1-4.2L15.6 5.2a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.2 19 4 20z"/><path d="M13.8 7l3.2 3.2"/></svg>';
 const PDFI='<svg class="pi" viewBox="0 0 34 40" aria-hidden="true"><path d="M4 2h18l9 9v25a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="currentColor" opacity=".14"/><path d="M4 2h18l9 9v25a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z M22 2v9h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="16.5" y="29" text-anchor="middle" font-family="Barlow,Arial,sans-serif" font-weight="700" font-size="9" fill="currentColor">PDF</text></svg>';
 const UPI='<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 29H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l7 7v7"/><path d="M18 3v7h7"/><text x="13" y="21.5" text-anchor="middle" font-family="Barlow,Arial,sans-serif" font-weight="700" font-size="7" fill="currentColor" stroke="none">PDF</text><path d="M25 30v-9.5M21 24l4-4 4 4"/></svg>';
 const pdfUrl=f=>f&&(f.url||("/_blob/"+f.id));
@@ -1191,15 +1234,16 @@ function cleanWeeks(res){
       P.days[i]=o}}
   return Object.entries(M).sort((a,b)=>a[0].localeCompare(b[0])).filter(([,P])=>Object.keys(P.days).length).map(([key,P])=>{
     const plan={days:Object.values(P.days).sort((a,b)=>a.d-b.d),updatedAt:new Date().toISOString(),fuente:"pdf"};return{key,plan}})}
-async function setLectura(id,L){try{await db.doc("cuentas/"+id).update({lectura:L})}catch(e){const a=accounts[id];if(a&&a.pdf)try{await db.doc("cuentas/"+id).set({...a,lectura:L})}catch(e2){}}}
-async function readPlanPdf(id,blob){
-  if(DEVAPP){const f=(accounts[id]||{}).pdf;if(!f)return;try{await db.doc("cuentas/"+id).update({lectura:{estado:"pendiente",pdf:f.id,at:new Date().toISOString()}});toast(t("queued"))}catch(e){toast(t("saveErr"))}return}
+async function setLectura(id,L,kind){const g=kind==="grp",dp=g?"grupos/":"cuentas/",src=g?grps:accounts;try{await db.doc(dp+id).update({lectura:L})}catch(e){const a=src[id];if(a&&a.pdf)try{await db.doc(dp+id).set({...a,lectura:L})}catch(e2){}}}
+async function readPlanPdf(id,blob,kind){
+  const grp=kind==="grp",src=grp?grps:accounts,dp=grp?"grupos/":"cuentas/",wp=grp?"gplanes":"planes";
+  if(DEVAPP){const f=(src[id]||{}).pdf;if(!f)return;try{await db.doc(dp+id).update({lectura:{estado:"pendiente",pdf:f.id,at:new Date().toISOString()}});toast(t("queued"))}catch(e){toast(t("saveErr"))}return}
   if(readingNow.has(id))return;
   let sample=null;try{sample=await claude.use("sample")}catch(e){}
   if(!sample){toast(t("readUnavail"));return}
   readingNow.add(id);renderDevPage();
   try{
-    if(!blob){const f=(accounts[id]||{}).pdf;const r=await fetch(pdfUrl(f));if(!r.ok)throw new Error("fetch");blob=await r.blob()}
+    if(!blob){const f=(src[id]||{}).pdf;const r=await fetch(pdfUrl(f));if(!r.ok)throw new Error("fetch");blob=await r.blob()}
     const {text,doc}=await pdfRead(blob),plain=text.replace(/--- Página \d+ ---/g,"").trim();
     let images=[],lim=null;try{lim=await sample.limits()}catch(e){}
     if(lim&&lim.images){try{images=await pdfImages(doc,typeof lim.images==="number"?Math.max(1,Math.min(12,lim.images)):(typeof lim.maxImages==="number"?Math.max(1,Math.min(12,lim.maxImages)):12))}catch(e){images=[]}}
@@ -1207,11 +1251,11 @@ async function readPlanPdf(id,blob){
     const now=new Date(),mon=dk(mondayOf(now));
     const res=await sample.json(planPrompt(text.slice(0,40000),mon,dk(now),images.length>0),{modelTier:"complex",cache:false,...(images.length?{images}:{})});
     const weeks=cleanWeeks(res);if(!weeks.length)throw new Error("noweeks");
-    const pid=((accounts[id]||{}).pdf||{}).id;if(pid)for(const w of weeks)w.plan.pdf=pid;
-    for(const w of weeks)await db.doc(`planes/${id}/semanas/${w.key}`).set(w.plan);
-    await setLectura(id,{estado:"ok",semanas:weeks.length,desde:weeks[0].key,at:new Date().toISOString()});
+    const pid=((src[id]||{}).pdf||{}).id;if(pid)for(const w of weeks)w.plan.pdf=pid;
+    for(const w of weeks)await db.doc(`${wp}/${id}/semanas/${w.key}`).set(w.plan);
+    await setLectura(id,{estado:"ok",semanas:weeks.length,desde:weeks[0].key,at:new Date().toISOString()},kind);
     toast(t("readOk").replace("{n}",weeks.length))}
-  catch(e){toast(e&&e.code==="not_granted"?t("readDenied"):t("readErr"));await setLectura(id,{estado:"error",at:new Date().toISOString()})}
+  catch(e){toast(e&&e.code==="not_granted"?t("readDenied"):t("readErr"));await setLectura(id,{estado:"error",at:new Date().toISOString()},kind)}
   finally{readingNow.delete(id);renderDevPage()}}
 const fmtSize=b=>b>=1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round((b||0)/1024))+" KB";
 const pdfChip=f=>`<a class="pdfchip" href="${esc(pdfUrl(f))}" target="_blank" rel="noopener">${PDFI}<span><b>${esc(f.name||"PDF")}</b><small>${f.at?esc(fmtDM(new Date(f.at)))+" · ":""}${esc(fmtSize(f.size))}</small></span><em class="go">${esc(t("open"))}</em></a>`;
@@ -1224,18 +1268,22 @@ $("pdfIn").onchange=async()=>{
   try{const blob=f.type==="application/pdf"?f:new Blob([f],{type:"application/pdf"});
     const r=await assets.upload(blob),info={id:r.id,url:r.url,name:f.name.slice(0,120),size:r.sizeBytes||f.size,at:new Date().toISOString()};
     if(tg.kind==="acc"){const a=accounts[tg.id];if(!a)throw 0;await db.doc("cuentas/"+tg.id).set({...a,pdf:info,pdfs:[info,...accPdfs(a).filter(x=>x.id!==info.id)].slice(0,60)});readAfter={id:tg.id,blob}}
+    else if(tg.kind==="grp"){const g=grps[tg.id];if(!g)throw 0;await db.doc("grupos/"+tg.id).set({...g,pdf:info,pdfs:[info,...accPdfs(g).filter(x=>x.id!==info.id)].slice(0,60)});readAfter={id:tg.id,blob,kind:"grp"}}
     else if(tg.kind==="info"){const a=accounts[tg.id];if(!a)throw 0;await db.doc("cuentas/"+tg.id).set({...a,infos:[info,...(Array.isArray(a.infos)?a.infos:[]).filter(x=>x.id!==info.id)].slice(0,60)})}
     else await db.doc("general/"+("g"+Date.now().toString(36)+Math.random().toString(36).slice(2,5))).set(info);
     toast(t("uploaded"))}
   catch(e){toast(t("upErr"))}
-  finally{const b=tg.kind==="gen"?$("genUp"):document.querySelector(tg.kind==="info"?`[data-info="${tg.id}"]`:`[data-up="${tg.id}"]`);if(b)b.classList.remove("busy");if(btn)btn.classList.remove("busy")}
-  if(readAfter)readPlanPdf(readAfter.id,readAfter.blob)};
-function weeksOnce(id){return new Promise((ok,ko)=>{let u=null,done=false;u=db.collection(`planes/${id}/semanas`).onSnapshot(q=>{if(done)return;done=true;const o={};q.docs.forEach(d=>{o[d.id]=d.data()});setTimeout(()=>{if(u)u()});ok(o)},e=>{if(!done){done=true;ko(e)}})})}
-async function dropWeeks(id,fid,none){const W=await weeksOnce(id);for(const[k,w]of Object.entries(W)){if(!w)continue;if(w.pdf?w.pdf===fid:(none&&w.fuente==="pdf"))await db.doc(`planes/${id}/semanas/${k}`).delete()}}
+  finally{const b=tg.kind==="gen"?$("genUp"):document.querySelector(tg.kind==="info"?`[data-info="${tg.id}"]`:tg.kind==="grp"?`[data-gup="${tg.id}"]`:`[data-up="${tg.id}"]`);if(b)b.classList.remove("busy");if(btn)btn.classList.remove("busy")}
+  if(readAfter)readPlanPdf(readAfter.id,readAfter.blob,readAfter.kind)};
+function weeksOnce(id,base){return new Promise((ok,ko)=>{let u=null,done=false;u=db.collection(`${base||"planes"}/${id}/semanas`).onSnapshot(q=>{if(done)return;done=true;const o={};q.docs.forEach(d=>{o[d.id]=d.data()});setTimeout(()=>{if(u)u()});ok(o)},e=>{if(!done){done=true;ko(e)}})})}
+async function dropWeeks(id,fid,none,base){base=base||"planes";const W=await weeksOnce(id,base);for(const[k,w]of Object.entries(W)){if(!w)continue;if(w.pdf?w.pdf===fid:(none&&w.fuente==="pdf"))await db.doc(`${base}/${id}/semanas/${k}`).delete()}}
 function removePdf(kind,id,fid){
-  const a=kind!=="gen"?accounts[id]:null,f=kind==="acc"?accPdfs(a).find(x=>x.id===fid):kind==="info"?accInfos(a).find(x=>x.id===fid):gens[id];if(!f)return;
-  sheet(t("rmPdf"),`<p style="margin:0">${esc(t(kind==="acc"?"rmPlanTxt":"rmPdfTxt").replace("{n}",f.name||"PDF"))}</p>`,async()=>{
-    try{if(kind==="acc"){const cur=accounts[id];if(!cur)return;const L=accPdfs(cur).filter(x=>x.id!==fid),n={...cur,pdfs:L};
+  const a=kind==="grp"?grps[id]:kind!=="gen"?accounts[id]:null,f=kind==="acc"||kind==="grp"?accPdfs(a).find(x=>x.id===fid):kind==="info"?accInfos(a).find(x=>x.id===fid):gens[id];if(!f)return;
+  sheet(t("rmPdf"),`<p style="margin:0">${esc(t(kind==="acc"?"rmPlanTxt":kind==="grp"?"rmGrpTxt":"rmPdfTxt").replace("{n}",f.name||"PDF"))}</p>`,async()=>{
+    try{if(kind==="grp"){const cur=grps[id];if(!cur)return;const L=accPdfs(cur).filter(x=>x.id!==fid),n={...cur,pdfs:L};
+        if(cur.pdf&&cur.pdf.id===fid){if(L.length){n.pdf=L[0];delete n.lectura}else{delete n.pdf;delete n.lectura}}
+        if(!L.length)delete n.pdfs;await db.doc("grupos/"+id).set(n);try{await dropWeeks(id,fid,!L.length,"gplanes")}catch(e){}}
+      else if(kind==="acc"){const cur=accounts[id];if(!cur)return;const L=accPdfs(cur).filter(x=>x.id!==fid),n={...cur,pdfs:L};
         if(cur.pdf&&cur.pdf.id===fid){if(L.length){n.pdf=L[0];delete n.lectura}else{delete n.pdf;delete n.lectura}}
         if(!L.length)delete n.pdfs;await db.doc("cuentas/"+id).set(n);try{await dropWeeks(id,fid,!L.length)}catch(e){}}
       else if(kind==="info"){const cur=accounts[id];if(!cur)return;const n={...cur,infos:accInfos(cur).filter(x=>x.id!==fid)};if(!n.infos.length)delete n.infos;await db.doc("cuentas/"+id).set(n)}
@@ -1264,6 +1312,9 @@ function renderPdfPage(){
   $("pfBack").textContent="← "+t("backAcc");let rows=[];
   if(pdfView.kind==="gen"){$("pfH").textContent=t("genTitle");
     rows=Object.entries(gens).sort((a,b)=>String(b[1].at).localeCompare(String(a[1].at))).map(([id,f])=>`<div class="prow">${pdfChip(f)}${dlBtn(f)}<button type="button" class="ib" data-rmgen="${esc(id)}" aria-label="${esc(t("rmPdf"))}">✕</button></div>`)}
+  else if(pdfView.kind==="grp"){const g=grps[pdfView.id];if(!g){show("dev");return}$("pfH").textContent=g.nombre||"—";
+    const P=accPdfs(g).slice().sort((x,y)=>String(y.at).localeCompare(String(x.at)));$("pfCount").textContent=t("pdfsCount").replace("{n}",P.length);
+    $("pfList").innerHTML=`<p class="pf-acc" style="margin-top:0">${esc(t("plansH"))} · ${esc(grpN(grpCount(pdfView.id)))}</p>${P.length?`<div class="plist" style="margin-top:0">${P.map(f=>`${g.pdf&&g.pdf.id===f.id?`<span class="pf-cur">${esc(t("current"))}</span>`:""}<div class="prow">${pdfChip(f)}${dlBtn(f)}<button type="button" class="ib" data-rmgrp="${esc(f.id)}" aria-label="${esc(t("rmPdf"))}">✕</button></div>`).join("")}</div>`:`<p class="nopdf" style="margin:0">${esc(t("noPlans"))}</p>`}`;return}
   else{const a=accounts[pdfView.id];if(!a){show("dev");return}$("pfH").textContent=a.nombre||"—";
     const P=accPdfs(a).slice().sort((x,y)=>String(y.at).localeCompare(String(x.at))),I=accInfos(a).slice().sort((x,y)=>String(y.at).localeCompare(String(x.at)));
     const cnt=P.length+I.length;$("pfCount").textContent=t("pdfsCount").replace("{n}",cnt);
@@ -1276,7 +1327,7 @@ async function dlPdf(id,name,btn){if(btn)btn.classList.add("busy");
     if(window.SendoNative&&SendoNative.savePdf){if(SendoNative.savePdf(fn,b64big(pdf))!=="ok")throw 0;toast(t("docSaved"))}
     else{const u=URL.createObjectURL(new Blob([pdf],{type:"application/pdf"})),a=document.createElement("a");a.href=u;a.download=fn;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60e3)}}
   catch(e){toast(t("docErr"))}finally{if(btn)btn.classList.remove("busy")}}
-$("pdfPage").addEventListener("click",e=>{const d=e.target.closest("[data-dl]");if(d){dlPdf(d.dataset.dl,d.dataset.dn,d);return}const g=e.target.closest("[data-rmgen]");if(g){removePdf("gen",g.dataset.rmgen);return}const r=e.target.closest("[data-rmacc]");if(r&&pdfView){removePdf("acc",pdfView.id,r.dataset.rmacc);return}const q=e.target.closest("[data-rminfo]");if(q&&pdfView)removePdf("info",pdfView.id,q.dataset.rminfo)});
+$("pdfPage").addEventListener("click",e=>{const d=e.target.closest("[data-dl]");if(d){dlPdf(d.dataset.dl,d.dataset.dn,d);return}const g=e.target.closest("[data-rmgen]");if(g){removePdf("gen",g.dataset.rmgen);return}const r=e.target.closest("[data-rmacc]");if(r&&pdfView){removePdf("acc",pdfView.id,r.dataset.rmacc);return}const gr=e.target.closest("[data-rmgrp]");if(gr&&pdfView){removePdf("grp",pdfView.id,gr.dataset.rmgrp);return}const q=e.target.closest("[data-rminfo]");if(q&&pdfView)removePdf("info",pdfView.id,q.dataset.rminfo)});
 $("genPdfs").onclick=()=>{pdfView={kind:"gen"};show("pdfs")};
 $("pfBack").onclick=()=>show("dev");
 
@@ -1289,8 +1340,13 @@ function watchPlan(uid){
   if(unsubPlan){try{unsubPlan()}catch(e){}unsubPlan=null}
   plans={};client=uid||null;canEdit=editing&&!preview&&!!client;if(inside())renderWeek();
   if(!db||!client)return;
-  const u=db.collection(`planes/${client}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});plans=o;if(inside())renderWeek()},()=>{});
-  unsubPlan=typeof u==="function"?u:null}
+  const gid=grpOf(accounts[client]);let own={},gw={};
+  const mix=()=>{const ids=new Set(accPdfs(grps[gid]).map(x=>x.id)),G={};
+    for(const[k,w]of Object.entries(gw))if(w&&(w.pdf?ids.has(w.pdf):!(w.fuente==="pdf"&&!ids.size)))G[k]={...w,_g:1};
+    plans={...G,...own};if(inside())renderWeek()};
+  const u=db.collection(`planes/${client}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});own=o;mix()},()=>{});
+  const u2=gid?db.collection(`gplanes/${gid}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});gw=o;mix()},()=>{}):null;
+  unsubPlan=()=>{[u,u2].forEach(f=>{if(typeof f==="function")try{f()}catch(e){}})}}
 function leaveInside(){document.body.classList.remove("inside","arrive");document.body.classList.add("home");["devSec","docSec","weekSec","nutSec"].forEach(id=>$(id).hidden=true);const rb=$("rootsBg");if(rb)rb.remove()}
 function show(a){
   if(a==="pdfs"&&!pdfView)a="dev";
@@ -1340,27 +1396,50 @@ $("acc").addEventListener("focusout",()=>setTimeout(()=>{if(!$("acc").contains(d
 $("btnDev").onclick=()=>{if(isDev)show("dev");else toast(t("devOnly"))};
 
 /* ---------- página de cuentas ---------- */
+function renderGroups(){
+  $("grpH").textContent=t("groupsH");$("grpNew").innerHTML=PLUS+esc(t("newGrp"));
+  const G=Object.entries(grps).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es"));
+  $("grpList").innerHTML=G.length?G.map(([id,g])=>{const np=accPdfs(g).length,L=g.lectura||{},rd=readingNow.has(id)||L.estado==="pendiente";
+    const st=rd?t("reading"):!g.pdf?t("metaNone"):L.estado==="ok"?t("metaOk").replace("{d}",fmtDM(new Date(L.desde+"T00:00:00"))):L.estado==="error"?t("metaErr"):t("pdfN").replace("{n}",np);
+    return `<div class="dv-gen dv-grp" style="--gc:${esc(gcol(id))}"><span class="dv-gi gi" aria-hidden="true">${esc(ini(g.nombre))}</span><div class="dv-gt"><b>${esc(g.nombre||"—")}</b><small>${esc(grpN(grpCount(id)))} · ${esc(st)}</small></div>
+      ${L.estado==="error"&&!rd&&g.pdf?`<button type="button" class="ib2 rp" data-greread="${esc(id)}" aria-label="${esc(t("retry"))}" title="${esc(t("retry"))}">↻</button>`:""}
+      ${np?`<button type="button" class="ib2 rp" data-gpdfs="${esc(id)}" aria-label="${esc(t("grpPdfs"))}" title="${esc(t("grpPdfs"))}">${LISTI}</button>`:""}
+      <button type="button" class="ib2 rp" data-gedit="${esc(id)}" aria-label="${esc(t("grpEditL"))}" title="${esc(t("grpEditL"))}">${PEN}</button>
+      <button type="button" class="ib2 hi rp" data-gup="${esc(id)}" aria-label="${esc(t("upGrp"))}" title="${esc(t("upGrp"))}">${UPL}</button></div>`}).join(""):`<p class="dp-empty">${esc(t("grpEmpty"))}</p>`}
+function renderFilter(){
+  const box=$("dpFilter"),G=Object.entries(grps).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es"));
+  if(!G.length){box.hidden=true;box.innerHTML="";grpFilter="";return}
+  if(grpFilter&&grpFilter!=="-"&&!grps[grpFilter])grpFilter="";box.hidden=false;
+  box.innerHTML=[["",t("allAcc")],...G.map(([id,g])=>[id,g.nombre]),["-",t("grpNone")]].map(([k,l])=>{const c=k&&k!=="-";
+    return `<button type="button" class="chip" data-gf="${esc(k)}" aria-pressed="${grpFilter===k}"${c?` style="--gc:${esc(gcol(k))}"`:""}>${c?"<i></i>":""}${esc(l||"—")}</button>`}).join("")}
 function renderDevPage(){
-  if(access!=="dev")return;renderGen();
+  if(access!=="dev")return;renderGen();renderGroups();renderFilter();
   const L=Object.entries(accounts).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es")),q=norm($("dpSearch").value);
   if(!$("devPage").classList.contains("stagger"))$("dpNum").textContent=L.length;$("dpWord").textContent=L.length===1?t("accWord1"):t("accWordN");
   $("dpNew").setAttribute("aria-label",t("newAcc"));$("dpNew").title=t("newAcc");$("dpSearch").placeholder=t("search");
-  const F=q?L.filter(([,a])=>norm(a.nombre).includes(q)):L;
+  const F=L.filter(([,a])=>(!q||norm(a.nombre).includes(q))&&(!grpFilter||(grpFilter==="-"?!grpOf(a):a.grupo===grpFilter)));
   if(!L.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noAcc"))}</p>`;return}
   if(!F.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noMatch"))}</p>`;return}
-  $("dpList").innerHTML=F.map(([id,a],i)=>{const n=accPdfs(a).length+accInfos(a).length,L2=a.lectura||{},rd=readingNow.has(id)||L2.estado==="pendiente",op=openAcc.has(id);
-    const st=rd?["warn",t("reading")]:!a.pdf?["",t("metaNone")]:L2.estado==="ok"?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:L2.estado==="error"?["err",t("metaErr")]:["",t("pdfN").replace("{n}",n)];
-    return `<article class="arow${op?" open":""}" style="--i:${Math.min(i,10)}">
+  $("dpList").innerHTML=F.map(([id,a],i)=>{const n=accPdfs(a).length+accInfos(a).length,L2=a.lectura||{},rd=readingNow.has(id)||L2.estado==="pendiente",op=openAcc.has(id),gid=grpOf(a),gok=grpOk(gid);
+    const st=rd?["warn",t("reading")]:!a.pdf?(gok?["ok",t("metaGrp")]:["",t("metaNone")]):L2.estado==="ok"?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:L2.estado==="error"?["err",t("metaErr")]:["",t("pdfN").replace("{n}",n)];
+    return `<article class="arow${op?" open":""}${gid?" has-g":""}" style="--i:${Math.min(i,10)}${gid?`;--gc:${esc(gcol(gid))}`:""}">
     <button type="button" class="arow-h rp" data-tog="${esc(id)}" aria-expanded="${op}"><i class="av" aria-hidden="true">${esc(ini(a.nombre))}<i class="dot ${st[0]}"></i></i>
-      <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${esc(st[1])}</small></span>${CHEV}</button>
+      <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${gid?`<span class="gname">${esc(grps[gid].nombre)}</span> · `:""}${esc(st[1])}</small></span>${CHEV}</button>
     <div class="arow-b"><div class="arow-in">
       <div class="kv"><span class="k">${esc(t("pass"))}</span><code>${shown.has(id)?esc(a.clave):"•".repeat(Math.max(6,Math.min(12,String(a.clave||"").length)))}</code>
         <button type="button" class="ib2 rp" data-eye="${esc(id)}" aria-label="${esc(t(shown.has(id)?"hide":"show"))}" aria-pressed="${shown.has(id)}">${EYE}</button>
         <button type="button" class="ib2 rp" data-copy="${esc(id)}" aria-label="${esc(t("copy"))}">${COPY}</button></div>
-      ${a.pdf&&!rd?`<div class="kv"><span class="k">${esc(t("diaryK"))}</span>${L2.estado==="ok"?`<button type="button" class="tl" data-diary="${esc(id)}">${esc(t("seeDiary"))}</button>`:""}<button type="button" class="tl" data-reread="${esc(id)}">${esc(t(L2.estado==="error"?"retry":"reread"))}</button></div>`:""}
+      ${(a.pdf&&!rd)||gok?`<div class="kv"><span class="k">${esc(t("diaryK"))}</span>${L2.estado==="ok"||gok?`<button type="button" class="tl" data-diary="${esc(id)}">${esc(t("seeDiary"))}</button>`:""}${a.pdf&&!rd?`<button type="button" class="tl" data-reread="${esc(id)}">${esc(t(L2.estado==="error"?"retry":"reread"))}</button>`:""}</div>`:""}
       <div class="arow-act"><button type="button" class="pill-b hi rp" data-up="${esc(id)}">${UPL}${esc(t("upShort"))}</button><button type="button" class="pill-b hi rp" data-info="${esc(id)}" title="${esc(t("upInfo"))}">${UPL}${esc(t("infoBtn"))}</button>${n?`<button type="button" class="pill-b rp" data-pdfs="${esc(id)}">${LISTI}${esc(t("pdfsShort").replace("{n}",n))}</button>`:""}<button type="button" class="pill-b rp" data-edit="${esc(id)}">${esc(t("editShort"))}</button></div>
     </div></div></article>`}).join("")}
 $("dpSearch").oninput=renderDevPage;
+$("grpNew").onclick=()=>editGroup(null);
+$("dpFilter").addEventListener("click",e=>{const b=e.target.closest("[data-gf]");if(!b)return;grpFilter=b.dataset.gf;renderDevPage()});
+$("grpList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.gup){pickPdf({kind:"grp",id:b.dataset.gup},b);return}
+  if(b.dataset.gpdfs){pdfView={kind:"grp",id:b.dataset.gpdfs};show("pdfs");return}
+  if(b.dataset.greread){readPlanPdf(b.dataset.greread,null,"grp");return}
+  if(b.dataset.gedit)editGroup(b.dataset.gedit)});
 $("dpNew").onclick=()=>editAccount(null);
 $("dpExit").onclick=()=>{if(DEVAPP)return;show("login")};
 if(DEVAPP){const sb=$("dpSync");sb.hidden=false;sb.setAttribute("aria-label",t("ghSync"));sb.title=t("ghSync");sb.onclick=async()=>{if(sb.classList.contains("busy"))return;sb.classList.remove("done");sb.classList.add("busy");try{await DEVAPP.sync();sb.classList.remove("busy");void sb.offsetWidth;sb.classList.add("done");toast(t("ghSyncOk"))}catch(e){sb.classList.remove("busy");if(String(e&&e.message)!=="auth")toast(t("ghSyncErr"))}};}
@@ -1383,20 +1462,43 @@ $("dpList").addEventListener("click",async e=>{
 function genPass(){const S="ba be bi bo bu da de di do ka ke ki ko ku la le li lo lu ma me mi mo mu na ne ni no pa pe pi po ra re ri ro sa se si so ta te ti to za zo".split(" "),r=n=>Math.floor(Math.random()*n);
   let s="";for(let i=0;i<3;i++)s+=S[r(S.length)];return s+String(10+r(90))}
 function editAccount(id){
-  const a=id?accounts[id]:null;
+  const a=id?accounts[id]:null,G=Object.entries(grps).sort((x,y)=>String(x[1].nombre).localeCompare(String(y[1].nombre),"es"));
+  const g0=a?grpOf(a):(grpFilter&&grpFilter!=="-"&&grps[grpFilter]?grpFilter:"");
   const card=sheet(a?t("editAcc"):t("newAcc"),`<label class="f">${esc(t("yourName"))}<input id="aN" maxlength="60" autocomplete="off" value="${esc(a?a.nombre:"")}"></label>
-    <label class="f">${esc(t("pass"))}<span class="pwrow"><input id="aP" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(a?a.clave:genPass())}"><button type="button" class="ghost" id="aG">${esc(t("gen"))}</button></span></label>`,
+    <label class="f">${esc(t("pass"))}<span class="pwrow"><input id="aP" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(a?a.clave:genPass())}"><button type="button" class="ghost" id="aG">${esc(t("gen"))}</button></span></label>
+    ${G.length?`<label class="f">${esc(t("grpField"))}<select id="aGrp"><option value="">${esc(t("grpNone"))}</option>${G.map(([k,g])=>`<option value="${esc(k)}"${k===g0?" selected":""}>${esc(g.nombre)}</option>`).join("")}</select><span class="f-hint">${esc(t("grpHint"))}</span></label>`:""}`,
     async c=>{const n=c.querySelector("#aN").value.trim().replace(/\s+/g," "),p=c.querySelector("#aP").value.trim();
       if(!n){toast(t("needName"));c.querySelector("#aN").focus();return false}
       if(Object.entries(accounts).some(([k,x])=>k!==id&&norm(x.nombre)===norm(n))){toast(t("dupName"));return false}
       if(p.length<4){toast(t("shortPw"));return false}
       const nid=id||("c"+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
-      try{await db.doc("cuentas/"+nid).set({nombre:n.slice(0,60),clave:p.slice(0,40),alta:a&&a.alta||new Date().toISOString()});shown.add(nid);toast(t("accSaved"))}
+      const gs=c.querySelector("#aGrp"),gv=gs?gs.value:"",d={...(a||{}),nombre:n.slice(0,60),clave:p.slice(0,40),alta:a&&a.alta||new Date().toISOString()};
+      if(gv&&grps[gv])d.grupo=gv;else delete d.grupo;
+      try{await db.doc("cuentas/"+nid).set(d);shown.add(nid);toast(t("accSaved"))}
       catch(e){toast(t("saveErr"));return false}},
     a?()=>{setTimeout(()=>sheet(t("delAcc"),`<p style="margin:0">${esc(t("delConfirm").replace("{n}",a.nombre))}</p>`,
       async()=>{try{await db.doc("cuentas/"+id).delete();shown.delete(id);if(assets)for(const f of [...accPdfs(a),...accInfos(a)])if(f&&f.id)try{await assets.delete(f.id)}catch(e){}toast(t("accDeleted"))}catch(e){toast(t("saveErr"))}},null,null,{save:t("delAcc")}),240)}:null,
     "#aN",{clear:t("delAcc")});
   card.querySelector("#aG").onclick=()=>{card.querySelector("#aP").value=genPass()}}
+
+function editGroup(id){
+  const g=id?grps[id]:null,used=new Set(Object.values(grps).map(x=>x.color));let col=g&&g.color||GCOL.find(c=>!used.has(c))||GCOL[Object.keys(grps).length%GCOL.length];
+  const card=sheet(g?t("editGrp"):t("newGrp"),`<label class="f">${esc(t("grpName"))}<input id="gN" maxlength="40" autocomplete="off" value="${esc(g?g.nombre:"")}"></label>
+    <div class="f"><span>${esc(t("grpColor"))}</span><div class="gcols">${GCOL.map(c=>`<button type="button" class="gc" data-c="${c}" style="--gc:${c}" aria-pressed="${c===col}" aria-label="${c}"></button>`).join("")}</div></div>
+    <p class="f-hint">${esc(g?grpN(grpCount(id))+" · "+t("grpSub"):t("grpSub"))}</p>`,
+    async c=>{const n=c.querySelector("#gN").value.trim().replace(/\s+/g," ");
+      if(!n){toast(t("needGrpName"));c.querySelector("#gN").focus();return false}
+      if(Object.entries(grps).some(([k,x])=>k!==id&&norm(x.nombre)===norm(n))){toast(t("dupGrp"));return false}
+      const nid=id||("g"+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
+      try{await db.doc("grupos/"+nid).set({...(g||{}),nombre:n.slice(0,40),color:col,alta:g&&g.alta||new Date().toISOString()});toast(t("grpSaved"))}
+      catch(e){toast(t("saveErr"));return false}},
+    g?()=>{setTimeout(()=>sheet(t("delGrp"),`<p style="margin:0">${esc(t("delGrpConfirm").replace("{n}",g.nombre))}</p>`,
+      async()=>{try{for(const[k,a]of Object.entries(accounts))if(a.grupo===id){const n={...a};delete n.grupo;await db.doc("cuentas/"+k).set(n)}
+          try{const W=await weeksOnce(id,"gplanes");for(const k of Object.keys(W))await db.doc(`gplanes/${id}/semanas/${k}`).delete()}catch(e){}
+          await db.doc("grupos/"+id).delete();if(assets)for(const f of accPdfs(g))if(f&&f.id)try{await assets.delete(f.id)}catch(e){}
+          if(grpFilter===id)grpFilter="";toast(t("grpDeleted"))}catch(e){toast(t("saveErr"))}},null,null,{save:t("delGrp")}),240)}:null,
+    "#gN",{clear:t("delGrp")});
+  card.querySelectorAll(".gc").forEach(b=>b.onclick=()=>{col=b.dataset.c;card.querySelectorAll(".gc").forEach(x=>x.setAttribute("aria-pressed",String(x===b)))})}
 
 /* ---------- barra de edición (desarrollador) ---------- */
 /* «Ver diario»: la cuenta tal como la ve el cliente. Pestaña arriba con un lápiz (editar sí/no) y la ✕, que es la única salida */
@@ -1464,6 +1566,7 @@ if(APP){document.addEventListener("visibilitychange",()=>{if(!document.hidden&&a
     if(!isDev){clearTimeout(giveUp);show("blocked");return}
     try{assets=await claude.use("assets")}catch(e){assets=null}
     db.collection("general").onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});gens=o;if(access==="dev")renderGen();renderPdfPage();if(inside())renderDocs()},()=>{});
+    db.collection("grupos").onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});grps=o;renderDevPage();renderPdfPage()},()=>{});
     let first=true;
     db.collection("cuentas").onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});accounts=o;
       if(first){first=false;clearTimeout(giveUp);const s=LS.get("sendo.sess");
