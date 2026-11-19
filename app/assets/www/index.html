@@ -236,6 +236,14 @@ body.pv #btnHome{display:none}
 .gbox-h{display:flex;align-items:center;gap:8px;padding:2px 2px 2px 2px}
 .gbox-tog{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:4px 6px 4px 2px;border:0;background:none;color:inherit;text-align:left;border-radius:14px;cursor:pointer;position:relative;overflow:hidden}
 .gbox-tog .dv-gt{flex:1}
+.gbox-tog{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
+.dp-hint{margin:-2px 2px 2px;font-size:.78rem;color:var(--muted)}
+.gbox.shift{transition:transform .3s var(--grow)}
+.gbox.lifting{transition:transform .25s var(--grow),box-shadow .25s}
+.gbox.dragging{position:relative;z-index:30;box-shadow:var(--lift),0 18px 40px -18px rgba(0,0,0,.45);cursor:grabbing}
+.gbox.dragging .gbox-tog{cursor:grabbing}
+.gbox.dropping{transition:transform .32s var(--grow),box-shadow .32s}
+body.gdrag,body.gdrag *{-webkit-user-select:none;user-select:none}
 .gbox.open .gbox-tog .chev{transform:rotate(180deg)}
 .gbox{gap:0}
 .gbox-l{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--grow)}
@@ -793,7 +801,7 @@ const S={
   noPlans:["Todavía no hay planes en PDF.","Oraindik ez dago PDF planik."],
   pdfsN:["PDFs subidos · {n}","Igotako PDFak · {n}"],current:["Plan actual","Uneko plana"],
   accWord1:["cuenta","kontu"],accWordN:["cuentas","kontu"],
-  groupsH:["Grupos","Taldeak"],dvTabAcc:["Cuentas","Kontuak"],dvTabGrp:["Grupos","Taldeak"],newGrp:["Nuevo grupo","Talde berria"],editGrp:["Editar grupo","Taldea editatu"],grpName:["Nombre del grupo","Taldearen izena"],grpColor:["Color","Kolorea"],
+  groupsH:["Grupos","Taldeak"],grpDragHint:["Mantén pulsado un grupo y desliza para cambiarlo de sitio.","Eutsi talde bati sakatuta eta irristatu lekuz aldatzeko."],grpOrderSaved:["Orden guardado","Ordena gordeta"],dvTabAcc:["Cuentas","Kontuak"],dvTabGrp:["Grupos","Taldeak"],newGrp:["Nuevo grupo","Talde berria"],editGrp:["Editar grupo","Taldea editatu"],grpName:["Nombre del grupo","Taldearen izena"],grpColor:["Color","Kolorea"],
   grpNone:["Sin grupo","Talderik gabe"],grpField:["Grupos","Taldeak"],grpBoxEmpty:["No hay cuentas en este grupo.","Ez dago konturik talde honetan."],allAcc:["Todas","Guztiak"],grpEmpty:["Todavía no hay grupos. Crea uno para dar el mismo plan a varias cuentas.","Oraindik ez dago talderik. Sortu bat hainbat konturi plan bera emateko."],
   grpN1:["1 cuenta","Kontu 1"],grpN:["{n} cuentas","{n} kontu"],grpSub:["Sus PDFs dan el plan a todas las cuentas del grupo.","Bere PDFek taldeko kontu guztiei ematen diete plana."],upGrp:["Subir PDF de plan para el grupo","Taldearentzako plan PDFa igo"],
   grpPdfs:["PDFs del grupo","Taldearen PDFak"],grpEditL:["Editar grupo","Taldea editatu"],delGrp:["Borrar grupo","Taldea ezabatu"],
@@ -1246,6 +1254,7 @@ const grpCount=g=>Object.values(accounts).filter(a=>grpList(a).includes(g)).leng
 function mergeWeek(a,b){const D={};for(const x of a.days||[])D[x.d]={...x};
   for(const x of b.days||[]){const o=D[x.d]||{};for(const[k,v]of Object.entries(x))o[k]=k==="eu"&&v&&typeof v==="object"?{...(o.eu||{}),...v}:v;D[x.d]=o}
   const{days,...rest}=b;return{...a,...rest,days:Object.keys(D).map(Number).sort((x,y)=>x-y).map(k=>D[k])}}
+const grpOrd=([ka,a],[kb,b])=>((a.orden??1e9)-(b.orden??1e9))||String(a.nombre).localeCompare(String(b.nombre),"es");
 const grpOk=g=>!!g&&((grps[g]||{}).lectura||{}).estado==="ok";
 const CAL_A='<svg class="cala" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.2"/><path d="M3.5 9.8h17"/><path class="cpin" d="M8 3v3.6M16 3v3.6"/>'+[[8,13.6],[12,13.6],[16,13.6],[8,17.2],[12,17.2]].map(([x,y],i)=>`<circle class="cdot" style="--d:${i}" cx="${x}" cy="${y}" r="1.15" fill="currentColor" stroke="none"/>`).join("")+'</svg>';
 const LOCK_C='<svg class="lck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shk" d="M8 10.6V8a4 4 0 0 1 8 0v2.6"/><rect x="5" y="10.6" width="14" height="10" rx="2.6"/><path d="M12 14.6v2"/></svg>';
@@ -1501,13 +1510,15 @@ $("acc").addEventListener("focusout",()=>setTimeout(()=>{if(!$("acc").contains(d
 $("btnDev").onclick=()=>{if(isDev)show("dev");else toast(t("devOnly"))};
 
 /* ---------- página de cuentas ---------- */
-let openGrp=new Set();
+let openGrp=new Set(),gdrag=null;
 function renderGroups(){
   $("grpH").textContent=t("groupsH");$("grpNew").innerHTML=PLUS+esc(t("newGrp"));
-  const G=Object.entries(grps).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es")),L=Object.entries(accounts).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es"));
+  if(gdrag){gdrag.pending=1;return}
+  const G=Object.entries(grps).sort(grpOrd),L=Object.entries(accounts).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es"));
+  $("grpH").title=G.length>1?t("grpDragHint"):"";
   const box=(key,cls,style,head,M,empty)=>{const op=openGrp.has(key);
     return `<section class="gbox${cls}${op?" open":""}" data-gbox="${esc(key)}"${style}>${head(op)}<div class="gbox-l"><div class="gbox-in">${M.length?M.map(([id,a],i)=>accRow(id,a,i,key)).join(""):`<p class="dp-empty">${esc(empty)}</p>`}</div></div></section>`};
-  const H=G.length?[]:[`<p class="dp-empty">${esc(t("grpEmpty"))}</p>`];H.push(...G.map(([gid,g])=>box(gid,"",` style="--gc:${esc(gcol(gid))}"`,op=>grpHead(gid,g,op),L.filter(([,a])=>grpList(a).includes(gid)),t("grpBoxEmpty"))));
+  const H=G.length?(G.length>1?[`<p class="dp-hint">${esc(t("grpDragHint"))}</p>`]:[]):[`<p class="dp-empty">${esc(t("grpEmpty"))}</p>`];H.push(...G.map(([gid,g])=>box(gid,"",` style="--gc:${esc(gcol(gid))}"`,op=>grpHead(gid,g,op),L.filter(([,a])=>grpList(a).includes(gid)),t("grpBoxEmpty"))));
   const N=L.filter(([,a])=>!grpsOf(a).length);
   if(N.length)H.push(box("-"," none","",op=>`<div class="gbox-h"><button type="button" class="gbox-tog rp" data-gt="-" aria-expanded="${op}"><span class="gi" aria-hidden="true">—</span><span class="dv-gt"><b>${esc(t("grpNone"))}</b><small>${esc(grpN(N.length))}</small></span>${CHEV}</button></div>`,N,""));
   $("grpList").innerHTML=H.join("")}
@@ -1542,6 +1553,38 @@ function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length+accAntr
     </div></div></article>`}
 $("dpSearch").oninput=renderDevPage;
 $("grpNew").onclick=()=>editGroup(null);
+/* mover los grupos: mantener pulsado un grupo, deslizar arriba o abajo y soltar donde se quiera */
+{const LIST=$("grpList");let press=null,endAt=0;
+  LIST.addEventListener("click",ev=>{if(gdrag||Date.now()-endAt<600){ev.stopPropagation();ev.preventDefault()}},true);
+  const boxes=()=>[...LIST.querySelectorAll(".gbox:not(.none)")];
+  const start=(box,y)=>{const B=boxes();if(B.length<2)return;const R0=B.map(b=>b.getBoundingClientRect()),i=B.indexOf(box),gap=B.length>1?R0[1].top-R0[0].bottom:8;
+    gdrag={box,B,R0,i,to:i,y0:y,s0:scrollY,y,gap,moved:false};document.body.classList.add("gdrag");try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
+    box.classList.add("lifting","dragging");box.style.transform="scale(1.03)";B.forEach(b=>{if(b!==box)b.classList.add("shift")});
+    setTimeout(()=>box.classList.remove("lifting"),260);tick()};
+  const layout=()=>{const g=gdrag;if(!g)return;const dy=g.y-g.y0+(scrollY-g.s0),r=g.R0[g.i],h=r.height+g.gap,c=r.top+dy+r.height/2;
+    let to=0;g.R0.forEach((q,j)=>{if(j!==g.i&&c>q.top+q.height/2)to++});g.to=to;if(Math.abs(dy)>4)g.moved=true;
+    g.box.style.transform=`translateY(${dy}px) scale(1.03)`;
+    g.B.forEach((b,j)=>{if(b===g.box)return;let s=0;if(g.i<to&&j>g.i&&j<=to)s=-h;else if(g.i>to&&j>=to&&j<g.i)s=h;b.style.transform=s?`translateY(${s}px)`:""})};
+  const tick=()=>{if(!gdrag)return;const y=gdrag.y,H=innerHeight,e=90;if(y<e)scrollBy(0,-Math.ceil((e-y)/7));else if(y>H-e)scrollBy(0,Math.ceil((y-(H-e))/7));layout();requestAnimationFrame(tick)};
+  const end=async()=>{const g=gdrag;if(!g)return;gdrag=null;const{box,B,R0,i,to}=g;
+    const tgt=i===to?0:to>i?R0[to].bottom-R0[i].bottom:R0[to].top-R0[i].top;box.classList.add("dropping");box.style.transform=`translateY(${tgt}px)`;
+    await new Promise(r=>setTimeout(r,330));
+    const order=B.map(b=>b.dataset.gbox);order.splice(to,0,order.splice(i,1)[0]);
+    B.forEach(b=>{b.classList.remove("shift","dragging","dropping");b.style.transform=""});document.body.classList.remove("gdrag");
+    const ref=LIST.querySelector(".gbox.none");order.forEach(k=>{const el=LIST.querySelector(`.gbox[data-gbox="${CSS.escape(k)}"]`);if(el)LIST.insertBefore(el,ref)});
+    endAt=Date.now();
+    if(i!==to){try{for(const[j,k]of order.entries()){const x=grps[k];if(x&&x.orden!==j)await db.doc("grupos/"+k).set({...x,orden:j})}toast(t("grpOrderSaved"))}catch(e){toast(t("saveErr"))}}
+    endAt=Date.now();if(g.pending)renderDevPage()};
+  const down=(e,y,x)=>{const h=e.target.closest(".gbox-tog");if(!h||gdrag)return;const box=h.closest(".gbox");if(!box||box.classList.contains("none"))return;
+    press={x,y,box,tm:setTimeout(()=>{if(press){start(press.box,press.y);press=null}},380)}};
+  const move=(e,y,x)=>{if(gdrag){gdrag.y=y;if(e.cancelable)e.preventDefault();return}if(press&&Math.hypot(x-press.x,y-press.y)>8){clearTimeout(press.tm);press=null}};
+  const up=()=>{if(press){clearTimeout(press.tm);press=null}if(gdrag)end()};
+  LIST.addEventListener("touchstart",e=>{const p=e.touches[0];down(e,p.clientY,p.clientX)},{passive:true});
+  addEventListener("touchmove",e=>{const p=e.touches[0];if(p)move(e,p.clientY,p.clientX)},{passive:false});
+  addEventListener("touchend",up);addEventListener("touchcancel",up);
+  LIST.addEventListener("mousedown",e=>{if(e.button===0)down(e,e.clientY,e.clientX)});
+  addEventListener("mousemove",e=>move(e,e.clientY,e.clientX));addEventListener("mouseup",up);
+  LIST.addEventListener("contextmenu",e=>{if(e.target.closest(".gbox-tog"))e.preventDefault()})}
 $("grpList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
   if(b.dataset.gt!==undefined){const k=b.dataset.gt,bx=b.closest(".gbox"),op=!openGrp.has(k);op?openGrp.add(k):openGrp.delete(k);bx.classList.toggle("open",op);b.setAttribute("aria-expanded",String(op));
     if(op&&!RM.matches){const inn=bx.querySelector(".gbox-in");inn.classList.remove("stagger");void inn.offsetWidth;inn.classList.add("stagger");setTimeout(()=>inn.classList.remove("stagger"),1400)}return}
@@ -1575,7 +1618,7 @@ $("dpList").addEventListener("click",accClick);$("grpList").addEventListener("cl
 function genPass(){const S="ba be bi bo bu da de di do ka ke ki ko ku la le li lo lu ma me mi mo mu na ne ni no pa pe pi po ra re ri ro sa se si so ta te ti to za zo".split(" "),r=n=>Math.floor(Math.random()*n);
   let s="";for(let i=0;i<3;i++)s+=S[r(S.length)];return s+String(10+r(90))}
 function editAccount(id){
-  const a=id?accounts[id]:null,G=Object.entries(grps).sort((x,y)=>String(x[1].nombre).localeCompare(String(y[1].nombre),"es"));
+  const a=id?accounts[id]:null,G=Object.entries(grps).sort(grpOrd);
   const g0=a?grpsOf(a):(grpFilter&&grpFilter!=="-"&&grps[grpFilter]?[grpFilter]:[]);
   const card=sheet(a?t("editAcc"):t("newAcc"),`<label class="f">${esc(t("yourName"))}<input id="aN" maxlength="60" autocomplete="off" value="${esc(a?a.nombre:"")}"></label>
     <label class="f">${esc(t("pass"))}<span class="pwrow"><input id="aP" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(a?a.clave:genPass())}"><button type="button" class="ghost" id="aG">${esc(t("gen"))}</button></span></label>
@@ -1604,7 +1647,7 @@ function editGroup(id){
       if(!n){toast(t("needGrpName"));c.querySelector("#gN").focus();return false}
       if(Object.entries(grps).some(([k,x])=>k!==id&&norm(x.nombre)===norm(n))){toast(t("dupGrp"));return false}
       const nid=id||("g"+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
-      try{await db.doc("grupos/"+nid).set({...(g||{}),nombre:n.slice(0,40),color:col,alta:g&&g.alta||new Date().toISOString()});toast(t("grpSaved"))}
+      try{await db.doc("grupos/"+nid).set({...(g||{}),nombre:n.slice(0,40),color:col,alta:g&&g.alta||new Date().toISOString(),orden:g&&g.orden!=null?g.orden:Math.max(-1,...Object.values(grps).map(x=>x.orden??-1))+1});toast(t("grpSaved"))}
       catch(e){toast(t("saveErr"));return false}},
     g?()=>{setTimeout(()=>sheet(t("delGrp"),`<p style="margin:0">${esc(t("delGrpConfirm").replace("{n}",g.nombre))}</p>`,
       async()=>{try{for(const[k,a]of Object.entries(accounts))if(grpList(a).includes(id)){const n={...a},l=grpList(a).filter(x=>x!==id);delete n.grupo;if(l.length)n.grupos=l;else delete n.grupos;await db.doc("cuentas/"+k).set(n)}
