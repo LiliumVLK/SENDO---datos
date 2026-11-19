@@ -233,12 +233,20 @@ body.pv #btnHome{display:none}
 .chip[aria-pressed=true]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
 .gbox{--gc:var(--accent);display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:24px;border:1px solid color-mix(in srgb,var(--gc) 32%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--gc) 10%,var(--surface)),color-mix(in srgb,var(--gc) 3%,var(--bg)) 120px)}
 .gbox.none{--gc:var(--muted);border-style:dashed;background:none}
-.gbox-h{display:flex;align-items:center;gap:12px;padding:2px 2px 2px 4px}
+.gbox-h{display:flex;align-items:center;gap:8px;padding:2px 2px 2px 2px}
+.gbox-tog{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:4px 6px 4px 2px;border:0;background:none;color:inherit;text-align:left;border-radius:14px;cursor:pointer;position:relative;overflow:hidden}
+.gbox-tog .dv-gt{flex:1}
+.gbox.open .gbox-tog .chev{transform:rotate(180deg)}
+.gbox{gap:0}
+.gbox-l{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--grow)}
+.gbox.open .gbox-l{grid-template-rows:1fr}
+.gbox-l>.gbox-in{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px}
+.gbox.open .gbox-l>.gbox-in{padding-top:10px}
+.gbox-l .dp-empty{margin:0;padding:6px 6px 8px;font-size:.85rem}
 .gbox-h .gi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--gc) 18%,var(--surface));color:var(--gc);font:700 .9rem var(--body)}
 .gbox.none .gi{background:var(--sunk);color:var(--muted)}
 .gbox-h .ib2{width:38px;height:38px}.gbox-h .ib2 svg{width:17px;height:17px}
-.gbox-l{display:flex;flex-direction:column;gap:8px}
-.gbox-l .dp-empty{margin:0;padding:6px 6px 8px;font-size:.85rem}
+
 .arow.has-g .av{position:relative}
 .arow.has-g .av::after{content:"";position:absolute;inset:-5px;border-radius:50%;background:var(--ring);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px));pointer-events:none}
 .arow-t small .gname{font-weight:600}
@@ -387,7 +395,7 @@ body.home:not(.dev).typing .acc{height:auto;min-height:calc(100svh - 32px);overf
 .nav .today{width:auto;padding:0 12px;border-radius:999px;font:600 .78rem var(--body)}
 /* ===== menú de arriba del diario: Plan semanal / Nutrición ===== */
 .tabs{display:none}
-body.inside .tabs{display:flex;justify-content:center;position:sticky;top:0;z-index:15;gap:6px;
+body.inside .tabs,body.dvt .dvtabs{display:flex;justify-content:center;position:sticky;top:0;z-index:15;gap:6px;
   margin:-16px calc(-1 * max(16px,env(safe-area-inset-right,0px))) 48px calc(-1 * max(16px,env(safe-area-inset-left,0px)));
   padding:calc(env(safe-area-inset-top,0px) + 7px) max(12px,env(safe-area-inset-right,0px)) 7px max(12px,env(safe-area-inset-left,0px));
   background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
@@ -404,6 +412,16 @@ body.inside .tabs{display:flex;justify-content:center;position:sticky;top:0;z-in
   box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 60%,transparent),0 8px 26px -4px color-mix(in srgb,var(--accent) 60%,transparent),0 0 34px -6px color-mix(in srgb,var(--accent) 55%,transparent);
   transition:left .42s cubic-bezier(.5,1.5,.4,1) var(--dl,0s),width .42s cubic-bezier(.5,1.5,.4,1) var(--dw,0s)}
 .tabs-ind::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 55%);pointer-events:none}
+/* menú de arriba de SENDO Dev: Cuentas / Grupos */
+body.dvt .dvtabs{margin-bottom:20px}
+body.dvt .corner{position:absolute;z-index:14;top:calc(env(safe-area-inset-top,0px) + 92px)}
+body.dvt .dv-head{padding-top:6px}
+body[data-dt=grp] #devPage [data-pane=acc],body:not([data-dt=grp]) #devPage [data-pane=grp]{display:none}
+body.dvswap #devPage [data-pane]{transform-origin:50% 22px;animation:tabIn .5s var(--grow) both}
+.dvtabs .p2{opacity:.55;transition:opacity .3s}.dvtabs [aria-selected=true] .p2{opacity:1}
+.dvtabs .ic .p1,.dvtabs .ic .p2,.dvtabs .gsq{transform-box:fill-box;transform-origin:center}
+.dvtabs .go .p2{animation:calDot .45s var(--grow) .12s both}
+.dvtabs .go .gsq{animation:calDot .45s var(--grow) both;animation-delay:calc(var(--d) * 60ms + .08s)}
 /* iconos: se animan al elegir la sección */
 .tabs .cal-dot{opacity:.35;transition:opacity .3s}
 .tabs [aria-selected=true] .cal-dot{opacity:1}
@@ -611,26 +629,26 @@ body.swap .sec+.sec{animation-delay:.06s}
   </section>
   <section class="dpage" id="devPage" hidden aria-labelledby="dpH">
     <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
+    <nav class="tabs dvtabs" id="dvTabs" role="tablist"><i class="tabs-ind" aria-hidden="true"></i><button type="button" role="tab" class="rp" data-dt="acc" aria-selected="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle class="p1" cx="9.5" cy="8.2" r="3.4"/><path class="p1" d="M3.4 19.6c.7-3.4 3.1-5.4 6.1-5.4s5.4 2 6.1 5.4"/><circle class="p2" cx="17" cy="9.4" r="2.5"/><path class="p2" d="M17.4 14.3c2 .3 3.3 1.9 3.8 4.2"/></svg><span data-t="dvTabAcc"></span></button><button type="button" role="tab" class="rp" data-dt="grp" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect class="gsq" style="--d:0" x="3.5" y="3.5" width="7.2" height="7.2" rx="2.2"/><rect class="gsq" style="--d:1" x="13.3" y="3.5" width="7.2" height="7.2" rx="2.2"/><rect class="gsq" style="--d:2" x="3.5" y="13.3" width="7.2" height="7.2" rx="2.2"/><rect class="gsq fill" style="--d:3" x="13.3" y="13.3" width="7.2" height="7.2" rx="2.2"/></svg><span data-t="dvTabGrp"></span></button></nav>
     <header class="dv-head" style="--i:0">
       <svg class="dv-mark" id="dpLogo" viewBox="-5 136 773 426" aria-hidden="true"></svg>
       <div class="dv-tt"><p class="dv-kick" data-t="devAcc"></p><h1 id="dpH"><span id="dpNum">0</span><span id="dpWord"></span></h1></div>
       <button type="button" class="dv-add dv-sync rp" id="dpSync" hidden><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></button>
       <button type="button" class="dv-add rp" id="dpNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
     </header>
-    <section class="dv-gen" aria-labelledby="genH" style="--i:1">
+    <section class="dv-gen" aria-labelledby="genH" data-pane="acc" style="--i:1">
       <span class="dv-gi" id="genIc" aria-hidden="true"></span>
       <div class="dv-gt"><b id="genH" data-t="genTitle"></b><small id="genMeta"></small></div>
       <button type="button" class="ib2 rp" id="genPdfs"></button>
       <button type="button" class="ib2 hi rp" id="genUp"></button>
     </section>
-    <section class="dv-grps" id="dpGroups" aria-labelledby="grpH" style="--i:2">
+    <section class="dv-grps" id="dpGroups" aria-labelledby="grpH" data-pane="grp" style="--i:1">
       <div class="dv-gh"><h2 id="grpH"></h2><button type="button" class="pill-b rp" id="grpNew"></button></div>
       <div class="dv-glist" id="grpList"></div>
     </section>
-    <label class="dv-search" style="--i:3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="sr" data-t="search"></span><input type="search" id="dpSearch" autocomplete="off"></label>
-    <div class="dp-filter" id="dpFilter" role="group" hidden style="--i:4"></div>
-    <div class="dp-list" id="dpList" style="--i:4"></div>
-    <button type="button" class="dp-exit2" id="dpExit" data-t="devExit" style="--i:5"></button>
+    <label class="dv-search" data-pane="acc" style="--i:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="sr" data-t="search"></span><input type="search" id="dpSearch" autocomplete="off"></label>
+    <div class="dp-list" id="dpList" data-pane="acc" style="--i:3"></div>
+    <button type="button" class="dp-exit2" id="dpExit" data-t="devExit" data-pane="acc" style="--i:4"></button>
   </section>
   <section class="dpage" id="pdfPage" hidden aria-labelledby="pfH">
     <div class="pf-top"><button type="button" class="ghost" id="pfBack"></button></div>
@@ -739,7 +757,7 @@ const S={
   noPlans:["Todavía no hay planes en PDF.","Oraindik ez dago PDF planik."],
   pdfsN:["PDFs subidos · {n}","Igotako PDFak · {n}"],current:["Plan actual","Uneko plana"],
   accWord1:["cuenta","kontu"],accWordN:["cuentas","kontu"],
-  groupsH:["Grupos","Taldeak"],newGrp:["Nuevo grupo","Talde berria"],editGrp:["Editar grupo","Taldea editatu"],grpName:["Nombre del grupo","Taldearen izena"],grpColor:["Color","Kolorea"],
+  groupsH:["Grupos","Taldeak"],dvTabAcc:["Cuentas","Kontuak"],dvTabGrp:["Grupos","Taldeak"],newGrp:["Nuevo grupo","Talde berria"],editGrp:["Editar grupo","Taldea editatu"],grpName:["Nombre del grupo","Taldearen izena"],grpColor:["Color","Kolorea"],
   grpNone:["Sin grupo","Talderik gabe"],grpField:["Grupos","Taldeak"],grpBoxEmpty:["No hay cuentas en este grupo.","Ez dago konturik talde honetan."],allAcc:["Todas","Guztiak"],grpEmpty:["Todavía no hay grupos. Crea uno para dar el mismo plan a varias cuentas.","Oraindik ez dago talderik. Sortu bat hainbat konturi plan bera emateko."],
   grpN1:["1 cuenta","Kontu 1"],grpN:["{n} cuentas","{n} kontu"],grpSub:["Sus PDFs dan el plan a todas las cuentas del grupo.","Bere PDFek taldeko kontu guztiei ematen diete plana."],upGrp:["Subir PDF de plan para el grupo","Taldearentzako plan PDFa igo"],
   grpPdfs:["PDFs del grupo","Taldearen PDFak"],grpEditL:["Editar grupo","Taldea editatu"],delGrp:["Borrar grupo","Taldea ezabatu"],
@@ -968,7 +986,7 @@ function renderLegend(){$("legend").innerHTML=NUT.map(n=>`<div class="lg" style=
 
 /* ---------- navegación ---------- */
 let tab="plan";
-function placeInd(stretch){const b=document.querySelector('#tabs [aria-selected="true"]'),i=document.querySelector("#tabs .tabs-ind");if(!b||!i||!b.offsetWidth)return;
+function placeInd(stretch,nav){nav=nav||"#tabs";const b=document.querySelector(nav+' [aria-selected="true"]'),i=document.querySelector(nav+" .tabs-ind");if(!b||!i||!b.offsetWidth)return;
   const L0=parseFloat(i.style.left)||0,nl=b.offsetLeft,right=nl>L0;
   /* la pastilla se estira: primero avanza el borde de delante y después alcanza el de detrás */
   if(stretch&&!RM.matches){i.style.setProperty("--dl",right?".09s":"0s");i.style.setProperty("--dw",right?"0s":".09s")}else{i.style.setProperty("--dl","0s");i.style.setProperty("--dw","0s")}
@@ -989,7 +1007,19 @@ $("tabs").addEventListener("keydown",e=>{if(e.key!=="ArrowLeft"&&e.key!=="ArrowR
 {let sx=0,sy=0,st=0;addEventListener("touchstart",e=>{if(!inside()||document.querySelector(".sheet"))return;const p=e.touches[0];sx=p.clientX;sy=p.clientY;st=Date.now()},{passive:true});
   addEventListener("touchend",e=>{if(!inside()||!st)return;const p=e.changedTouches[0],dx=p.clientX-sx,dy=p.clientY-sy;st=0;
     if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.8){if(dx<0&&tab==="plan")setTab("nut",true);else if(dx>0&&tab==="nut")setTab("plan",true)}},{passive:true})}
-addEventListener("resize",()=>placeInd());
+addEventListener("resize",()=>{placeInd();placeInd(false,"#dvTabs")});
+let dvTab=LS.get("sendo.dvtab")==="grp"?"grp":"acc";
+function setDvTab(x,anim){dvTab=x;LS.set("sendo.dvtab",x);document.body.dataset.dt=x;
+  document.querySelectorAll("#dvTabs [data-dt]").forEach(b=>{b.setAttribute("aria-selected",String(b.dataset.dt===x));b.tabIndex=b.dataset.dt===x?0:-1});
+  placeInd(anim,"#dvTabs");
+  if(anim){const b=document.querySelector(`#dvTabs [data-dt="${x}"]`);b.classList.remove("go");void b.offsetWidth;b.classList.add("go");setTimeout(()=>b.classList.remove("go"),1000);
+    document.body.style.setProperty("--sx",x==="grp"?"1":"-1");
+    document.body.classList.remove("dvswap");void document.body.offsetWidth;document.body.classList.add("dvswap");clearTimeout(setDvTab.t);setDvTab.t=setTimeout(()=>document.body.classList.remove("dvswap"),700);scrollTo({top:0,behavior:"smooth"})}}
+$("dvTabs").addEventListener("click",e=>{const b=e.target.closest("[data-dt]");if(b&&b.dataset.dt!==dvTab)setDvTab(b.dataset.dt,true)});
+$("dvTabs").addEventListener("keydown",e=>{if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;const n=dvTab==="acc"?"grp":"acc";setDvTab(n,true);document.querySelector(`#dvTabs [data-dt="${n}"]`).focus()});
+{let sx=0,sy=0,st=0;addEventListener("touchstart",e=>{if(access!=="dev"||document.querySelector(".sheet"))return;const p=e.touches[0];sx=p.clientX;sy=p.clientY;st=Date.now()},{passive:true});
+  addEventListener("touchend",e=>{if(access!=="dev"||!st)return;const p=e.changedTouches[0],dx=p.clientX-sx,dy=p.clientY-sy;st=0;
+    if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.8){if(dx<0&&dvTab==="acc")setDvTab("grp",true);else if(dx>0&&dvTab==="grp")setDvTab("acc",true)}},{passive:true})}
 function showInside(anim){
   setTab("plan");requestAnimationFrame(placeInd);
   document.body.classList.remove("home");document.body.classList.add("inside");$("devSec").hidden=!editing||pvMode;renderDev();renderDocs();$("weekSec").hidden=false;$("nutSec").hidden=false;renderWeek();scrollTo(0,0);
@@ -1035,7 +1065,7 @@ const SV={
     return U.sort((a,b)=>a.y-b.y||(a.k==="card"?-1:1))},
   /* las mismas piezas en la página de desarrollador de SENDO Dev */
   devUnits(H){const pg=$("devPage");try{pg.getAnimations({subtree:true}).forEach(a=>a.finish())}catch(e){}
-    const U=[];document.querySelectorAll(".corner button,#devPage .dv-head,#devPage .dv-gen,#devPage .dv-gh,#grpList .dp-empty,#devPage .dv-search,#dpFilter,#dpList .gbox,#dpList .arow,#dpList>.dp-empty,#dpExit").forEach(el=>{
+    const U=[];document.querySelectorAll(".corner button,#dvTabs,#devPage .dv-head,#devPage .dv-gen,#devPage .dv-gh,#grpList .dp-empty,#devPage .dv-search,#grpList .gbox,#dpList .arow,#dpList>.dp-empty,#dpExit").forEach(el=>{
       if(getComputedStyle(el).display==="none")return;const b=el.getBoundingClientRect();if(!b.width||b.bottom<0||b.top>H)return;
       const btn=el.matches(".corner button");U.push({el,k:btn?"btn":"row",b,x:btn?b.left+b.width/2:b.left+Math.min(38,b.width/2),y:b.top+Math.min(b.height/2,30)})});
     return U.sort((a,b)=>a.y-b.y)},
@@ -1372,7 +1402,7 @@ function show(a){
   if(a!=="edit"&&editing){editing=false;preview=false;pvMode=false;watchPlan(null)}
   if(a!=="app"&&a!=="edit"&&inside())leaveInside();
   $("acc").hidden=!["login","nodb","blocked","ghsetup"].includes(a);$("devPage").hidden=a!=="dev";$("pdfPage").hidden=a!=="pdfs";
-  document.body.classList.toggle("locked",a!=="app");document.body.classList.toggle("dev",a==="dev"||(a==="edit"&&!pvMode)||a==="pdfs");renderPv();
+  document.body.classList.toggle("locked",a!=="app");document.body.classList.toggle("dvt",a==="dev");if(a==="dev"){setDvTab(dvTab,false);requestAnimationFrame(()=>placeInd(false,"#dvTabs"))}document.body.classList.toggle("dev",a==="dev"||(a==="edit"&&!pvMode)||a==="pdfs");renderPv();
   LS.set("sendo.dev",a==="dev"||a==="edit"||a==="pdfs"?"1":"");
   renderAcc();renderDevPage();renderPdfPage();
   if(a==="app"&&prev!=="app"){scrollTo(0,0);intro()}
@@ -1414,38 +1444,33 @@ $("acc").addEventListener("focusout",()=>setTimeout(()=>{if(!$("acc").contains(d
 $("btnDev").onclick=()=>{if(isDev)show("dev");else toast(t("devOnly"))};
 
 /* ---------- página de cuentas ---------- */
+let openGrp=new Set();
 function renderGroups(){
   $("grpH").textContent=t("groupsH");$("grpNew").innerHTML=PLUS+esc(t("newGrp"));
-  $("grpList").innerHTML=Object.keys(grps).length?"":`<p class="dp-empty">${esc(t("grpEmpty"))}</p>`}
-function grpHead(id,g){const np=accPdfs(g).length,L=g.lectura||{},rd=readingNow.has(id)||L.estado==="pendiente";
+  const G=Object.entries(grps).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es")),L=Object.entries(accounts).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es"));
+  if(!G.length){$("grpList").innerHTML=`<p class="dp-empty">${esc(t("grpEmpty"))}</p>`;return}
+  const box=(key,cls,style,head,M,empty)=>{const op=openGrp.has(key);
+    return `<section class="gbox${cls}${op?" open":""}" data-gbox="${esc(key)}"${style}>${head(op)}<div class="gbox-l"><div class="gbox-in">${M.length?M.map(([id,a],i)=>accRow(id,a,i,key)).join(""):`<p class="dp-empty">${esc(empty)}</p>`}</div></div></section>`};
+  const H=G.map(([gid,g])=>box(gid,"",` style="--gc:${esc(gcol(gid))}"`,op=>grpHead(gid,g,op),L.filter(([,a])=>grpList(a).includes(gid)),t("grpBoxEmpty")));
+  const N=L.filter(([,a])=>!grpsOf(a).length);
+  if(N.length)H.push(box("-"," none","",op=>`<div class="gbox-h"><button type="button" class="gbox-tog rp" data-gt="-" aria-expanded="${op}"><span class="gi" aria-hidden="true">—</span><span class="dv-gt"><b>${esc(t("grpNone"))}</b><small>${esc(grpN(N.length))}</small></span>${CHEV}</button></div>`,N,""));
+  $("grpList").innerHTML=H.join("")}
+function grpHead(id,g,op){const np=accPdfs(g).length,L=g.lectura||{},rd=readingNow.has(id)||L.estado==="pendiente";
   const st=rd?t("reading"):!g.pdf?t("metaNone"):L.estado==="ok"?t("metaOk").replace("{d}",fmtDM(new Date(L.desde+"T00:00:00"))):L.estado==="error"?t("metaErr"):t("pdfN").replace("{n}",np);
-  return `<div class="gbox-h"><span class="gi" aria-hidden="true">${esc(ini(g.nombre))}</span><div class="dv-gt"><b>${esc(g.nombre||"—")}</b><small>${esc(grpN(grpCount(id)))} · ${esc(st)}</small></div>
+  return `<div class="gbox-h"><button type="button" class="gbox-tog rp" data-gt="${esc(id)}" aria-expanded="${!!op}"><span class="gi" aria-hidden="true">${esc(ini(g.nombre))}</span><span class="dv-gt"><b>${esc(g.nombre||"—")}</b><small>${esc(grpN(grpCount(id)))} · ${esc(st)}</small></span>${CHEV}</button>
     ${L.estado==="error"&&!rd&&g.pdf?`<button type="button" class="ib2 rp" data-greread="${esc(id)}" aria-label="${esc(t("retry"))}" title="${esc(t("retry"))}">↻</button>`:""}
     ${np?`<button type="button" class="ib2 rp" data-gpdfs="${esc(id)}" aria-label="${esc(t("grpPdfs"))}" title="${esc(t("grpPdfs"))}">${LISTI}</button>`:""}
     <button type="button" class="ib2 rp" data-gedit="${esc(id)}" aria-label="${esc(t("grpEditL"))}" title="${esc(t("grpEditL"))}">${PEN}</button>
     <button type="button" class="ib2 hi rp" data-gup="${esc(id)}" aria-label="${esc(t("upGrp"))}" title="${esc(t("upGrp"))}">${UPL}</button></div>`}
-function renderFilter(){
-  const box=$("dpFilter"),G=Object.entries(grps).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es"));
-  if(!G.length){box.hidden=true;box.innerHTML="";grpFilter="";return}
-  if(grpFilter&&grpFilter!=="-"&&!grps[grpFilter])grpFilter="";box.hidden=false;
-  box.innerHTML=[["",t("allAcc")],...G.map(([id,g])=>[id,g.nombre]),["-",t("grpNone")]].map(([k,l])=>{const c=k&&k!=="-";
-    return `<button type="button" class="chip" data-gf="${esc(k)}" aria-pressed="${grpFilter===k}"${c?` style="--gc:${esc(gcol(k))}"`:""}>${c?"<i></i>":""}${esc(l||"—")}</button>`}).join("")}
 function renderDevPage(){
-  if(access!=="dev")return;renderGen();renderGroups();renderFilter();
+  if(access!=="dev")return;renderGen();renderGroups();
   const L=Object.entries(accounts).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es")),q=norm($("dpSearch").value);
   if(!$("devPage").classList.contains("stagger"))$("dpNum").textContent=L.length;$("dpWord").textContent=L.length===1?t("accWord1"):t("accWordN");
   $("dpNew").setAttribute("aria-label",t("newAcc"));$("dpNew").title=t("newAcc");$("dpSearch").placeholder=t("search");
   const F=L.filter(([,a])=>!q||norm(a.nombre).includes(q));
   if(!L.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noAcc"))}</p>`;return}
-  if(!F.length&&(q||!Object.keys(grps).length)){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noMatch"))}</p>`;return}
-  const G=Object.entries(grps).sort((x,y)=>String(x[1].nombre).localeCompare(String(y[1].nombre),"es"));
-  if(!G.length){$("dpList").innerHTML=F.map(([id,a],i)=>accRow(id,a,i,"")).join("");return}
-  // un recuadro por grupo (una cuenta en varios grupos sale en cada uno) y otro para las cuentas sin grupo
-  const boxes=G.filter(([gid])=>!grpFilter||grpFilter===gid).map(([gid,g])=>{const M=F.filter(([,a])=>grpList(a).includes(gid));if(q&&!M.length)return"";
-    return `<section class="gbox" style="--gc:${esc(gcol(gid))}">${grpHead(gid,g)}<div class="gbox-l">${M.length?M.map(([id,a],i)=>accRow(id,a,i,gid)).join(""):`<p class="dp-empty">${esc(t("grpBoxEmpty"))}</p>`}</div></section>`});
-  if(!grpFilter||grpFilter==="-"){const M=F.filter(([,a])=>!grpsOf(a).length);
-    if(M.length||grpFilter==="-")boxes.push(`<section class="gbox none"><div class="gbox-h"><span class="gi" aria-hidden="true">—</span><div class="dv-gt"><b>${esc(t("grpNone"))}</b><small>${esc(grpN(M.length))}</small></div></div><div class="gbox-l">${M.length?M.map(([id,a],i)=>accRow(id,a,i,"-")).join(""):`<p class="dp-empty">${esc(t("noMatch"))}</p>`}</div></section>`)}
-  const h=boxes.join("");$("dpList").innerHTML=h||`<p class="dp-empty">${esc(t("noMatch"))}</p>`}
+  if(!F.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noMatch"))}</p>`;return}
+  $("dpList").innerHTML=F.map(([id,a],i)=>accRow(id,a,i,"")).join("")}
 function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length,L2=a.lectura||{},rd=readingNow.has(id)||L2.estado==="pendiente",ok=box+"|"+id,op=openAcc.has(ok),gs=grpsOf(a),gok=gs.some(grpOk);
     const ring=gs.length===1?gcol(gs[0]):`conic-gradient(${gs.map((g,j)=>`${gcol(g)} ${j/gs.length*100}% ${(j+1)/gs.length*100}%`).join(",")})`;
     const st=rd?["warn",t("reading")]:!a.pdf?(gok?["ok",t("metaGrp")]:["",t("metaNone")]):L2.estado==="ok"?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:L2.estado==="error"?["err",t("metaErr")]:["",t("pdfN").replace("{n}",n)];
@@ -1461,8 +1486,9 @@ function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length,L2=a.le
     </div></div></article>`}
 $("dpSearch").oninput=renderDevPage;
 $("grpNew").onclick=()=>editGroup(null);
-$("dpFilter").addEventListener("click",e=>{const b=e.target.closest("[data-gf]");if(!b)return;grpFilter=b.dataset.gf;renderDevPage()});
-$("dpList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+$("grpList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.gt!==undefined){const k=b.dataset.gt,bx=b.closest(".gbox"),op=!openGrp.has(k);op?openGrp.add(k):openGrp.delete(k);bx.classList.toggle("open",op);b.setAttribute("aria-expanded",String(op));
+    if(op&&!RM.matches){const inn=bx.querySelector(".gbox-in");inn.classList.remove("stagger");void inn.offsetWidth;inn.classList.add("stagger");setTimeout(()=>inn.classList.remove("stagger"),1400)}return}
   if(b.dataset.gup){pickPdf({kind:"grp",id:b.dataset.gup},b);return}
   if(b.dataset.gpdfs){pdfView={kind:"grp",id:b.dataset.gpdfs};show("pdfs");return}
   if(b.dataset.greread){readPlanPdf(b.dataset.greread,null,"grp");return}
@@ -1471,10 +1497,10 @@ $("dpNew").onclick=()=>editAccount(null);
 $("dpExit").onclick=()=>{if(DEVAPP)return;show("login")};
 if(DEVAPP){const sb=$("dpSync");sb.hidden=false;sb.setAttribute("aria-label",t("ghSync"));sb.title=t("ghSync");sb.onclick=async()=>{if(sb.classList.contains("busy"))return;sb.classList.remove("done");sb.classList.add("busy");try{await DEVAPP.sync();sb.classList.remove("busy");void sb.offsetWidth;sb.classList.add("done");toast(t("ghSyncOk"))}catch(e){sb.classList.remove("busy");if(String(e&&e.message)!=="auth")toast(t("ghSyncErr"))}};}
 if(DEVAPP){const b=$("dpExit");if(b)b.style.display="none";$("btnOut").style.display="none";{const tg=$("cover").querySelector(".tag");if(tg){tg.dataset.t="devAcc";tg.textContent=t("devAcc")}}DEVAPP.onAuth=()=>{LS.set("sendo.gh","");show("ghsetup")}}
-$("dpList").addEventListener("click",async e=>{
+const accClick=async e=>{
   const b=e.target.closest("button");if(!b)return;
   if(b.dataset.tog){const id=b.dataset.tog,art=b.closest(".arow"),op=!openAcc.has(id);openAcc.clear();if(op)openAcc.add(id);
-    $("dpList").querySelectorAll(".arow.open").forEach(x=>{if(x!==art){x.classList.remove("open");const hb=x.querySelector("[data-tog]");if(hb)hb.setAttribute("aria-expanded","false")}});
+    document.querySelectorAll("#devPage .arow.open").forEach(x=>{if(x!==art){x.classList.remove("open");const hb=x.querySelector("[data-tog]");if(hb)hb.setAttribute("aria-expanded","false")}});
     art.classList.toggle("open",op);b.setAttribute("aria-expanded",String(op));return}
   if(b.dataset.eye){const id=b.dataset.eye;shown.has(id)?shown.delete(id):shown.add(id);renderDevPage();return}
   if(b.dataset.copy){const a=accounts[b.dataset.copy];if(!a)return;
@@ -1485,7 +1511,8 @@ $("dpList").addEventListener("click",async e=>{
   if(b.dataset.pdfs){pdfView={kind:"acc",id:b.dataset.pdfs};show("pdfs");return}
   if(b.dataset.reread){readPlanPdf(b.dataset.reread,null);return}
   if(b.dataset.diary){editing=true;preview=true;pvMode=true;watchPlan(b.dataset.diary);wkOffset=0;show("edit");return}
-  if(b.dataset.edit)editAccount(b.dataset.edit)});
+  if(b.dataset.edit)editAccount(b.dataset.edit)};
+$("dpList").addEventListener("click",accClick);$("grpList").addEventListener("click",accClick);
 function genPass(){const S="ba be bi bo bu da de di do ka ke ki ko ku la le li lo lu ma me mi mo mu na ne ni no pa pe pi po ra re ri ro sa se si so ta te ti to za zo".split(" "),r=n=>Math.floor(Math.random()*n);
   let s="";for(let i=0;i<3;i++)s+=S[r(S.length)];return s+String(10+r(90))}
 function editAccount(id){
