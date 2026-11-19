@@ -3,6 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Poppins:ital,wght@0,300;0,400;0,500;1,300&display=swap">
+<script>try{const m=localStorage.getItem("sendo.theme");if(m==="dark"||m==="light")document.documentElement.dataset.theme=m}catch(e){}</script>
 <style>
 :root{
   --bg:#f3f5f4;--surface:#ffffff;--sunk:#e8ecea;--line:#d5dcd8;
@@ -1093,7 +1094,7 @@ let swiping=false;
 $("btnTheme").onclick=()=>{
   if(swiping)return;
   const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches,next=dark?"light":"dark";
-  const apply=()=>{r.dataset.theme=next};
+  const apply=()=>{r.dataset.theme=next;LS.set("sendo.theme",next)};
   if(RM.matches){apply();return}
   if(document.startViewTransition){swiping=true;
     let s=$("vtMask");if(!s){s=document.createElement("style");s.id="vtMask";document.head.append(s)}
