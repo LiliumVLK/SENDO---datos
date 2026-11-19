@@ -22,6 +22,14 @@
   --bg:#0f1513;--surface:#17201d;--sunk:#1d2824;--line:#2b3833;
   --fg:#e6ece9;--muted:#93a39c;--accent:#5cc2a6;--accent-ink:#0b1a15;--accent-soft:#1d3a32;
   --warn:#e2ab4f;--danger:#ef7a63;--lift:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);color-scheme:dark}
+/* ===== Diario del cliente: paleta «Vino · Lavanda» (oscuro cálido, claro frío) ===== */
+body.inside{--bg:#f4f3fd;--surface:#fdfcff;--sunk:#e9e7fa;--line:#d9d5f3;--fg:#1d1a3a;--muted:#67638f;--accent:#6b5cf0;--accent-ink:#ffffff;--accent-soft:#e5e1fd;--accent2:#3fa8f0;--accent3:#e46fc6}
+:root[data-theme="dark"] body.inside{--bg:#14090c;--surface:#20111a;--sunk:#2b1722;--line:#3e2230;--fg:#f6e6ea;--muted:#bd97a4;--accent:#f06b8a;--accent-ink:#1c070d;--accent-soft:#3d1724;--accent2:#ff9e5e;--accent3:#b04fd6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body.inside{--bg:#14090c;--surface:#20111a;--sunk:#2b1722;--line:#3e2230;--fg:#f6e6ea;--muted:#bd97a4;--accent:#f06b8a;--accent-ink:#1c070d;--accent-soft:#3d1724;--accent2:#ff9e5e;--accent3:#b04fd6}}
+body.inside{background:radial-gradient(120% 60% at 0% 0%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%),radial-gradient(90% 50% at 100% 35%,color-mix(in srgb,var(--accent2) 16%,transparent),transparent 65%),radial-gradient(100% 60% at 30% 110%,color-mix(in srgb,var(--accent3) 16%,transparent),transparent 60%),var(--bg);background-attachment:fixed}
+body.inside .tabs-ind{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+body.inside .sec{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 9%,var(--surface)),var(--surface) 160px);border-color:color-mix(in srgb,var(--accent) 22%,var(--line))}
+body.inside .wkrow.today{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 24%,var(--surface)),color-mix(in srgb,var(--accent2) 12%,var(--surface)))}
 *{box-sizing:border-box}
 html{-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums;min-height:100svh}
@@ -984,7 +992,7 @@ const SV={
       const btn=el.matches(".corner button");U.push({el,k:btn?"btn":"row",b,x:btn?b.left+b.width/2:b.left+Math.min(38,b.width/2),y:b.top+Math.min(b.height/2,30)})});
     return U.sort((a,b)=>a.y-b.y)},
   run(done,o={}){
-    const W=innerWidth,H=innerHeight,dpr=Math.min(2,devicePixelRatio||1),css=getComputedStyle(document.documentElement),ACC=css.getPropertyValue("--accent").trim()||"#5cc2a6";
+    const W=innerWidth,H=innerHeight,dpr=Math.min(2,devicePixelRatio||1),css=getComputedStyle(document.documentElement);let ACC=css.getPropertyValue("--accent").trim()||"#5cc2a6";
     const logo=$("logo"),lr=logo.getBoundingClientRect(),INK=getComputedStyle($("cover")).getPropertyValue("--cink").trim()||"#000";
     const ox=lr.left+lr.width*402/823,oy=lr.top+lr.height*236/616,BIG=W*H>500000;
     const old=$("rootsBg");if(old)old.remove();const[cv,bg]=mkCanvas(W,H,Math.min(1.5,dpr),"#000");cv.id="rootsBg";cv.className="rootsbg";document.body.prepend(cv);
@@ -1013,7 +1021,7 @@ const SV={
       END=U[n-1].tl+1050};
     // todo el trabajo pesado se hace ya, en el toque, antes de que nada se mueva: la portada se queda fija encima
     const cov=$("cover"),cr=cov.getBoundingClientRect(),cs=cov.style;Object.assign(cs,{position:"fixed",top:cr.top+"px",left:cr.left+"px",width:cr.width+"px",height:cr.height+"px",minHeight:"0",margin:"0",zIndex:"40"});
-    document.body.classList.add("sapping","svkeep");(o.show||(()=>showInside(false)))();build();
+    document.body.classList.add("sapping","svkeep");(o.show||(()=>showInside(false)))();build();ACC=getComputedStyle(document.body).getPropertyValue("--accent").trim()||ACC;
     const unkeep=()=>{document.body.classList.remove("svkeep");["position","top","left","width","height","minHeight","margin","zIndex"].forEach(k=>cs[k]="")};
     const part=(pts,f)=>{const N=pts.length-1,e=f*N;fx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<=Math.ceil(e);i++){const q=i<=e?pts[i]:SV.at({pts},e);fx.lineTo(q[0],q[1])}};
     const frame=now=>{const t=now-t0;
@@ -1095,7 +1103,7 @@ $("btnTheme").onclick=()=>{
     try{document.startViewTransition(apply).finished.finally(done)}catch(e){apply();done()}
     return}
   swiping=true;const ov=document.createElement("div");ov.className="tswipe";
-  ov.style.setProperty("--to",next==="dark"?"#0f1513":"#f3f5f4");document.body.append(ov);
+  {const ins=document.body.classList.contains("inside");ov.style.setProperty("--to",next==="dark"?(ins?"#14090c":"#0f1513"):(ins?"#f4f3fd":"#f3f5f4"))}document.body.append(ov);
   ov.addEventListener("animationend",()=>{apply();ov.classList.add("out");setTimeout(()=>{ov.remove();swiping=false},520)},{once:true})};
 function renderAll(){requestAnimationFrame(placeInd);renderPv();renderCover();renderLegend();renderAcc();renderDevPage();renderPdfPage();if(document.body.classList.contains("inside")){renderDev();renderDocs();renderWeek()}}
 document.body.classList.add("home","waiting");buildLogo();$("miniLogo").innerHTML=LOGO_T.map(p=>`<path d="${p}"/>`).join("")+`<path d="${LOGO_M}"/>`;$("dpLogo").innerHTML=`<path d="${LOGO_M}"/>`;renderAll();
