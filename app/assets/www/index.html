@@ -61,6 +61,7 @@ body.home #btnHome{display:none}
 :root[data-theme="dark"] .cover,:root[data-theme="dark"] .acc{--cbg:#000;--cink:#fff}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cover,:root:not([data-theme="light"]) .acc{--cbg:#000;--cink:#fff}}
 body.inside .cover,body.locked .cover{display:none}
+body.inside.svkeep .cover{display:flex}
 body.waiting .cover{visibility:hidden}
 /* ===== acceso: bienvenida la primera vez ===== */
 .acc{--cbg:#fff;--cink:#000;position:relative;min-height:calc(100svh - 32px);border-radius:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;
@@ -981,9 +982,9 @@ const SV={
     const ox=lr.left+lr.width*402/823,oy=lr.top+lr.height*236/616,BIG=W*H>500000;
     const old=$("rootsBg");if(old)old.remove();const[cv,bg]=mkCanvas(W,H,Math.min(1.5,dpr),"#000");cv.id="rootsBg";cv.className="rootsbg";document.body.prepend(cv);
     const fxc=document.createElement("canvas");fxc.className="saviafx";fxc.width=W;fxc.height=H;document.body.append(fxc);const fx=fxc.getContext("2d",{alpha:true,desynchronized:true});
-    const LP=SV.logoPts(lr,BIG?680:520);
+    const LP=SV.logoPts(lr,BIG?560:420);logo.style.willChange="transform";
     // el logotipo coge aire (se encoge y brilla) antes de estallar
-    const BOOM=380;let pre=null;try{pre=logo.animate([{transform:"scale(1)",filter:"none"},{transform:"scale(.92)",offset:.6},{transform:"scale(1.07)",filter:`drop-shadow(0 0 16px ${ACC})`}],{duration:BOOM,easing:"cubic-bezier(.5,0,.8,.4)",fill:"forwards"})}catch(e){}
+    const BOOM=380;let pre=null;try{pre=logo.animate([{transform:"scale(1)"},{transform:"scale(.92)",offset:.6},{transform:"scale(1.07)"}],{duration:BOOM,easing:"cubic-bezier(.5,0,.8,.4)",fill:"forwards"})}catch(e){}
     const TAU=240,P=LP.map(([x,y])=>{let a=Math.atan2(y-oy,x-ox)+SV.R(-.55,.55);const sp=SV.R(.3,1.35);
       return{sx:x,sy:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-.12,r:SV.R(.8,1.9),ct:BOOM+SV.R(120,650),tl:0}});
     const ex=(p,t)=>{const d=Math.max(0,t-BOOM),k=TAU*(1-Math.exp(-d/TAU))+d*.06;return[p.sx+p.vx*k,p.sy+p.vy*k+d*d*.00004]};
@@ -994,8 +995,7 @@ const SV={
       U=SV.units(H);const n=U.length;if(!n){END=BOOM+900;return}
       const D=Math.min(120,1000/Math.max(1,n-1));
       U.forEach((u,i)=>{u.tl=1300+i*D;u.L=u.k==="btn"?8:u.k==="tabs"?13:15;u.bend=SV.R(-4,4);u.sp=u.k!=="card";
-        const lx=u.x-u.b.left,ly=u.y-u.b.top,R=Math.hypot(Math.max(lx,u.b.width-lx),Math.max(ly,u.b.height-ly))+30;u.c0=`circle(0px at ${lx}px ${ly}px)`;u.c1=`circle(${R}px at ${lx}px ${ly}px)`;
-        u.el.style.clipPath=u.c0});
+        const st=u.el.style;st.transformOrigin=`${u.x-u.b.left}px ${u.y-u.b.top}px`;st.opacity="0";st.willChange="transform,opacity"});
       document.body.classList.remove("sapping");
       // cada gota elige su pieza: unas cuantas forman la semilla, el resto se siembra por la pieza
       const area=U.map(u=>Math.max(1,(Math.min(H,u.b.bottom)-Math.max(0,u.b.top))*u.b.width*(u.k==="card"?.35:1))),tot=area.reduce((a,b)=>a+b,0);
@@ -1004,13 +1004,17 @@ const SV={
       P.forEach(p=>{p.tl=p.u.tl+(p.seed?SV.R(-60,0):SV.R(-40,220));p.fd=SV.R(500,660);p.tf=p.tl-p.fd;const[x,y]=ex(p,p.tf);p.fx=x;p.fy=y;
         p.cx=SV.lerp(x,p.tx,.5)+SV.R(-40,40);p.cy=Math.min(y,p.ty)-SV.R(40,130)});
       END=U[n-1].tl+1050};
+    // todo el trabajo pesado se hace ya, en el toque, antes de que nada se mueva: la portada se queda fija encima
+    const cov=$("cover"),cr=cov.getBoundingClientRect(),cs=cov.style;Object.assign(cs,{position:"fixed",top:cr.top+"px",left:cr.left+"px",width:cr.width+"px",height:cr.height+"px",minHeight:"0",margin:"0",zIndex:"40"});
+    document.body.classList.add("sapping","svkeep");showInside(false);build();
+    const unkeep=()=>{document.body.classList.remove("svkeep");["position","top","left","width","height","minHeight","margin","zIndex"].forEach(k=>cs[k]="")};
     const part=(pts,f)=>{const N=pts.length-1,e=f*N;fx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<=Math.ceil(e);i++){const q=i<=e?pts[i]:SV.at({pts},e);fx.lineTo(q[0],q[1])}};
     const frame=now=>{const t=now-t0;
-      if(!frame.laid&&t>=560){frame.laid=1;document.body.classList.add("sapping");showInside(false)}else if(frame.laid&&!U&&t>=600)build();
+      if(!frame.laid&&t>=560){frame.laid=1;unkeep()}
       if(t>=BOOM&&!frame.boom){frame.boom=1;logo.style.opacity="0"}
-      fx.save();fx.globalCompositeOperation="destination-out";fx.fillStyle="rgba(0,0,0,.34)";fx.fillRect(0,0,W,H);fx.restore();
+      fx.clearRect(0,0,W,H);
       // destello del estallido
-      if(t>=BOOM&&t<BOOM+340){const k=(t-BOOM)/340,g=fx.createRadialGradient(ox,oy,0,ox,oy,60+lr.width*.7*k);g.addColorStop(0,ACC);g.addColorStop(1,"rgba(0,0,0,0)");fx.globalAlpha=(1-k)*.5;fx.fillStyle=g;fx.fillRect(0,0,W,H)}
+      if(t>=BOOM&&t<BOOM+340){const k=(t-BOOM)/340,g=fx.createRadialGradient(ox,oy,0,ox,oy,60+lr.width*.7*k);g.addColorStop(0,ACC);g.addColorStop(1,"rgba(0,0,0,0)");const rr=60+lr.width*.7*k;fx.globalAlpha=(1-k)*.5;fx.fillStyle=g;fx.fillRect(ox-rr,oy-rr,rr*2,rr*2)}
       // gotas: se agrupan por color y brillo y se pintan de una vez
       if(t>=BOOM){const B=[[],[],[],[],[],[]];
         for(const p of P){let x,y,lv=2,r=p.r;
@@ -1021,14 +1025,14 @@ const SV={
         B.forEach((b,i)=>{if(!b.length)return;fx.fillStyle=i<3?INK:ACC;fx.globalAlpha=[.35,.65,.95][i%3];fx.beginPath();for(let j=0;j<b.length;j+=3){fx.moveTo(b[j]+b[j+2],b[j+1]);fx.arc(b[j],b[j+1],b[j+2],0,6.283)}fx.fill()})}
       // germinación: la pieza crece desde la semilla
       if(U)for(const u of U){const d=t-u.tl;if(d<0)continue;
-        if(!u.go){u.go=1;try{const an=u.el.animate([{clipPath:u.c0},{clipPath:u.c1}],{duration:u.k==="card"?900:680,easing:"cubic-bezier(.2,.75,.25,1)",fill:"forwards"});
-          an.onfinish=()=>{u.el.style.clipPath="";an.cancel()};u.an=an}catch(e){u.el.style.clipPath=""}}
+        if(!u.go){u.go=1;const s0=u.k==="card"?.94:u.k==="row"?.82:.6;try{const an=u.el.animate([{opacity:0,transform:`scale(${s0})`},{opacity:1,transform:"scale(1)"}],{duration:u.k==="card"?700:560,easing:"cubic-bezier(.2,.8,.25,1.08)",fill:"forwards"});
+          an.onfinish=()=>{u.el.style.opacity="";an.cancel()};u.an=an}catch(e){u.el.style.opacity=""}}
       }
       fx.globalAlpha=1;SV.grow(bg,veins,t,"rgba(0,0,0,.26)");
       if(U&&!dimmed&&t>END-700){dimmed=1;cv.classList.add("dim")}
       if(t<END)requestAnimationFrame(frame);
-      else{fxc.remove();if(U)U.forEach(u=>{u.el.style.clipPath="";u.an&&u.an.cancel()});document.body.classList.remove("sapping");
-        logo.style.opacity="";pre&&pre.cancel();done&&done()}};
+      else{fxc.remove();if(!frame.laid)unkeep();if(U)U.forEach(u=>{const s=u.el.style;s.opacity=s.transformOrigin=s.willChange="";u.an&&u.an.cancel()});document.body.classList.remove("sapping");
+        logo.style.opacity=logo.style.willChange="";pre&&pre.cancel();done&&done()}};
     requestAnimationFrame(frame)}};
 function goInside(){
   const c=$("cover");if(c.classList.contains("exiting"))return;
