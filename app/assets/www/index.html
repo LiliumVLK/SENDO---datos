@@ -676,6 +676,13 @@ body.swap .sec+.sec{animation-delay:.06s}
 .wkfood>div.tr.tr::before{content:"";position:absolute;left:-16px;top:0;bottom:-10px;border-left:2px dotted color-mix(in srgb,var(--accent) 50%,transparent)}
 .wkfood>div.tr.tr:last-of-type::before{bottom:auto;height:19px}
 .wkfood>div.tr::after{content:"";position:absolute;left:-16px;top:0;width:14px;height:19px;border-left:2px dotted color-mix(in srgb,var(--accent) 50%,transparent);border-bottom:2px dotted color-mix(in srgb,var(--accent) 50%,transparent);border-bottom-left-radius:9px}
+/* fondo de los entrenos: un solo bloque con tinte y una línea de color a la izquierda */
+.wkfood>div.tr{background:color-mix(in srgb,var(--accent) 15%,var(--surface));padding-right:12px;border-top:0;box-shadow:inset 3px 0 0 var(--accent)}
+.wkfood>div:not(.tr)+div.tr,.wkfood>div.tr:first-child{border-radius:16px 16px 0 0;margin-top:6px}
+.wkfood>div.tr:has(+div:not(.tr)),.wkfood>div.tr:last-child{border-radius:0 0 16px 16px}
+.wkfood>div:not(.tr)+div.tr:has(+div:not(.tr)),.wkfood>div:not(.tr)+div.tr:last-child,.wkfood>div.tr:first-child:has(+div:not(.tr)){border-radius:16px}
+.wkfood>div.tr+div.tr{border-top:1px dashed color-mix(in srgb,var(--accent) 35%,transparent)}
+.wkfood>div.tr+div:not(.tr){border-top-color:transparent;margin-top:6px}
 .col{font-size:.54rem;padding:1px 7px 1px 4px;gap:4px}
 .col i{width:5px;height:5px}
 .wkfood .edit{margin:10px 0 0 44px;font-size:.78rem}
