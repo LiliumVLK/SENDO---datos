@@ -1188,7 +1188,10 @@ function goInside(){
     if(!faded&&e>1150){faded=true;veil.style.opacity="0";cv.classList.add("dim")}
     if(e<2200||roots.length)requestAnimationFrame(frame);else{veil.remove();c.classList.remove("exiting")}};
   requestAnimationFrame(frame)}
-function goHome(){const rb=$("rootsBg");if(rb)rb.remove();document.body.classList.remove("inside");document.body.classList.add("home");$("devSec").hidden=true;$("docSec").hidden=true;$("weekSec").hidden=true;$("nutSec").hidden=true;scrollTo(0,0);intro()}
+/* al salir del diario todo vuelve a como estaba al principio: semana actual, días cerrados, Plan semanal, arriba del todo */
+function resetDiary(){wkOffset=0;open.clear();const sh=document.querySelector(".sheet [data-cancel]");if(sh)sh.click();
+  if(tab!=="plan")setTab("plan");document.body.classList.remove("swap","arrive");scrollTo(0,0);try{renderLegend()}catch(e){}}
+function goHome(){resetDiary();const rb=$("rootsBg");if(rb)rb.remove();document.body.classList.remove("inside");document.body.classList.add("home");$("devSec").hidden=true;$("docSec").hidden=true;$("weekSec").hidden=true;$("nutSec").hidden=true;scrollTo(0,0);intro()}
 $("btnEnter").onclick=goInside;$("btnHome").onclick=()=>editing?show("dev"):goHome();
 $("wkPrev").onclick=()=>{wkOffset--;open.clear();renderWeek();slideWeek(-1)};$("wkNext").onclick=()=>{wkOffset++;open.clear();renderWeek();slideWeek(1)};$("wkPrev").classList.add("rp");$("wkNext").classList.add("rp");
 document.querySelectorAll(".langsw button").forEach(b=>b.onclick=()=>{LANG=b.dataset.lang;LS.set("tpl.lang",LANG);renderAll()});
@@ -1566,7 +1569,7 @@ const accClick=async e=>{
   if(b.dataset.rmpdf){removePdf("acc",b.dataset.rmpdf);return}
   if(b.dataset.pdfs){pdfView={kind:"acc",id:b.dataset.pdfs};show("pdfs");return}
   if(b.dataset.reread){readPlanPdf(b.dataset.reread,null);return}
-  if(b.dataset.diary){editing=true;preview=true;pvMode=true;watchPlan(b.dataset.diary);wkOffset=0;show("edit");return}
+  if(b.dataset.diary){editing=true;preview=true;pvMode=true;watchPlan(b.dataset.diary);resetDiary();show("edit");return}
   if(b.dataset.edit)editAccount(b.dataset.edit)};
 $("dpList").addEventListener("click",accClick);$("grpList").addEventListener("click",accClick);
 function genPass(){const S="ba be bi bo bu da de di do ka ke ki ko ku la le li lo lu ma me mi mo mu na ne ni no pa pe pi po ra re ri ro sa se si so ta te ti to za zo".split(" "),r=n=>Math.floor(Math.random()*n);
@@ -1619,7 +1622,7 @@ function renderPv(){let b=$("pvBar");const on=access==="edit"&&pvMode&&!!client;
   const a=accounts[client];b.classList.toggle("on",!preview);
   b.innerHTML=`<span class="pv-dot" aria-hidden="true"></span><span class="pv-t"><small>${esc(t(preview?"pvLabel":"pvEditing"))}</small><b>${esc(a?a.nombre:"—")}</b></span><button type="button" class="pv-b pv-pen" id="pvEdit" aria-pressed="${!preview}" aria-label="${esc(t("pvEdit"))}" title="${esc(t("pvEdit"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pen-b" d="M4 20l1-4.2L15.6 5.2a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.2 19 4 20z"/><path class="pen-t" d="M13.8 7l3.2 3.2"/><path class="pen-l" d="M4 20h7"/></svg></button><button type="button" class="pv-b pv-x" id="pvClose" aria-label="${esc(t("backAcc"))}" title="${esc(t("backAcc"))}">✕</button>`;
   $("pvEdit").onclick=()=>{preview=!preview;canEdit=!preview&&!!client;renderPv();const pb=$("pvBar");if(pb){pb.classList.remove("flip");void pb.offsetWidth;pb.classList.add("flip")}renderWeek()};
-  $("pvClose").onclick=()=>show("dev")}
+  $("pvClose").onclick=()=>{resetDiary();show("dev")}}
 function renderDev(){
   const box=$("devBox");if(!box)return;if(!editing||pvMode){$("devSec").hidden=true;return}
   const a=accounts[client];
