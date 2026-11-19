@@ -331,6 +331,16 @@ body.gdrag,body.gdrag *{-webkit-user-select:none;user-select:none}
 .act-n{position:absolute;top:-3px;right:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--fg);color:var(--bg);font:700 .6rem/17px var(--body)}
 .act.busy{pointer-events:none}.act.busy .act-i svg{opacity:.15}
 .act.busy .act-i::after{content:"";position:absolute;inset:11px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
+/* borradores: plan nuevo por revisar */
+.draftb{display:inline-block;vertical-align:1px;margin-left:6px;padding:1px 8px;border-radius:999px;font:700 .62rem/1.5 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--warn,#c98a1b);background:color-mix(in srgb,var(--warn,#e2ab4f) 18%,transparent);border:1px dashed color-mix(in srgb,var(--warn,#e2ab4f) 60%,transparent)}
+.act.a-pub .act-i{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff);animation:pubPulse 2.4s var(--ease) infinite}
+.chk .tick{stroke-dasharray:12;stroke-dashoffset:0}
+.arow.open .a-pub .tick,.g-pub .tick,.pv-pub .tick{animation:tickIn .6s var(--grow) .3s both}
+@keyframes tickIn{from{stroke-dashoffset:12}}
+@keyframes pubPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 45%,transparent)}50%{box-shadow:0 0 0 7px transparent}}
+.pv-b.pv-pub{background:var(--accent);color:var(--accent-ink,#fff);animation:pubPulse 2.4s var(--ease) infinite}
+.pv-b.pv-pub svg{width:20px;height:20px}
+@media (prefers-reduced-motion:reduce){.act.a-pub .act-i,.pv-b.pv-pub{animation:none}}
 /* «Diario» junto al nombre */
 .arow{position:relative}
 .arow.has-dia .arow-t{padding-right:46px}
@@ -863,7 +873,11 @@ const S={
   pdfN:["{n} PDF","{n} PDF"],upShort:["Subir plan","Plana igo"],pdfsShort:["PDFs · {n}","PDFak · {n}"],editShort:["Editar","Editatu"],diaryK:["Diario","Egunkaria"],
   infoBtn:["Info","Info"],antroBtn:["Antropo\u00admetría","Antropo\u00admetria"],antroH:["Antropometría","Antropometria"],noAntro:["Sin PDFs de antropometría.","Ez dago antropometria PDFrik."],
   upAntro:["Subir un PDF de antropometría de este cliente (medidas, pliegues, peso…)","Bezero honen antropometria PDF bat igo (neurriak, tolesturak, pisua…)"],
-  actDiary:["Diario","Egunkaria"],actFiles:["Archivos","Fitxategiak"],filesTip:["Subir o ver los PDFs de esta cuenta","Kontu honen PDFak igo edo ikusi"],actAll:["Ver PDFs","PDFak ikusi"],actHide:["Ocultar","Ezkutatu"],actShow:["Mostrar","Erakutsi"],
+  actDiary:["Diario","Egunkaria"],metaReview:["Plan nuevo por revisar","Plan berria berrikusteko"],actPub:["Publicar","Argitaratu"],draftTag:["Borrador","Zirriborroa"],
+  pubTip:["Revisar y publicar el plan nuevo","Plan berria berrikusi eta argitaratu"],pubH:["Publicar el plan nuevo","Plan berria argitaratu"],
+  pubTxt:["Claude ha leído {n} semana(s) desde el {d}. Están en borrador: el cliente todavía no las ve. Revísalas en «Diario» (puedes corregirlas con el lápiz) y publícalas cuando estén bien.","Claudek {n} aste irakurri ditu {d}(e)tik. Zirriborroan daude: bezeroak oraindik ez ditu ikusten. Berrikusi «Egunkaria» atalean (arkatzarekin zuzen ditzakezu) eta argitaratu ondo daudenean."],
+  pubTxtG:["Claude ha leído {n} semana(s) desde el {d} para el grupo. Están en borrador: las cuentas del grupo todavía no las ven.","Claudek {n} aste irakurri ditu {d}(e)tik taldearentzat. Zirriborroan daude: taldeko kontuek oraindik ez dituzte ikusten."],
+  pubDiscard:["Descartar","Baztertu"],published:["Publicado: el cliente ya lo ve","Argitaratuta: bezeroak ikusten du"],publishedG:["Publicado para todo el grupo","Talde osoarentzat argitaratuta"],discarded:["Borrador descartado","Zirriborroa baztertuta"],actFiles:["Archivos","Fitxategiak"],filesTip:["Subir o ver los PDFs de esta cuenta","Kontu honen PDFak igo edo ikusi"],actAll:["Ver PDFs","PDFak ikusi"],actHide:["Ocultar","Ezkutatu"],actShow:["Mostrar","Erakutsi"],
   hideTip:["Ocultar la cuenta: el cliente no podrá entrar de ninguna manera","Kontua ezkutatu: bezeroak ezin izango du inola ere sartu"],showTip:["Volver a mostrar la cuenta: el cliente podrá entrar otra vez","Kontua berriz erakutsi: bezeroak berriz sartu ahal izango du"],
   hiddenTag:["Oculta","Ezkutuan"],hiddenOk:["Cuenta oculta: el cliente ya no puede entrar. La verás en Grupos.","Kontua ezkutuan: bezeroak ezin du sartu. Taldeak atalean ikusiko duzu."],shownOk:["La cuenta vuelve a estar visible","Kontua berriz ikusgai dago"],actPlan:["Plan","Plana"],actPdfs:["PDFs","PDFak"],actReread:["Releer","Irakurri"],actRetry:["Reintentar","Berriz saiatu"],upInfo:["Subir un PDF de información para todas las semanas de este cliente","Bezero honen aste guztietarako informazio PDF bat igo"],
   plansH:["Planes","Planak"],
@@ -972,7 +986,7 @@ function locDay(d){if(LANG!=="eu"||!d||!d.eu||typeof d.eu!=="object")return d;co
 function renderWeek(){
   const mon=curMon(),sun=addDays(mon,6),key=dk(mon),today=dk(new Date()),plan=plans[key];
   $("wkTitle").textContent=wkOffset===0?t("thisWeek"):wkOffset===-1?t("lastWeek"):wkOffset===1?t("nextWeek"):t("weekOf")+" "+fmtDM(mon);
-  $("wkSub").textContent=(editing&&!pvMode&&client&&accounts[client]?accounts[client].nombre+" · ":"")+`${fmtDM(mon)} – ${fmtDM(sun)}`;
+  $("wkSub").innerHTML=esc((editing&&!pvMode&&client&&accounts[client]?accounts[client].nombre+" · ":"")+`${fmtDM(mon)} – ${fmtDM(sun)}`)+(plan&&plan._draft?` <span class="draftb">${esc(t("draftTag"))}</span>`:"");
   const box=$("wkBox");box.innerHTML="";
   if(!plan){const e=document.createElement("div");e.className="empty";
     e.innerHTML=`<strong>${t("noPlan")}</strong><span>${canEdit?t("noPlanTxt"):t("noPlanRo")}</span>`;
@@ -1084,10 +1098,14 @@ function editNote(key){
     async c=>{const p={...(plans[key]||{days:[]})},v=c.querySelector("#noteIn").value.trim();if(v)p.note=v;else delete p.note;await putPlan(key,p)},null,"#noteIn")}
 async function savePlanDay(key,nd,delIdx){
   const p={...(plans[key]||{days:[]})};let days=(p.days||[]).filter(x=>x.d!==(nd?nd.d:delIdx));if(nd)days.push(nd);days.sort((a,b)=>a.d-b.d);p.days=days;await putPlan(key,p)}
+let planRaw={};
 async function putPlan(key,p){
+  const dr=!!p._draft&&!p._g;delete p._draft;
   if(p._g){delete p._g;delete p.pdf;delete p.fuente}
-  p.updatedAt=new Date().toISOString();plans[key]=p;renderWeek();
-  if(!db||!client)return;try{await db.doc(`planes/${client}/semanas/${key}`).set(p);toast(t("saved"))}catch(e){toast(t("saveErr"))}}
+  p.updatedAt=new Date().toISOString();plans[key]=dr?{...p,_draft:1}:p;renderWeek();
+  // corregir un borrador lo deja en borrador: el plan publicado de esa semana no cambia hasta publicar
+  const doc=dr?{...(planRaw[key]||{}),draft:p}:p;
+  if(!db||!client)return;try{await db.doc(`planes/${client}/semanas/${key}`).set(doc);toast(t("saved"))}catch(e){toast(t("saveErr"))}}
 async function copyPrev(key,prev){const p={days:JSON.parse(JSON.stringify(prev.days||[]))};if(prev.note)p.note=prev.note;await putPlan(key,p)}
 
 /* ---------- leyenda de colores ---------- */
@@ -1318,6 +1336,7 @@ function mergeWeek(a,b){const D={};for(const x of a.days||[])D[x.d]={...x};
 const grpOrd=([ka,a],[kb,b])=>((a.orden??1e9)-(b.orden??1e9))||String(a.nombre).localeCompare(String(b.nombre),"es");
 const grpOk=g=>!!g&&((grps[g]||{}).lectura||{}).estado==="ok";
 const CAL_A='<svg class="cala" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.2"/><path d="M3.5 9.8h17"/><path class="cpin" d="M8 3v3.6M16 3v3.6"/>'+[[8,13.6],[12,13.6],[16,13.6],[8,17.2],[12,17.2]].map(([x,y],i)=>`<circle class="cdot" style="--d:${i}" cx="${x}" cy="${y}" r="1.15" fill="currentColor" stroke="none"/>`).join("")+'</svg>';
+const CHECK_I='<svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path class="tick" d="M8.2 12.3l2.6 2.6 5-5.4"/></svg>';
 const FILES_I='<svg class="fls" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="fb" d="M3.5 8.2A1.7 1.7 0 0 1 5.2 6.5h3.9l1.9 2h7.8a1.7 1.7 0 0 1 1.7 1.7v7.6a1.7 1.7 0 0 1-1.7 1.7H5.2a1.7 1.7 0 0 1-1.7-1.7z"/><path class="fp" d="M7 8.6V5.2A1.2 1.2 0 0 1 8.2 4h7.6a1.2 1.2 0 0 1 1.2 1.2v3.4"/><path class="ff" d="M3.6 11.2h16.8"/></svg>';
 const LOCK_C='<svg class="lck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shk" d="M8 10.6V8a4 4 0 0 1 8 0v2.6"/><rect x="5" y="10.6" width="14" height="10" rx="2.6"/><path d="M12 14.6v2"/></svg>';
 const LOCK_O='<svg class="lck open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shk" d="M8 10.6V8a4 4 0 0 1 7.7-1.5"/><rect x="5" y="10.6" width="14" height="10" rx="2.6"/><path d="M12 14.6v2"/></svg>';
@@ -1425,8 +1444,9 @@ async function readPlanPdf(id,blob,kind){
     const res=await sample.json(planPrompt(text.slice(0,40000),mon,dk(now),images.length>0),{modelTier:"complex",cache:false,...(images.length?{images}:{})});
     const weeks=cleanWeeks(res);if(!weeks.length)throw new Error("noweeks");
     const pid=((src[id]||{}).pdf||{}).id;if(pid)for(const w of weeks)w.plan.pdf=pid;
-    for(const w of weeks)await db.doc(`${wp}/${id}/semanas/${w.key}`).set(w.plan);
-    await setLectura(id,{estado:"ok",semanas:weeks.length,desde:weeks[0].key,at:new Date().toISOString()},kind);
+    let prevW={};try{prevW=await weeksOnce(id,wp)}catch(e){}
+    for(const w of weeks){const old=prevW[w.key];await db.doc(`${wp}/${id}/semanas/${w.key}`).set(old&&old.days?{...old,draft:w.plan}:{draft:w.plan,pdf:w.plan.pdf,fuente:"pdf"})}
+    await setLectura(id,{estado:"revisar",semanas:weeks.length,desde:weeks[0].key,at:new Date().toISOString()},kind);
     toast(t("readOk").replace("{n}",weeks.length))}
   catch(e){toast(e&&e.code==="not_granted"?t("readDenied"):t("readErr"));await setLectura(id,{estado:"error",at:new Date().toISOString()},kind)}
   finally{readingNow.delete(id);renderDevPage()}}
@@ -1450,7 +1470,19 @@ $("pdfIn").onchange=async()=>{
   finally{const b=tg.kind==="gen"?$("genUp"):document.querySelector(tg.kind==="info"?`[data-info="${tg.id}"]`:tg.kind==="antro"?`[data-antro="${tg.id}"]`:tg.kind==="grp"?`[data-gup="${tg.id}"]`:`[data-up="${tg.id}"]`);if(b)b.classList.remove("busy");if(btn)btn.classList.remove("busy")}
   if(readAfter)readPlanPdf(readAfter.id,readAfter.blob,readAfter.kind)};
 function weeksOnce(id,base){return new Promise((ok,ko)=>{let u=null,done=false;u=db.collection(`${base||"planes"}/${id}/semanas`).onSnapshot(q=>{if(done)return;done=true;const o={};q.docs.forEach(d=>{o[d.id]=d.data()});setTimeout(()=>{if(u)u()});ok(o)},e=>{if(!done){done=true;ko(e)}})})}
-async function dropWeeks(id,fid,none,base){base=base||"planes";const W=await weeksOnce(id,base);for(const[k,w]of Object.entries(W)){if(!w)continue;if(w.pdf?w.pdf===fid:(none&&w.fuente==="pdf"))await db.doc(`${base}/${id}/semanas/${k}`).delete()}}
+async function dropWeeks(id,fid,none,base){base=base||"planes";const W=await weeksOnce(id,base);for(const[k,w]of Object.entries(W)){if(!w)continue;
+  if(w.draft&&w.draft.pdf===fid){const{draft,...rest}=w;if(rest.days&&rest.pdf!==fid){await db.doc(`${base}/${id}/semanas/${k}`).set(rest);continue}}
+  if(w.pdf?w.pdf===fid:(none&&w.fuente==="pdf"))await db.doc(`${base}/${id}/semanas/${k}`).delete()}}
+/* publicar o descartar el borrador que dejó la lectura de un PDF */
+function publishDrafts(kind,id){const grp=kind==="grp",src=grp?grps:accounts,a=src[id];if(!a)return;const L=a.lectura||{},dp=grp?"grupos/":"cuentas/",base=grp?"gplanes":"planes";
+  const done=async pub=>{try{const W=await weeksOnce(id,base);let n=0;
+      for(const[k,w]of Object.entries(W)){if(!w||!w.draft)continue;n++;
+        if(pub){const d={...w.draft};if(!d.pdf&&w.pdf)d.pdf=w.pdf;if(!d.fuente)d.fuente="pdf";await db.doc(`${base}/${id}/semanas/${k}`).set(d)}
+        else{const{draft,...rest}=w;if(rest.days)await db.doc(`${base}/${id}/semanas/${k}`).set(rest);else await db.doc(`${base}/${id}/semanas/${k}`).delete()}}
+      const cur=src[id];if(cur){const nl={...(cur.lectura||{})};if(pub)nl.estado="ok";else{delete nl.estado;nl.estado=Object.values(W).some(w=>w&&w.days)?"ok":"descartado"}
+        await db.doc(dp+id).set({...cur,lectura:nl})}
+      toast(t(pub?(grp?"publishedG":"published"):"discarded"))}catch(e){toast(t("saveErr"))}};
+  sheet(t("pubH"),`<p style="margin:0">${esc(t(grp?"pubTxtG":"pubTxt").replace("{n}",L.semanas||1).replace("{d}",L.desde?fmtDM(new Date(L.desde+"T00:00:00")):"—"))}</p>`,()=>done(true),()=>done(false),null,{save:t("actPub"),clear:t("pubDiscard")})}
 function removePdf(kind,id,fid){
   const a=kind==="grp"?grps[id]:kind!=="gen"?accounts[id]:null,f=kind==="acc"||kind==="grp"?accPdfs(a).find(x=>x.id===fid):kind==="info"?accInfos(a).find(x=>x.id===fid):kind==="antro"?accAntros(a).find(x=>x.id===fid):gens[id];if(!f)return;
   if(kind==="acc"||kind==="grp"){
@@ -1535,11 +1567,12 @@ function watchPlan(uid){
   plans={};client=uid||null;canEdit=editing&&!preview&&!!client;if(inside())renderWeek();
   if(!db||!client)return;
   const gl=grpsOf(accounts[client]);let own={};const gw={};
+  const dv=w=>w&&w.draft?{...w.draft,_draft:1}:w;
   const mix=()=>{const G={};
     for(const gid of gl){const ids=new Set([...accPdfs(grps[gid]),...accDel(grps[gid])].map(x=>x.id));
-      for(const[k,w]of Object.entries(gw[gid]||{}))if(w&&(w.pdf?ids.has(w.pdf):!(w.fuente==="pdf"&&!ids.size))){const{pdf,fuente,...c}=w;G[k]=G[k]?mergeWeek(G[k],c):{...c}}}
-    for(const k in G)G[k]._g=1;plans={...G,...own};if(inside())renderWeek()};
-  const U=[db.collection(`planes/${client}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});own=o;mix()},()=>{})];
+      for(const[k,w]of Object.entries(gw[gid]||{}))if(w&&(w.pdf?ids.has(w.pdf):!(w.fuente==="pdf"&&!ids.size))){const{pdf,fuente,...c}=dv(w);G[k]=G[k]?mergeWeek(G[k],c):{...c}}}
+    for(const k in G)G[k]._g=1;const O={};for(const k in own)O[k]=dv(own[k]);plans={...G,...O};if(inside())renderWeek()};
+  const U=[db.collection(`planes/${client}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});own=o;planRaw=o;mix()},()=>{})];
   for(const gid of gl)U.push(db.collection(`gplanes/${gid}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});gw[gid]=o;mix()},()=>{}));
   unsubPlan=()=>{U.forEach(f=>{if(typeof f==="function")try{f()}catch(e){}})}}
 function leaveInside(){document.body.classList.remove("inside","arrive");document.body.classList.add("home");["devSec","docSec","weekSec","nutSec"].forEach(id=>$(id).hidden=true);const rb=$("rootsBg");if(rb)rb.remove()}
@@ -1604,8 +1637,9 @@ function renderGroups(){
   if(N.length)H.push(box("-"," none","",op=>`<div class="gbox-h"><button type="button" class="gbox-tog rp" data-gt="-" aria-expanded="${op}"><span class="gi" aria-hidden="true">—</span><span class="dv-gt"><b>${esc(t("grpNone"))}</b><small>${esc(grpN(N.length))}</small></span>${CHEV}</button></div>`,N,""));
   $("grpList").innerHTML=H.join("")}
 function grpHead(id,g,op){const np=accPdfs(g).length+accDel(g).length,L=g.lectura||{},rd=readingNow.has(id)||L.estado==="pendiente";
-  const st=rd?t("reading"):!g.pdf?t("metaNone"):L.estado==="ok"?t("metaOk").replace("{d}",fmtDM(new Date(L.desde+"T00:00:00"))):L.estado==="error"?t("metaErr"):t("pdfN").replace("{n}",np);
+  const st=rd?t("reading"):L.estado==="revisar"?t("metaReview"):!g.pdf?t("metaNone"):L.estado==="ok"?t("metaOk").replace("{d}",fmtDM(new Date(L.desde+"T00:00:00"))):L.estado==="error"?t("metaErr"):t("pdfN").replace("{n}",np);
   return `<div class="gbox-h"><button type="button" class="gbox-tog rp" data-gt="${esc(id)}" aria-expanded="${!!op}"><span class="gi" aria-hidden="true">${esc(ini(g.nombre))}</span><span class="dv-gt"><b>${esc(g.nombre||"—")}</b><small>${esc(grpN(grpCount(id)))} · ${esc(st)}</small></span>${CHEV}</button>
+    ${L.estado==="revisar"&&!rd?`<button type="button" class="ib2 hi rp g-pub" data-gpub="${esc(id)}" aria-label="${esc(t("pubTip"))}" title="${esc(t("pubTip"))}">${CHECK_I}</button>`:""}
     ${L.estado==="error"&&!rd&&g.pdf?`<button type="button" class="ib2 rp" data-greread="${esc(id)}" aria-label="${esc(t("retry"))}" title="${esc(t("retry"))}">↻</button>`:""}
     ${np?`<button type="button" class="ib2 rp" data-gpdfs="${esc(id)}" aria-label="${esc(t("grpPdfs"))}" title="${esc(t("grpPdfs"))}">${LISTI}</button>`:""}
     <button type="button" class="ib2 rp" data-gedit="${esc(id)}" aria-label="${esc(t("grpEditL"))}" title="${esc(t("grpEditL"))}">${PEN}</button>
@@ -1632,8 +1666,8 @@ function toggleFiles(b){const k=b.dataset.files,art=b.closest(".arow"),pan=art&&
     clearTimeout(pan._t);pan._t=setTimeout(()=>{pan.classList.remove("open","closing")},RM.matches?0:330)}}
 function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length+accAntros(a).length+accDel(a).length,L2=a.lectura||{},rd=readingNow.has(id)||L2.estado==="pendiente",ok=box+"|"+id,op=openAcc.has(ok),gs=grpsOf(a),gok=gs.some(grpOk);
     const ring=gs.length===1?gcol(gs[0]):`conic-gradient(${gs.map((g,j)=>`${gcol(g)} ${j/gs.length*100}% ${(j+1)/gs.length*100}%`).join(",")})`;
-    const st=rd?["warn",t("reading")]:!a.pdf?(L2.estado==="ok"&&accDel(a).length?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:gok?["ok",t("metaGrp")]:["",t("metaNone")]):L2.estado==="ok"?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:L2.estado==="error"?["err",t("metaErr")]:["",t("pdfN").replace("{n}",n)];
-    const dia=(L2.estado==="ok"&&!rd)||gok,fo=openFiles.has(ok);
+    const st=rd?["warn",t("reading")]:!a.pdf?(L2.estado==="ok"&&accDel(a).length?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:gok?["ok",t("metaGrp")]:["",t("metaNone")]):L2.estado==="revisar"?["warn",t("metaReview")]:L2.estado==="ok"?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:L2.estado==="error"?["err",t("metaErr")]:["",t("pdfN").replace("{n}",n)];
+    const dia=((L2.estado==="ok"||L2.estado==="revisar")&&!rd)||gok||gs.some(g=>((grps[g]||{}).lectura||{}).estado==="revisar"),fo=openFiles.has(ok);
     return `<article class="arow${op?" open":""}${gs.length?" has-g":""}${a.oculta?" is-hidden":""}${dia?" has-dia":""}" style="--i:${Math.min(i,10)}${gs.length?`;--ring:${ring}`:""}">
     <button type="button" class="arow-h rp" data-tog="${esc(ok)}" aria-expanded="${op}"><i class="av" aria-hidden="true">${esc(ini(a.nombre))}<i class="dot ${st[0]}"></i></i>
       <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${a.oculta?`<span class="htag">${LOCK_C}${esc(t("hiddenTag"))}</span> · `:""}${gs.length?gs.map(g=>`<span class="gname" style="color:${esc(gcol(g))}">${esc(grps[g].nombre)}</span>`).join(", ")+" · ":""}${esc(st[1])}</small></span>${CHEV}</button>
@@ -1642,7 +1676,7 @@ function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length+accAntr
       <div class="kv"><span class="k">${esc(t("pass"))}</span><code>${shown.has(id)?esc(a.clave):"•".repeat(Math.max(6,Math.min(12,String(a.clave||"").length)))}</code>
         <button type="button" class="ib2 rp" data-eye="${esc(id)}" aria-label="${esc(t(shown.has(id)?"hide":"show"))}" aria-pressed="${shown.has(id)}">${EYE}</button>
         <button type="button" class="ib2 rp" data-copy="${esc(id)}" aria-label="${esc(t("copy"))}">${COPY}</button></div>
-      <div class="acts">${act("files",ok,FILES_I,t("actFiles"),t("filesTip"),` a-files${fo?" on":""}`,n)}${a.pdf&&!rd?act("reread",id,REREAD_I,t(L2.estado==="error"?"actRetry":"actReread"),t(L2.estado==="error"?"retry":"reread")):""}${a.oculta?act("hide",id,LOCK_O,t("actShow"),t("showTip")," a-hid a-lock"):act("hide",id,LOCK_C,t("actHide"),t("hideTip")," a-lock")}${act("edit",id,PEN,t("editShort"),t("editShort"))}</div>
+      <div class="acts">${L2.estado==="revisar"&&!rd?act("pub",id,CHECK_I,t("actPub"),t("pubTip")," a-pub"):""}${act("files",ok,FILES_I,t("actFiles"),t("filesTip"),` a-files${fo?" on":""}`,n)}${a.pdf&&!rd?act("reread",id,REREAD_I,t(L2.estado==="error"?"actRetry":"actReread"),t(L2.estado==="error"?"retry":"reread")):""}${a.oculta?act("hide",id,LOCK_O,t("actShow"),t("showTip")," a-hid a-lock"):act("hide",id,LOCK_C,t("actHide"),t("hideTip")," a-lock")}${act("edit",id,PEN,t("editShort"),t("editShort"))}</div>
       <div class="fpan${fo?" open":""}" data-fp="${esc(ok)}"><div class="fpan-in"><div class="fpan-row">${act("up",id,UP_I,t("actPlan"),t("upShort")," fo-i")}${act("info",id,INFO_I,t("infoBtn"),t("upInfo")," fo-i")}${act("antro",id,BODY_I,t("antroBtn"),t("upAntro")," fo-i")}${act("pdfs",id,DOCS_I,t("actAll"),t("pdfsShort").replace("{n}",n),` fo-i${n?"":" off"}`,n)}</div></div></div>
     </div></div></article>`}
 $("dpSearch").oninput=renderDevPage;
@@ -1685,6 +1719,7 @@ $("grpList").addEventListener("click",e=>{const b=e.target.closest("button");if(
   if(b.dataset.gup){pickPdf({kind:"grp",id:b.dataset.gup},b);return}
   if(b.dataset.gpdfs){pdfView={kind:"grp",id:b.dataset.gpdfs};show("pdfs");return}
   if(b.dataset.greread){readPlanPdf(b.dataset.greread,null,"grp");return}
+  if(b.dataset.gpub){publishDrafts("grp",b.dataset.gpub);return}
   if(b.dataset.gedit)editGroup(b.dataset.gedit)});
 $("dpNew").onclick=()=>editAccount(null);
 $("dpExit").onclick=()=>{if(DEVAPP)return;show("login")};
@@ -1702,6 +1737,7 @@ const accClick=async e=>{
   if(b.dataset.info){pickPdf({kind:"info",id:b.dataset.info},b);return}
   if(b.dataset.antro){pickPdf({kind:"antro",id:b.dataset.antro},b);return}
   if(b.dataset.files){toggleFiles(b);return}
+  if(b.dataset.pub){publishDrafts("acc",b.dataset.pub);return}
   if(b.dataset.hide){const id=b.dataset.hide,a=accounts[id];if(!a)return;const n={...a};if(a.oculta)delete n.oculta;else n.oculta=true;
     try{await db.doc("cuentas/"+id).set(n);toast(t(n.oculta?"hiddenOk":"shownOk"))}catch(err){toast(t("saveErr"))}return}
   if(b.dataset.rmpdf){removePdf("acc",b.dataset.rmpdf);return}
@@ -1759,6 +1795,7 @@ function renderPv(){let b=$("pvBar");const on=access==="edit"&&pvMode&&!!client;
   if(!b||b.classList.contains("out")){if(b)b.remove();b=document.createElement("div");b.id="pvBar";b.className="pvbar";document.body.append(b)}
   const a=accounts[client];b.classList.toggle("on",!preview);
   b.innerHTML=`<span class="pv-dot" aria-hidden="true"></span><span class="pv-t"><small>${esc(t(preview?"pvLabel":"pvEditing"))}</small><b>${esc(a?a.nombre:"—")}</b></span><button type="button" class="pv-b pv-pen" id="pvEdit" aria-pressed="${!preview}" aria-label="${esc(t("pvEdit"))}" title="${esc(t("pvEdit"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pen-b" d="M4 20l1-4.2L15.6 5.2a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.2 19 4 20z"/><path class="pen-t" d="M13.8 7l3.2 3.2"/><path class="pen-l" d="M4 20h7"/></svg></button><button type="button" class="pv-b pv-x" id="pvClose" aria-label="${esc(t("backAcc"))}" title="${esc(t("backAcc"))}">✕</button>`;
+  if(a&&(a.lectura||{}).estado==="revisar"){const pe=$("pvEdit"),pb=document.createElement("button");pb.type="button";pb.className="pv-b pv-pub";pb.id="pvPub";pb.setAttribute("aria-label",t("pubTip"));pb.title=t("pubTip");pb.innerHTML=CHECK_I;pe.before(pb);pb.onclick=()=>publishDrafts("acc",client)}
   $("pvEdit").onclick=()=>{preview=!preview;canEdit=!preview&&!!client;renderPv();const pb=$("pvBar");if(pb){pb.classList.remove("flip");void pb.offsetWidth;pb.classList.add("flip")}renderWeek()};
   $("pvClose").onclick=()=>{resetDiary();show("dev")}}
 function renderDev(){
