@@ -331,6 +331,36 @@ body.gdrag,body.gdrag *{-webkit-user-select:none;user-select:none}
 .act-n{position:absolute;top:-3px;right:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--fg);color:var(--bg);font:700 .6rem/17px var(--body)}
 .act.busy{pointer-events:none}.act.busy .act-i svg{opacity:.15}
 .act.busy .act-i::after{content:"";position:absolute;inset:11px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
+/* «Diario» junto al nombre */
+.arow{position:relative}
+.arow.has-dia .arow-t{padding-right:46px}
+.arow-dia{position:absolute;top:12px;right:52px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));background:var(--surface);color:var(--accent);cursor:pointer;overflow:hidden;transition:transform .3s var(--grow),background .25s}
+.arow-dia svg{width:19px;height:19px}
+.arow-dia:hover{background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.arow-dia:active{transform:scale(.9)}
+/* «Archivos»: un botón que despliega Plan, Info, Antropometría y Ver PDFs */
+.act.a-files .act-i{transition:background .3s,border-color .3s,color .3s,transform .35s var(--grow)}
+.act.a-files.on .act-i{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff);transform:scale(1.06)}
+.act.a-files.on .act-n{opacity:0;transform:scale(.4)}
+.act-n{transition:opacity .25s,transform .3s var(--grow)}
+.fls .fp,.fls .ff{transform-box:view-box;transform-origin:12px 19px;transition:transform .45s var(--grow)}
+.act.a-files.on .fls .fp{transform:translateY(-2.2px) rotate(-4deg)}
+.act.a-files.on .fls .ff{transform:translateY(1.6px) skewX(-12deg) scaleY(.85)}
+.fpan{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s var(--grow)}
+.fpan.open{grid-template-rows:1fr}
+.fpan.closing{grid-template-rows:0fr;transition-delay:.12s}
+.fpan-in{min-height:0;overflow:hidden}
+.fpan-row{position:relative;display:flex;flex-wrap:wrap;gap:8px 2px;margin:0 8px 14px 58px;padding:12px 4px 8px;border-radius:20px;background:color-mix(in srgb,var(--accent) 7%,var(--sunk));border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line))}
+.fpan .fo-i .act-i{background:var(--surface)}
+.fpan .fo-i.off{display:none}
+.fpan.fan .fo-i{animation:fanOut .55s var(--grow) both;animation-delay:calc(var(--k) * 55ms + 60ms)}
+.fpan.closing .fo-i{animation:fanIn .32s cubic-bezier(.5,0,.75,0) both;animation-delay:calc((3 - var(--k)) * 35ms)}
+.fpan .fo-i:nth-child(1){--k:0}.fpan .fo-i:nth-child(2){--k:1}.fpan .fo-i:nth-child(3){--k:2}.fpan .fo-i:nth-child(4){--k:3}
+@keyframes fanOut{from{opacity:0;transform:translate(var(--fx,0),var(--fy,0)) scale(.35) rotate(-25deg)}60%{opacity:1}}
+@keyframes fanIn{to{opacity:0;transform:translate(var(--fx,0),var(--fy,0)) scale(.35) rotate(-25deg)}}
+.fpan .fo-i .act-l{transition:none}
+@media (max-width:420px){.fpan-row{margin-left:4px}}
+@media (prefers-reduced-motion:reduce){.fpan.fan .fo-i,.fpan.closing .fo-i{animation:none}.fpan,.fpan.closing{transition:none}}
 /* cuentas ocultas: recuadro semitransparente */
 .arow.is-hidden{opacity:.45;border-style:dashed;transition:opacity .35s,border-color .35s,box-shadow .35s}
 .arow.is-hidden.open{opacity:.8}
@@ -833,7 +863,7 @@ const S={
   pdfN:["{n} PDF","{n} PDF"],upShort:["Subir plan","Plana igo"],pdfsShort:["PDFs · {n}","PDFak · {n}"],editShort:["Editar","Editatu"],diaryK:["Diario","Egunkaria"],
   infoBtn:["Info","Info"],antroBtn:["Antropo\u00admetría","Antropo\u00admetria"],antroH:["Antropometría","Antropometria"],noAntro:["Sin PDFs de antropometría.","Ez dago antropometria PDFrik."],
   upAntro:["Subir un PDF de antropometría de este cliente (medidas, pliegues, peso…)","Bezero honen antropometria PDF bat igo (neurriak, tolesturak, pisua…)"],
-  actDiary:["Diario","Egunkaria"],actHide:["Ocultar","Ezkutatu"],actShow:["Mostrar","Erakutsi"],
+  actDiary:["Diario","Egunkaria"],actFiles:["Archivos","Fitxategiak"],filesTip:["Subir o ver los PDFs de esta cuenta","Kontu honen PDFak igo edo ikusi"],actAll:["Ver PDFs","PDFak ikusi"],actHide:["Ocultar","Ezkutatu"],actShow:["Mostrar","Erakutsi"],
   hideTip:["Ocultar la cuenta: el cliente no podrá entrar de ninguna manera","Kontua ezkutatu: bezeroak ezin izango du inola ere sartu"],showTip:["Volver a mostrar la cuenta: el cliente podrá entrar otra vez","Kontua berriz erakutsi: bezeroak berriz sartu ahal izango du"],
   hiddenTag:["Oculta","Ezkutuan"],hiddenOk:["Cuenta oculta: el cliente ya no puede entrar. La verás en Grupos.","Kontua ezkutuan: bezeroak ezin du sartu. Taldeak atalean ikusiko duzu."],shownOk:["La cuenta vuelve a estar visible","Kontua berriz ikusgai dago"],actPlan:["Plan","Plana"],actPdfs:["PDFs","PDFak"],actReread:["Releer","Irakurri"],actRetry:["Reintentar","Berriz saiatu"],upInfo:["Subir un PDF de información para todas las semanas de este cliente","Bezero honen aste guztietarako informazio PDF bat igo"],
   plansH:["Planes","Planak"],
@@ -1288,6 +1318,7 @@ function mergeWeek(a,b){const D={};for(const x of a.days||[])D[x.d]={...x};
 const grpOrd=([ka,a],[kb,b])=>((a.orden??1e9)-(b.orden??1e9))||String(a.nombre).localeCompare(String(b.nombre),"es");
 const grpOk=g=>!!g&&((grps[g]||{}).lectura||{}).estado==="ok";
 const CAL_A='<svg class="cala" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.2"/><path d="M3.5 9.8h17"/><path class="cpin" d="M8 3v3.6M16 3v3.6"/>'+[[8,13.6],[12,13.6],[16,13.6],[8,17.2],[12,17.2]].map(([x,y],i)=>`<circle class="cdot" style="--d:${i}" cx="${x}" cy="${y}" r="1.15" fill="currentColor" stroke="none"/>`).join("")+'</svg>';
+const FILES_I='<svg class="fls" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="fb" d="M3.5 8.2A1.7 1.7 0 0 1 5.2 6.5h3.9l1.9 2h7.8a1.7 1.7 0 0 1 1.7 1.7v7.6a1.7 1.7 0 0 1-1.7 1.7H5.2a1.7 1.7 0 0 1-1.7-1.7z"/><path class="fp" d="M7 8.6V5.2A1.2 1.2 0 0 1 8.2 4h7.6a1.2 1.2 0 0 1 1.2 1.2v3.4"/><path class="ff" d="M3.6 11.2h16.8"/></svg>';
 const LOCK_C='<svg class="lck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shk" d="M8 10.6V8a4 4 0 0 1 8 0v2.6"/><rect x="5" y="10.6" width="14" height="10" rx="2.6"/><path d="M12 14.6v2"/></svg>';
 const LOCK_O='<svg class="lck open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shk" d="M8 10.6V8a4 4 0 0 1 7.7-1.5"/><rect x="5" y="10.6" width="14" height="10" rx="2.6"/><path d="M12 14.6v2"/></svg>';
 const EYE_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 5.9A9.6 9.6 0 0 1 12 5.7c6 0 9.4 6.3 9.4 6.3a16 16 0 0 1-2.6 3.4M6.2 7.6C3.9 9.3 2.6 12 2.6 12s3.4 6.3 9.4 6.3c1.6 0 3-.4 4.3-1"/><path d="M9.9 10a3 3 0 0 0 4.2 4.2"/><path class="slash" d="M3.5 3.5l17 17"/></svg>';
@@ -1588,18 +1619,31 @@ function renderDevPage(){
   if(!L.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noAcc"))}</p>`;return}
   if(!F.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noMatch"))}</p>`;return}
   $("dpList").innerHTML=F.map(([id,a],i)=>accRow(id,a,i,"")).join("")}
+const openFiles=new Set();
 const act=(k,id,ic,lab,tip,cls,badge)=>`<button type="button" class="act rp${cls||""}" data-${k}="${esc(id)}" aria-label="${esc(tip)}" title="${esc(tip)}"><span class="act-i">${ic}${badge?`<b class="act-n">${badge}</b>`:""}</span><span class="act-l">${esc(lab)}</span></button>`;
+/* «Archivos»: las cuatro opciones salen en abanico desde el botón y vuelven a él al cerrarlo */
+function toggleFiles(b){const k=b.dataset.files,art=b.closest(".arow"),pan=art&&art.querySelector(`.fpan[data-fp="${CSS.escape(k)}"]`);if(!pan)return;
+  const op=!openFiles.has(k),items=[...pan.querySelectorAll(".fo-i")];
+  const aim=()=>{const r=b.querySelector(".act-i").getBoundingClientRect();items.forEach(it=>{const q=it.querySelector(".act-i").getBoundingClientRect();
+    it.style.setProperty("--fx",(r.left+r.width/2-(q.left+q.width/2)).toFixed(1)+"px");it.style.setProperty("--fy",(r.top+r.height/2-(q.top+q.height/2)).toFixed(1)+"px")})};
+  b.setAttribute("aria-expanded",String(op));
+  if(op){openFiles.add(k);b.classList.add("on");pan.classList.remove("closing");pan.classList.add("open");aim();pan.classList.remove("fan");void pan.offsetWidth;pan.classList.add("fan")}
+  else{openFiles.delete(k);b.classList.remove("on");aim();pan.classList.remove("fan");pan.classList.add("closing");
+    clearTimeout(pan._t);pan._t=setTimeout(()=>{pan.classList.remove("open","closing")},RM.matches?0:330)}}
 function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length+accAntros(a).length+accDel(a).length,L2=a.lectura||{},rd=readingNow.has(id)||L2.estado==="pendiente",ok=box+"|"+id,op=openAcc.has(ok),gs=grpsOf(a),gok=gs.some(grpOk);
     const ring=gs.length===1?gcol(gs[0]):`conic-gradient(${gs.map((g,j)=>`${gcol(g)} ${j/gs.length*100}% ${(j+1)/gs.length*100}%`).join(",")})`;
     const st=rd?["warn",t("reading")]:!a.pdf?(L2.estado==="ok"&&accDel(a).length?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:gok?["ok",t("metaGrp")]:["",t("metaNone")]):L2.estado==="ok"?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:L2.estado==="error"?["err",t("metaErr")]:["",t("pdfN").replace("{n}",n)];
-    return `<article class="arow${op?" open":""}${gs.length?" has-g":""}${a.oculta?" is-hidden":""}" style="--i:${Math.min(i,10)}${gs.length?`;--ring:${ring}`:""}">
+    const dia=(L2.estado==="ok"&&!rd)||gok,fo=openFiles.has(ok);
+    return `<article class="arow${op?" open":""}${gs.length?" has-g":""}${a.oculta?" is-hidden":""}${dia?" has-dia":""}" style="--i:${Math.min(i,10)}${gs.length?`;--ring:${ring}`:""}">
     <button type="button" class="arow-h rp" data-tog="${esc(ok)}" aria-expanded="${op}"><i class="av" aria-hidden="true">${esc(ini(a.nombre))}<i class="dot ${st[0]}"></i></i>
       <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${a.oculta?`<span class="htag">${LOCK_C}${esc(t("hiddenTag"))}</span> · `:""}${gs.length?gs.map(g=>`<span class="gname" style="color:${esc(gcol(g))}">${esc(grps[g].nombre)}</span>`).join(", ")+" · ":""}${esc(st[1])}</small></span>${CHEV}</button>
+    ${dia?`<button type="button" class="arow-dia a-cal rp" data-diary="${esc(id)}" aria-label="${esc(t("seeDiary"))}" title="${esc(t("seeDiary"))}">${CAL_A}</button>`:""}
     <div class="arow-b"><div class="arow-in">
       <div class="kv"><span class="k">${esc(t("pass"))}</span><code>${shown.has(id)?esc(a.clave):"•".repeat(Math.max(6,Math.min(12,String(a.clave||"").length)))}</code>
         <button type="button" class="ib2 rp" data-eye="${esc(id)}" aria-label="${esc(t(shown.has(id)?"hide":"show"))}" aria-pressed="${shown.has(id)}">${EYE}</button>
         <button type="button" class="ib2 rp" data-copy="${esc(id)}" aria-label="${esc(t("copy"))}">${COPY}</button></div>
-      <div class="acts">${(L2.estado==="ok"&&!rd)||gok?act("diary",id,CAL_A,t("actDiary"),t("seeDiary")," a-cal"):""}${act("up",id,UP_I,t("actPlan"),t("upShort"))}${act("info",id,INFO_I,t("infoBtn"),t("upInfo"))}${act("antro",id,BODY_I,t("antroBtn"),t("upAntro"))}${n?act("pdfs",id,DOCS_I,t("actPdfs"),t("pdfsShort").replace("{n}",n),"",n):""}${a.pdf&&!rd?act("reread",id,REREAD_I,t(L2.estado==="error"?"actRetry":"actReread"),t(L2.estado==="error"?"retry":"reread")):""}${a.oculta?act("hide",id,LOCK_O,t("actShow"),t("showTip")," a-hid a-lock"):act("hide",id,LOCK_C,t("actHide"),t("hideTip")," a-lock")}${act("edit",id,PEN,t("editShort"),t("editShort"))}</div>
+      <div class="acts">${act("files",ok,FILES_I,t("actFiles"),t("filesTip"),` a-files${fo?" on":""}`,n)}${a.pdf&&!rd?act("reread",id,REREAD_I,t(L2.estado==="error"?"actRetry":"actReread"),t(L2.estado==="error"?"retry":"reread")):""}${a.oculta?act("hide",id,LOCK_O,t("actShow"),t("showTip")," a-hid a-lock"):act("hide",id,LOCK_C,t("actHide"),t("hideTip")," a-lock")}${act("edit",id,PEN,t("editShort"),t("editShort"))}</div>
+      <div class="fpan${fo?" open":""}" data-fp="${esc(ok)}"><div class="fpan-in"><div class="fpan-row">${act("up",id,UP_I,t("actPlan"),t("upShort")," fo-i")}${act("info",id,INFO_I,t("infoBtn"),t("upInfo")," fo-i")}${act("antro",id,BODY_I,t("antroBtn"),t("upAntro")," fo-i")}${act("pdfs",id,DOCS_I,t("actAll"),t("pdfsShort").replace("{n}",n),` fo-i${n?"":" off"}`,n)}</div></div></div>
     </div></div></article>`}
 $("dpSearch").oninput=renderDevPage;
 $("grpNew").onclick=()=>editGroup(null);
@@ -1657,6 +1701,7 @@ const accClick=async e=>{
   if(b.dataset.up){pickPdf({kind:"acc",id:b.dataset.up},b);return}
   if(b.dataset.info){pickPdf({kind:"info",id:b.dataset.info},b);return}
   if(b.dataset.antro){pickPdf({kind:"antro",id:b.dataset.antro},b);return}
+  if(b.dataset.files){toggleFiles(b);return}
   if(b.dataset.hide){const id=b.dataset.hide,a=accounts[id];if(!a)return;const n={...a};if(a.oculta)delete n.oculta;else n.oculta=true;
     try{await db.doc("cuentas/"+id).set(n);toast(t(n.oculta?"hiddenOk":"shownOk"))}catch(err){toast(t("saveErr"))}return}
   if(b.dataset.rmpdf){removePdf("acc",b.dataset.rmpdf);return}
