@@ -970,19 +970,19 @@ const SV={
     const px=o.getImageData(0,0,W,H).data,T=[],step=W*H>500000?2:1.5;
     for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=step){const xi=x|0;if(px[(y*W+xi)*4+3]>140)T.push([xi,y])}
     for(let i=T.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[T[i],T[j]]=[T[j],T[i]]}
-    const out=T.slice(0,1100);
-    document.querySelectorAll("#wkBox .wkrow").forEach(r=>{const b=r.getBoundingClientRect();if(b.top<0||b.top>H)return;for(let k=0;k<22;k++)out.push([SV.R(b.left,b.right),b.top])});
+    const out=T.slice(0,W*H>500000?720:560);
+    document.querySelectorAll("#wkBox .wkrow").forEach(r=>{const b=r.getBoundingClientRect();if(b.top<0||b.top>H)return;for(let k=0;k<10;k++)out.push([SV.R(b.left,b.right),b.top])});
     return out},
   run(done){
     const W=innerWidth,H=innerHeight,dpr=Math.min(2,devicePixelRatio||1),css=getComputedStyle(document.documentElement),ACC=css.getPropertyValue("--accent").trim()||"#5cc2a6";
     const lr=$("logo").getBoundingClientRect(),ox=lr.left+lr.width*402/823,oy=lr.top+lr.height*236/616,rx=lr.width*.42,ry=lr.height*.5;
     // lienzo de raíces de fondo (el mismo que usa la app) y lienzo de la savia, encima de todo
-    const old=$("rootsBg");if(old)old.remove();const[cv,bg]=mkCanvas(W,H,dpr,"#000");cv.id="rootsBg";cv.className="rootsbg";document.body.prepend(cv);
-    const fxc=document.createElement("canvas");fxc.className="saviafx";fxc.width=Math.round(W*dpr);fxc.height=Math.round(H*dpr);document.body.append(fxc);const fx=fxc.getContext("2d");fx.scale(dpr,dpr);
+    const old=$("rootsBg");if(old)old.remove();const[cv,bg]=mkCanvas(W,H,Math.min(1.5,dpr),"#000");cv.id="rootsBg";cv.className="rootsbg";document.body.prepend(cv);
+    const fxc=document.createElement("canvas");fxc.className="saviafx";fxc.width=W;fxc.height=H;document.body.append(fxc);const fx=fxc.getContext("2d",{alpha:true,desynchronized:true});
     const logo=$("logo");logo.style.transition="filter .6s";logo.style.filter=`drop-shadow(0 0 10px ${ACC}) drop-shadow(0 0 22px ${ACC})`;
     let P=null,veins=[];const S=2150,END=3250,t0=performance.now();
     // a los 640 ms (la portada ya se ha ido) se coloca el diario, invisible, y se mide dónde va cada letra
-    const build=()=>{document.body.classList.add("sapping");showInside(false);
+    const build=()=>{
       const tgt=SV.targets(W,H),n=tgt.length,tips=[];for(let i=0;i<15;i++){const a=Math.PI*(.06+.88*i/14);tips.push([ox+Math.cos(a)*rx,oy+Math.sin(a)*ry])}
       const K=Math.min(34,Math.max(8,n>>5)),anc=[];for(let k=0;k<K;k++)anc.push(tgt[Math.floor(Math.random()*n)]);
       const ch=anc.map(([ax,ay])=>{const tp=tips.reduce((b,q)=>Math.abs(q[0]-ax)<Math.abs(b[0]-ax)?q:b,tips[0]);return{pts:SV.vein(tp[0],tp[1],ax,ay),w0:1.1,w1:.35,t0:1e9,dur:1,done:0,first:1e9}});
@@ -993,13 +993,15 @@ const SV={
       veins=[...ch];ch.forEach(c=>{if(c.first>1e8)return;for(let k=0;k<3;k++){const i=Math.max(1,Math.floor(SV.R(.2,.9)*(c.pts.length-1))),[x,y]=c.pts[i],[x0,y0]=c.pts[i-1],a=Math.atan2(y-y0,x-x0);
         veins.push(SV.twig(x,y,a+SV.R(.5,1.1)*(Math.random()<.5?-1:1),SV.R(10,24),c.t0+c.dur*i/(c.pts.length-1)))}});
       return P};
-    const frame=now=>{const t=now-t0;if(!P&&t>=640)P=build();
+    const frame=now=>{const t=now-t0;if(!frame.laid&&t>=560){frame.laid=1;document.body.classList.add("sapping");showInside(false)}else if(frame.laid&&!P&&t>=600)P=build();
         fx.save();fx.globalCompositeOperation="destination-out";fx.fillStyle="rgba(0,0,0,.3)";fx.fillRect(0,0,W,H);fx.restore();
         fx.fillStyle=ACC;const fade=t>S+250?1-SV.cl((t-S-250)/450):1;
+        const B=[[],[],[],[]];
         if(fade>0&&P)for(const p of P){const u=(t-p.t0)/p.dur;if(u<0)continue;const uc=SV.cl(u);let x,y;
           if(p.F&&uc<p.F){const q=SV.at(p.c,SV.eIO(uc/p.F)*(p.c.pts.length-1));x=q[0]+p.j;y=q[1]-p.j*.5}
           else{const v=p.F?(uc-p.F)/(1-p.F):uc,k=p.F?SV.eOut(v):SV.eIO(v),a=1-k,s0=p.F?SV.at(p.c,p.c.pts.length-1):[p.sx,p.sy];x=a*a*s0[0]+2*a*k*p.cx+k*k*p.tx;y=a*a*s0[1]+2*a*k*p.cy+k*k*p.ty}
-          fx.globalAlpha=fade*(u>1?.55+.45*Math.sin(t/90+p.ph):1);fx.beginPath();fx.arc(x,y,p.r,0,7);fx.fill()}
+          const lv=u>1?Math.min(3,Math.floor((.5+.5*Math.sin(t/90+p.ph))*4)):3;B[lv].push(x,y,p.r)}
+        if(fade>0)B.forEach((b,lv)=>{if(!b.length)return;fx.globalAlpha=fade*(.4+.2*lv);fx.beginPath();for(let i=0;i<b.length;i+=3){fx.moveTo(b[i]+b[i+2],b[i+1]);fx.arc(b[i],b[i+1],b[i+2],0,6.283)}fx.fill()});
         fx.globalAlpha=1;SV.grow(bg,veins,t,"rgba(0,0,0,.42)");
         if(t>=S&&!frame.rev){frame.rev=1;document.body.classList.add("sapped");document.body.classList.remove("sapping");cv.classList.add("dim");logo.style.filter=""}
         if(t<END)requestAnimationFrame(frame);else{fxc.remove();document.body.classList.remove("sapped");logo.style.transition="";done&&done()}};
