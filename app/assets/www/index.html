@@ -556,6 +556,7 @@ body.swap .sec+.sec{animation-delay:.06s}
 .wkfood .lbl{font-size:.72rem;letter-spacing:.12em;margin-bottom:4px}
 .wkfood .mt{display:block;white-space:pre-line}
 .wkfood .edit{margin:12px 0 0 50px}
+
 .optchip{display:inline-flex;align-items:center;gap:10px;margin:2px 0 2px;padding:7px 18px 7px 14px;border-radius:999px;background:var(--c);color:#fff;font:700 1rem var(--body);box-shadow:0 8px 18px -10px var(--c);text-shadow:0 1px 1px rgba(0,0,0,.18)}
 .optchip b{font-size:1.08rem}
 .optchip i{width:1.5px;height:20px;background:rgba(255,255,255,.65)}
@@ -623,6 +624,14 @@ body.swap .sec+.sec{animation-delay:.06s}
 .wkfood .lbl{font-size:.6rem;letter-spacing:.12em;margin-bottom:3px;gap:5px}
 .optchip{font-size:.8rem;padding:5px 13px 5px 11px;gap:8px;margin:1px 0}
 .optchip b{font-size:.84rem}.optchip i{height:15px}
+/* durante el entreno y post-entreno: más pequeños y con sangría, colgando de la línea de las comidas */
+.wkfood>div.tr{margin-left:30px;padding:7px 0 9px 34px;min-height:0;font-size:.76rem;line-height:1.45}
+.wkfood>div.tr .ic{top:7px;width:24px;height:24px;font-size:.7rem;border-width:1.5px;box-shadow:0 0 0 3px var(--surface)}
+.wkfood>div.tr .ic::after{inset:-2.5px}
+.wkfood>div.tr .lbl{font-size:.56rem;letter-spacing:.11em;margin-bottom:2px}
+.wkfood>div.tr.tr::before{content:"";position:absolute;left:-16px;top:0;bottom:-10px;border-left:2px dotted color-mix(in srgb,var(--accent) 50%,transparent)}
+.wkfood>div.tr.tr:last-of-type::before{bottom:auto;height:19px}
+.wkfood>div.tr::after{content:"";position:absolute;left:-16px;top:0;width:14px;height:19px;border-left:2px dotted color-mix(in srgb,var(--accent) 50%,transparent);border-bottom:2px dotted color-mix(in srgb,var(--accent) 50%,transparent);border-bottom-left-radius:9px}
 .col{font-size:.54rem;padding:1px 7px 1px 4px;gap:4px}
 .col i{width:5px;height:5px}
 .wkfood .edit{margin:10px 0 0 44px;font-size:.78rem}
@@ -994,7 +1003,7 @@ function food(day,key,i){
   const cells=[["desayuno",day.desayuno],["mediamanana",day.mediamanana],...(am?tr:[]),["comida",day.comida],["merienda",day.merienda],...(am?[]:tr),["cena",day.cena]].filter(c=>c[1]);
   const chip=k=>{const c=NUTK[day[k+"Col"]];return c?`<span class="col" style="--c:${c.c}"><i></i>${esc(c.n[LANG==="eu"?1:0])}</span>`:""};
   f.innerHTML=cells.length?cells.map(([k,v],ix)=>{const o=optOf(v,day[k+"Col"]);
-    return `<div style="--j:${ix}"><i class="ic" aria-hidden="true"><span>${MEAL_IC[k]}</span></i><span class="lbl">${t(k)}${o?"":chip(k)}</span>${o?`<span class="optchip" style="--c:${o.c.c}">${optHead(o)}${esc(optName(o.c,o.n))}</span>${o.rest?`<span class="mt">${esc(o.rest)}</span>`:""}`:`<span class="mt">${esc(v)}</span>`}</div>`}).join("")
+    return `<div style="--j:${ix}"${k==="intra"||k==="post"?' class="tr"':""}><i class="ic" aria-hidden="true"><span>${MEAL_IC[k]}</span></i><span class="lbl">${t(k)}${o?"":chip(k)}</span>${o?`<span class="optchip" style="--c:${o.c.c}">${optHead(o)}${esc(optName(o.c,o.n))}</span>${o.rest?`<span class="mt">${esc(o.rest)}</span>`:""}`:`<span class="mt">${esc(v)}</span>`}</div>`}).join("")
     :`<div style="--j:0"><i class="ic" aria-hidden="true"><span>😴</span></i><span class="lbl">${t("freeDay")}</span><span class="none">${t("noMeals")}</span></div>`;
   if(canEdit){const b=document.createElement("button");b.type="button";b.className="ghost edit rp";b.style.setProperty("--j",cells.length);b.textContent="✎ "+t("editDay");b.onclick=e=>{e.stopPropagation();editDay(key,i)};f.append(b)}
   return f}
