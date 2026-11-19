@@ -29,6 +29,15 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px
 .rootsbg{position:fixed;inset:0;z-index:-1;width:100%;height:100%;display:block;pointer-events:none;transition:opacity .9s var(--ease)}
 .rootsbg.dim{opacity:.1}
 .veil{position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:0;transition:opacity .9s var(--ease)}
+/* entrada «Savia que escribe»: el diario ya está colocado pero invisible hasta que la savia lo escribe */
+body.sapping .wrap>*:not(.cover),body.sapping .corner{opacity:0}
+body.sapped .corner{transition:opacity .6s .3s var(--ease)}
+/* la portada se queda un instante con el logotipo brillando antes de irse */
+.cover.sv-out{opacity:0;transition:opacity .45s .3s var(--ease)}
+.cover.sv-out .logo{transform:scale(1.05);transform-origin:48.8% 38.3%;transition:transform .8s var(--ease)}
+.cover.sv-out .tag,.cover.sv-out .enter,.cover.sv-out .acc-dev,.cover.sv-out .langsw{opacity:0;transition:opacity .25s}
+body.sapped .wrap>*:not(.cover){transition:opacity .6s var(--ease)}
+.saviafx{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none}
 :root[data-theme="dark"] .rootsbg{filter:invert(1)}:root[data-theme="dark"] .rootsbg.dim{opacity:.13}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .rootsbg{filter:invert(1)}:root:not([data-theme="light"]) .rootsbg.dim{opacity:.13}}
 button{font:inherit;color:inherit;cursor:pointer}
@@ -938,6 +947,63 @@ function growRoots(roots,ctxs,dt,W,H){
     if(r.w<.45||r.x<-60||r.x>W+60||r.y<-60||r.y>H+60)roots.splice(k,1)}}
 function mkCanvas(W,H,dpr,ink){const cv=document.createElement("canvas");cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   const g=cv.getContext("2d");g.scale(dpr,dpr);g.strokeStyle=ink;g.lineCap="round";g.lineJoin="round";return[cv,g]}
+/* ===== Entrada al diario: «Savia que escribe» =====
+   Una ola de luz recorre el logotipo; la savia sale de su raíz (parte de ella por raicillas finas que crecen hasta el diario)
+   y se posa formando las letras reales del diario, que después aparece en su lugar. Las raicillas se quedan de fondo. */
+const SV={
+  R:(a,b)=>a+Math.random()*(b-a),cl:(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),lerp:(a,b,t)=>a+(b-a)*t,
+  eOut:t=>1-Math.pow(1-Math.max(0,Math.min(1,t)),3),eIO:t=>{t=Math.max(0,Math.min(1,t));return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2},
+  at(g,u){const N=g.pts.length-1;u=SV.cl(u,0,N);const i=Math.min(N-1,Math.floor(u)),f=u-i,[x0,y0]=g.pts[i],[x1,y1]=g.pts[i+1];return[x0+(x1-x0)*f,y0+(y1-y0)*f]},
+  grow(c,segs,t,col){c.lineCap="round";c.lineJoin="round";c.strokeStyle=col;
+    for(const g of segs){const N=g.pts.length-1,tg=SV.cl((t-g.t0)/g.dur)*N;if(tg<=g.done)continue;let u=g.done,p=SV.at(g,u);
+      while(u<tg){const nu=Math.min(tg,Math.floor(u)+1),q=SV.at(g,nu);c.lineWidth=SV.lerp(g.w0,g.w1,u/N);c.beginPath();c.moveTo(p[0],p[1]);c.lineTo(q[0],q[1]);c.stroke();p=q;u=nu}g.done=tg}},
+  vein(x,y,tx,ty){const pts=[[x,y]],L=Math.hypot(tx-x,ty-y),n=Math.max(6,Math.round(L/8)),st=L/n;let a=Math.atan2(ty-y,tx-x)+SV.R(-.5,.5);
+    for(let i=0;i<n;i++){let d=Math.atan2(ty-y,tx-x)-a;d=Math.atan2(Math.sin(d),Math.cos(d));a+=d*.32+SV.R(-.32,.32);x+=Math.cos(a)*st;y+=Math.sin(a)*st;pts.push([x,y])}return pts},
+  twig(x,y,a,len,t0){const pts=[[x,y]],n=4;for(let i=0;i<n;i++){a+=SV.R(-.3,.3);x+=Math.cos(a)*len/n;y+=Math.sin(a)*len/n;pts.push([x,y])}return{pts,w0:.7,w1:.3,t0,dur:len/.12,done:0}},
+  /* destinos: las letras del diario que se ven en pantalla, dibujadas con su misma fuente */
+  targets(W,H){const oc=document.createElement("canvas");oc.width=W;oc.height=H;const o=oc.getContext("2d");o.fillStyle="#fff";o.textBaseline="top";
+    const els=document.querySelectorAll("#tabs button span,#weekSec .sechead h2,#weekSec .sechead p,#wkBox .wkrow *");
+    els.forEach(el=>{for(const n of el.childNodes){if(n.nodeType!==3||!n.textContent.trim())continue;const r=document.createRange();r.selectNodeContents(n);const b=r.getBoundingClientRect();
+      if(b.bottom<0||b.top>H||!b.width)continue;const cs=getComputedStyle(el);o.font=`${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      try{o.letterSpacing=cs.letterSpacing==="normal"?"0px":cs.letterSpacing}catch(e){}
+      let tx=n.textContent.replace(/\s+/g," ").trim();if(cs.textTransform==="uppercase")tx=tx.toUpperCase();o.fillText(tx,b.left,b.top+1)}});
+    const px=o.getImageData(0,0,W,H).data,T=[],step=W*H>500000?2:1.5;
+    for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=step){const xi=x|0;if(px[(y*W+xi)*4+3]>140)T.push([xi,y])}
+    for(let i=T.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[T[i],T[j]]=[T[j],T[i]]}
+    const out=T.slice(0,1100);
+    document.querySelectorAll("#wkBox .wkrow").forEach(r=>{const b=r.getBoundingClientRect();if(b.top<0||b.top>H)return;for(let k=0;k<22;k++)out.push([SV.R(b.left,b.right),b.top])});
+    return out},
+  run(done){
+    const W=innerWidth,H=innerHeight,dpr=Math.min(2,devicePixelRatio||1),css=getComputedStyle(document.documentElement),ACC=css.getPropertyValue("--accent").trim()||"#5cc2a6";
+    const lr=$("logo").getBoundingClientRect(),ox=lr.left+lr.width*402/823,oy=lr.top+lr.height*236/616,rx=lr.width*.42,ry=lr.height*.5;
+    // lienzo de raíces de fondo (el mismo que usa la app) y lienzo de la savia, encima de todo
+    const old=$("rootsBg");if(old)old.remove();const[cv,bg]=mkCanvas(W,H,dpr,"#000");cv.id="rootsBg";cv.className="rootsbg";document.body.prepend(cv);
+    const fxc=document.createElement("canvas");fxc.className="saviafx";fxc.width=Math.round(W*dpr);fxc.height=Math.round(H*dpr);document.body.append(fxc);const fx=fxc.getContext("2d");fx.scale(dpr,dpr);
+    const logo=$("logo");logo.style.transition="filter .6s";logo.style.filter=`drop-shadow(0 0 10px ${ACC}) drop-shadow(0 0 22px ${ACC})`;
+    let P=null,veins=[];const S=2150,END=3250,t0=performance.now();
+    // a los 640 ms (la portada ya se ha ido) se coloca el diario, invisible, y se mide dónde va cada letra
+    const build=()=>{document.body.classList.add("sapping");showInside(false);
+      const tgt=SV.targets(W,H),n=tgt.length,tips=[];for(let i=0;i<15;i++){const a=Math.PI*(.06+.88*i/14);tips.push([ox+Math.cos(a)*rx,oy+Math.sin(a)*ry])}
+      const K=Math.min(34,Math.max(8,n>>5)),anc=[];for(let k=0;k<K;k++)anc.push(tgt[Math.floor(Math.random()*n)]);
+      const ch=anc.map(([ax,ay])=>{const tp=tips.reduce((b,q)=>Math.abs(q[0]-ax)<Math.abs(b[0]-ax)?q:b,tips[0]);return{pts:SV.vein(tp[0],tp[1],ax,ay),w0:1.1,w1:.35,t0:1e9,dur:1,done:0,first:1e9}});
+      const P=[];for(const g of tgt){let bi=0,bd=1e9;anc.forEach(([ax,ay],k)=>{const d=(ax-g[0])**2+(ay-g[1])**2;if(d<bd){bd=d;bi=k}});const c=ch[bi],e=c.pts[c.pts.length-1],use=Math.random()<.32;
+        const a=SV.R(.05,.95)*Math.PI,rr=Math.sqrt(Math.random()),sx=use?e[0]:ox+Math.cos(a)*rx*rr,sy=use?e[1]:oy+Math.sin(a)*ry*rr;
+        const p={c,tx:g[0],ty:g[1],sx,sy,F:use?.62:0,t0:use?SV.R(700,1200):660+((sy-oy)/ry)*380+SV.R(0,240),dur:SV.R(1150,1500),cx:SV.lerp(sx,g[0],.5)+SV.R(use?-30:-80,use?30:80),cy:SV.lerp(sy,g[1],.5)+SV.R(use?-30:-60,use?30:60),r:SV.R(.7,1.6),ph:SV.R(0,6.3),j:SV.R(-2.5,2.5)};
+        P.push(p);if(use&&p.t0<c.first){c.first=c.t0=p.t0;c.dur=p.dur*p.F}}
+      veins=[...ch];ch.forEach(c=>{if(c.first>1e8)return;for(let k=0;k<3;k++){const i=Math.max(1,Math.floor(SV.R(.2,.9)*(c.pts.length-1))),[x,y]=c.pts[i],[x0,y0]=c.pts[i-1],a=Math.atan2(y-y0,x-x0);
+        veins.push(SV.twig(x,y,a+SV.R(.5,1.1)*(Math.random()<.5?-1:1),SV.R(10,24),c.t0+c.dur*i/(c.pts.length-1)))}});
+      return P};
+    const frame=now=>{const t=now-t0;if(!P&&t>=640)P=build();
+        fx.save();fx.globalCompositeOperation="destination-out";fx.fillStyle="rgba(0,0,0,.3)";fx.fillRect(0,0,W,H);fx.restore();
+        fx.fillStyle=ACC;const fade=t>S+250?1-SV.cl((t-S-250)/450):1;
+        if(fade>0&&P)for(const p of P){const u=(t-p.t0)/p.dur;if(u<0)continue;const uc=SV.cl(u);let x,y;
+          if(p.F&&uc<p.F){const q=SV.at(p.c,SV.eIO(uc/p.F)*(p.c.pts.length-1));x=q[0]+p.j;y=q[1]-p.j*.5}
+          else{const v=p.F?(uc-p.F)/(1-p.F):uc,k=p.F?SV.eOut(v):SV.eIO(v),a=1-k,s0=p.F?SV.at(p.c,p.c.pts.length-1):[p.sx,p.sy];x=a*a*s0[0]+2*a*k*p.cx+k*k*p.tx;y=a*a*s0[1]+2*a*k*p.cy+k*k*p.ty}
+          fx.globalAlpha=fade*(u>1?.55+.45*Math.sin(t/90+p.ph):1);fx.beginPath();fx.arc(x,y,p.r,0,7);fx.fill()}
+        fx.globalAlpha=1;SV.grow(bg,veins,t,"rgba(0,0,0,.42)");
+        if(t>=S&&!frame.rev){frame.rev=1;document.body.classList.add("sapped");document.body.classList.remove("sapping");cv.classList.add("dim");logo.style.filter=""}
+        if(t<END)requestAnimationFrame(frame);else{fxc.remove();document.body.classList.remove("sapped");logo.style.transition="";done&&done()}};
+    requestAnimationFrame(frame)}};
 function goInside(){
   const c=$("cover");if(c.classList.contains("exiting"))return;
   const old=$("rootsBg");if(old)old.remove();
@@ -946,6 +1012,7 @@ function goInside(){
   const [cv,g]=mkCanvas(W,H,dpr,"#000");cv.id="rootsBg";cv.className="rootsbg";
   const roots=newRoots(ox,oy,D);
   if(RM.matches){let n=0;while(roots.length&&n++<400)growRoots(roots,[g],1,W,H);cv.classList.add("dim");document.body.prepend(cv);if(DEVAPP)show("dev");else showInside(false);return}
+  if(!DEVAPP){if(c.classList.contains("sv-out"))return;c.classList.add("sv-out");SV.run(()=>c.classList.remove("sv-out"));return}
   const veil=document.createElement("div");veil.className="veil";veil.style.background=getComputedStyle(c).getPropertyValue("--cbg").trim()||"#fff";
   document.body.prepend(veil,cv);requestAnimationFrame(()=>{veil.style.opacity="1"});
   c.classList.add("exiting");
