@@ -313,6 +313,12 @@ body.pv #btnHome{display:none}
 .act.a-eye .act-i{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
 .act.busy{pointer-events:none}.act.busy .act-i svg{opacity:.15}
 .act.busy .act-i::after{content:"";position:absolute;inset:11px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
+/* cuentas ocultas: recuadro semitransparente */
+.arow.is-hidden{opacity:.45;border-style:dashed;transition:opacity .35s,border-color .35s,box-shadow .35s}
+.arow.is-hidden.open{opacity:.8}
+.htag{display:inline-flex;align-items:center;gap:3px;font-weight:600;color:var(--fg)}
+.htag svg{width:13px;height:13px}
+.act.a-hid .act-i{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
 /* el ojo de «Diario»: parpadea y mira al abrir la cuenta, y al pasar por encima */
 .eyea .lid,.eyea .pupil{transform-box:view-box;transform-origin:12px 12px}
 .arow.open .a-eye .lid{animation:blink 3.6s .5s var(--ease) infinite}
@@ -790,7 +796,9 @@ const S={
   pdfN:["{n} PDF","{n} PDF"],upShort:["Subir plan","Plana igo"],pdfsShort:["PDFs · {n}","PDFak · {n}"],editShort:["Editar","Editatu"],diaryK:["Diario","Egunkaria"],
   infoBtn:["Info","Info"],antroBtn:["Antropo\u00admetría","Antropo\u00admetria"],antroH:["Antropometría","Antropometria"],noAntro:["Sin PDFs de antropometría.","Ez dago antropometria PDFrik."],
   upAntro:["Subir un PDF de antropometría de este cliente (medidas, pliegues, peso…)","Bezero honen antropometria PDF bat igo (neurriak, tolesturak, pisua…)"],
-  actDiary:["Diario","Egunkaria"],actPlan:["Plan","Plana"],actPdfs:["PDFs","PDFak"],actReread:["Releer","Irakurri"],actRetry:["Reintentar","Berriz saiatu"],upInfo:["Subir un PDF de información para todas las semanas de este cliente","Bezero honen aste guztietarako informazio PDF bat igo"],
+  actDiary:["Diario","Egunkaria"],actHide:["Ocultar","Ezkutatu"],actShow:["Mostrar","Erakutsi"],
+  hideTip:["Ocultar la cuenta: el cliente no podrá entrar de ninguna manera","Kontua ezkutatu: bezeroak ezin izango du inola ere sartu"],showTip:["Volver a mostrar la cuenta: el cliente podrá entrar otra vez","Kontua berriz erakutsi: bezeroak berriz sartu ahal izango du"],
+  hiddenTag:["Oculta","Ezkutuan"],hiddenOk:["Cuenta oculta: el cliente ya no puede entrar. La verás en Grupos.","Kontua ezkutuan: bezeroak ezin du sartu. Taldeak atalean ikusiko duzu."],shownOk:["La cuenta vuelve a estar visible","Kontua berriz ikusgai dago"],actPlan:["Plan","Plana"],actPdfs:["PDFs","PDFak"],actReread:["Releer","Irakurri"],actRetry:["Reintentar","Berriz saiatu"],upInfo:["Subir un PDF de información para todas las semanas de este cliente","Bezero honen aste guztietarako informazio PDF bat igo"],
   plansH:["Planes","Planak"],infoH:["Información del cliente","Bezeroaren informazioa"],noInfo:["Sin PDFs de información.","Ez dago informazio PDFrik."],
   netErr:["Sin conexión. Inténtalo de nuevo.","Konexiorik ez. Saiatu berriro."],
   ghTxt:["Pega tu clave de GitHub para gestionar las cuentas de SENDO. Solo hace falta la primera vez.","Itsatsi zure GitHub gakoa SENDOko kontuak kudeatzeko. Lehen aldian bakarrik behar da."],
@@ -1228,6 +1236,8 @@ function mergeWeek(a,b){const D={};for(const x of a.days||[])D[x.d]={...x};
   const{days,...rest}=b;return{...a,...rest,days:Object.keys(D).map(Number).sort((x,y)=>x-y).map(k=>D[k])}}
 const grpOk=g=>!!g&&((grps[g]||{}).lectura||{}).estado==="ok";
 const EYE_A='<svg class="eyea" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="lid"><path d="M2.6 12s3.4-6.3 9.4-6.3 9.4 6.3 9.4 6.3-3.4 6.3-9.4 6.3S2.6 12 2.6 12z"/><g class="pupil"><circle cx="12" cy="12" r="3"/><circle class="glint" cx="13.1" cy="10.9" r=".8" fill="currentColor" stroke="none"/></g></g></svg>';
+const EYE_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 5.9A9.6 9.6 0 0 1 12 5.7c6 0 9.4 6.3 9.4 6.3a16 16 0 0 1-2.6 3.4M6.2 7.6C3.9 9.3 2.6 12 2.6 12s3.4 6.3 9.4 6.3c1.6 0 3-.4 4.3-1"/><path d="M9.9 10a3 3 0 0 0 4.2 4.2"/><path class="slash" d="M3.5 3.5l17 17"/></svg>';
+const SHOW_I='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.6 12s3.4-6.3 9.4-6.3 9.4 6.3 9.4 6.3-3.4 6.3-9.4 6.3S2.6 12 2.6 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 const INFO_I='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.4"/><circle cx="12" cy="7.9" r=".9" fill="currentColor" stroke="none"/></svg>';
 const BODY_I='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.4" r="2.1"/><path d="M5.2 8.6c2.3.7 4.5 1 6.8 1s4.5-.3 6.8-1"/><path d="M12 9.6v5.2"/><path d="M12 14.8l-3 6.4M12 14.8l3 6.4"/></svg>';
 const UP_I='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15.5V4.5M7.5 9 12 4.5 16.5 9"/><path d="M5 15.5v2.3A1.7 1.7 0 0 0 6.7 19.5h10.6a1.7 1.7 0 0 0 1.7-1.7v-2.3"/></svg>';
@@ -1468,7 +1478,7 @@ function doLogin(){
   if(APP){appLogin();return}
   const n=norm($("accName").value),pw=$("accPass").value;loginName=$("accName").value;
   if(!n||!pw){toast(t("badLogin"));return}
-  const hit=Object.entries(accounts).find(([,a])=>norm(a.nombre)===n&&String(a.clave)===pw);
+  const hit=Object.entries(accounts).find(([,a])=>!a.oculta&&norm(a.nombre)===n&&String(a.clave)===pw);
   if(!hit){toast(t("badLogin"));$("accPass").select();return}
   LS.set("sendo.sess",hit[0]);editing=false;watchPlan(hit[0]);$("accPass").value="";show("app")}
 $("btnOut").onclick=()=>{if(APP){LS.set("sendo.app","");LS.set("sendo.cache","");appData=null;avisos(null)}LS.set("sendo.sess","");watchPlan(null);show("login");toast(t("loggedOut"))};
@@ -1481,10 +1491,9 @@ let openGrp=new Set();
 function renderGroups(){
   $("grpH").textContent=t("groupsH");$("grpNew").innerHTML=PLUS+esc(t("newGrp"));
   const G=Object.entries(grps).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es")),L=Object.entries(accounts).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es"));
-  if(!G.length){$("grpList").innerHTML=`<p class="dp-empty">${esc(t("grpEmpty"))}</p>`;return}
   const box=(key,cls,style,head,M,empty)=>{const op=openGrp.has(key);
     return `<section class="gbox${cls}${op?" open":""}" data-gbox="${esc(key)}"${style}>${head(op)}<div class="gbox-l"><div class="gbox-in">${M.length?M.map(([id,a],i)=>accRow(id,a,i,key)).join(""):`<p class="dp-empty">${esc(empty)}</p>`}</div></div></section>`};
-  const H=G.map(([gid,g])=>box(gid,"",` style="--gc:${esc(gcol(gid))}"`,op=>grpHead(gid,g,op),L.filter(([,a])=>grpList(a).includes(gid)),t("grpBoxEmpty")));
+  const H=G.length?[]:[`<p class="dp-empty">${esc(t("grpEmpty"))}</p>`];H.push(...G.map(([gid,g])=>box(gid,"",` style="--gc:${esc(gcol(gid))}"`,op=>grpHead(gid,g,op),L.filter(([,a])=>grpList(a).includes(gid)),t("grpBoxEmpty"))));
   const N=L.filter(([,a])=>!grpsOf(a).length);
   if(N.length)H.push(box("-"," none","",op=>`<div class="gbox-h"><button type="button" class="gbox-tog rp" data-gt="-" aria-expanded="${op}"><span class="gi" aria-hidden="true">—</span><span class="dv-gt"><b>${esc(t("grpNone"))}</b><small>${esc(grpN(N.length))}</small></span>${CHEV}</button></div>`,N,""));
   $("grpList").innerHTML=H.join("")}
@@ -1500,7 +1509,7 @@ function renderDevPage(){
   const L=Object.entries(accounts).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es")),q=norm($("dpSearch").value);
   if(!$("devPage").classList.contains("stagger"))$("dpNum").textContent=L.length;$("dpWord").textContent=L.length===1?t("accWord1"):t("accWordN");
   $("dpNew").setAttribute("aria-label",t("newAcc"));$("dpNew").title=t("newAcc");$("dpSearch").placeholder=t("search");
-  const F=L.filter(([,a])=>!q||norm(a.nombre).includes(q));
+  const F=L.filter(([,a])=>!a.oculta&&(!q||norm(a.nombre).includes(q)));
   if(!L.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noAcc"))}</p>`;return}
   if(!F.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noMatch"))}</p>`;return}
   $("dpList").innerHTML=F.map(([id,a],i)=>accRow(id,a,i,"")).join("")}
@@ -1508,14 +1517,14 @@ const act=(k,id,ic,lab,tip,cls,badge)=>`<button type="button" class="act rp${cls
 function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length+accAntros(a).length,L2=a.lectura||{},rd=readingNow.has(id)||L2.estado==="pendiente",ok=box+"|"+id,op=openAcc.has(ok),gs=grpsOf(a),gok=gs.some(grpOk);
     const ring=gs.length===1?gcol(gs[0]):`conic-gradient(${gs.map((g,j)=>`${gcol(g)} ${j/gs.length*100}% ${(j+1)/gs.length*100}%`).join(",")})`;
     const st=rd?["warn",t("reading")]:!a.pdf?(gok?["ok",t("metaGrp")]:["",t("metaNone")]):L2.estado==="ok"?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:L2.estado==="error"?["err",t("metaErr")]:["",t("pdfN").replace("{n}",n)];
-    return `<article class="arow${op?" open":""}${gs.length?" has-g":""}" style="--i:${Math.min(i,10)}${gs.length?`;--ring:${ring}`:""}">
+    return `<article class="arow${op?" open":""}${gs.length?" has-g":""}${a.oculta?" is-hidden":""}" style="--i:${Math.min(i,10)}${gs.length?`;--ring:${ring}`:""}">
     <button type="button" class="arow-h rp" data-tog="${esc(ok)}" aria-expanded="${op}"><i class="av" aria-hidden="true">${esc(ini(a.nombre))}<i class="dot ${st[0]}"></i></i>
-      <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${gs.length?gs.map(g=>`<span class="gname" style="color:${esc(gcol(g))}">${esc(grps[g].nombre)}</span>`).join(", ")+" · ":""}${esc(st[1])}</small></span>${CHEV}</button>
+      <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${a.oculta?`<span class="htag">${EYE_OFF}${esc(t("hiddenTag"))}</span> · `:""}${gs.length?gs.map(g=>`<span class="gname" style="color:${esc(gcol(g))}">${esc(grps[g].nombre)}</span>`).join(", ")+" · ":""}${esc(st[1])}</small></span>${CHEV}</button>
     <div class="arow-b"><div class="arow-in">
       <div class="kv"><span class="k">${esc(t("pass"))}</span><code>${shown.has(id)?esc(a.clave):"•".repeat(Math.max(6,Math.min(12,String(a.clave||"").length)))}</code>
         <button type="button" class="ib2 rp" data-eye="${esc(id)}" aria-label="${esc(t(shown.has(id)?"hide":"show"))}" aria-pressed="${shown.has(id)}">${EYE}</button>
         <button type="button" class="ib2 rp" data-copy="${esc(id)}" aria-label="${esc(t("copy"))}">${COPY}</button></div>
-      <div class="acts">${(L2.estado==="ok"&&a.pdf&&!rd)||gok?act("diary",id,EYE_A,t("actDiary"),t("seeDiary")," a-eye"):""}${act("up",id,UP_I,t("actPlan"),t("upShort"))}${act("info",id,INFO_I,t("infoBtn"),t("upInfo"))}${act("antro",id,BODY_I,t("antroBtn"),t("upAntro"))}${n?act("pdfs",id,DOCS_I,t("actPdfs"),t("pdfsShort").replace("{n}",n),"",n):""}${a.pdf&&!rd?act("reread",id,REREAD_I,t(L2.estado==="error"?"actRetry":"actReread"),t(L2.estado==="error"?"retry":"reread")):""}${act("edit",id,PEN,t("editShort"),t("editShort"))}</div>
+      <div class="acts">${(L2.estado==="ok"&&a.pdf&&!rd)||gok?act("diary",id,EYE_A,t("actDiary"),t("seeDiary")," a-eye"):""}${act("up",id,UP_I,t("actPlan"),t("upShort"))}${act("info",id,INFO_I,t("infoBtn"),t("upInfo"))}${act("antro",id,BODY_I,t("antroBtn"),t("upAntro"))}${n?act("pdfs",id,DOCS_I,t("actPdfs"),t("pdfsShort").replace("{n}",n),"",n):""}${a.pdf&&!rd?act("reread",id,REREAD_I,t(L2.estado==="error"?"actRetry":"actReread"),t(L2.estado==="error"?"retry":"reread")):""}${a.oculta?act("hide",id,SHOW_I,t("actShow"),t("showTip")," a-hid"):act("hide",id,EYE_OFF,t("actHide"),t("hideTip"))}${act("edit",id,PEN,t("editShort"),t("editShort"))}</div>
     </div></div></article>`}
 $("dpSearch").oninput=renderDevPage;
 $("grpNew").onclick=()=>editGroup(null);
@@ -1541,6 +1550,8 @@ const accClick=async e=>{
   if(b.dataset.up){pickPdf({kind:"acc",id:b.dataset.up},b);return}
   if(b.dataset.info){pickPdf({kind:"info",id:b.dataset.info},b);return}
   if(b.dataset.antro){pickPdf({kind:"antro",id:b.dataset.antro},b);return}
+  if(b.dataset.hide){const id=b.dataset.hide,a=accounts[id];if(!a)return;const n={...a};if(a.oculta)delete n.oculta;else n.oculta=true;
+    try{await db.doc("cuentas/"+id).set(n);toast(t(n.oculta?"hiddenOk":"shownOk"))}catch(err){toast(t("saveErr"))}return}
   if(b.dataset.rmpdf){removePdf("acc",b.dataset.rmpdf);return}
   if(b.dataset.pdfs){pdfView={kind:"acc",id:b.dataset.pdfs};show("pdfs");return}
   if(b.dataset.reread){readPlanPdf(b.dataset.reread,null);return}
@@ -1631,7 +1642,13 @@ async function appRefresh(first){
   let s=null;try{s=JSON.parse(LS.get("sendo.app")||"null")}catch(e){}
   if(!s||!s.id){if(first)show("login");return}
   const raw=b64d(s.k);
-  if(first){try{const c=JSON.parse(LS.get("sendo.cache")||"null");if(c){appApply(await appOpen(raw,c));show("app")}}catch(e){}}
+  if(first){let box,net=true;
+    try{box=await Promise.race([appFetch(s.id),new Promise((_,ko)=>setTimeout(()=>ko(new Error("lento")),6000))])}catch(e){net=false}
+    if(net){if(!box){LS.set("sendo.app","");LS.set("sendo.cache","");appData=null;avisos(null);show("login");return}  // cuenta borrada u oculta: fuera
+      try{LS.set("sendo.cache",JSON.stringify(box));appApply(await appOpen(raw,box));show("app")}catch(e){show("login")}return}
+    // sin conexión: el último plan descargado, y se vuelve a comprobar en cuanto se pueda
+    try{const c=JSON.parse(LS.get("sendo.cache")||"null");if(c){appApply(await appOpen(raw,c));show("app");setTimeout(()=>appRefresh(false),4000);return}}catch(e){}
+    show("login");return}
   try{const box=await appFetch(s.id);
     if(!box){LS.set("sendo.app","");LS.set("sendo.cache","");appData=null;avisos(null);show("login");return}
     LS.set("sendo.cache",JSON.stringify(box));appApply(await appOpen(raw,box));if(access==="loading")show("app")}
