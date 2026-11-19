@@ -421,6 +421,8 @@ body.inside .tabs{display:flex;justify-content:center;position:sticky;top:0;z-in
 .tabs .ic,.tabs .cal-dot,.tabs .cal-pin{transform-box:fill-box;transform-origin:center}
 /* los botones de inicio y modo, aparte: debajo del menú, a la derecha */
 body.inside .corner{position:absolute;z-index:14;top:calc(env(safe-area-inset-top,0px) + 82px)}
+/* en la vista previa de SENDO Dev el botón de claro/oscuro se queda fijo arriba a la derecha, a la altura de la pestaña */
+body.inside.pv .corner{position:fixed;top:calc(env(safe-area-inset-top,0px) + 83px)}
 body.inside[data-tab=nut] #devSec,body.inside[data-tab=nut] #docSec,body.inside[data-tab=nut] #weekSec,body.inside:not([data-tab=nut]) #nutSec{display:none}
 body.swap .sec{transform-origin:50% 22px;animation:tabIn .5s var(--grow) both}
 body.swap .sec+.sec{animation-delay:.06s}
