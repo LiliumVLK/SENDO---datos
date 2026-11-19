@@ -120,9 +120,9 @@ body.dev .cover{display:none}
 .dp-sub{font:700 1.45rem/1.05 var(--display);margin:8px 2px -2px}
 .plist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .prow{display:flex;align-items:center;gap:8px}
-/* pestaña de vista previa: arriba, en la fila de los botones (el de inicio se oculta: solo se sale con la ✕) */
+/* pestaña de vista previa: arriba, en la fila de los botones, y fija al hacer scroll (el de inicio se oculta: solo se sale con la ✕) */
 body.pv #btnHome{display:none}
-.pvbar{position:absolute;z-index:14;top:calc(env(safe-area-inset-top,0px) + 82px);left:max(16px,env(safe-area-inset-left,0px));height:42px;max-width:calc(100% - 92px);
+.pvbar{position:fixed;z-index:14;top:calc(env(safe-area-inset-top,0px) + 82px);left:max(16px,env(safe-area-inset-left,0px));height:42px;max-width:calc(100% - 92px);
   display:flex;align-items:center;gap:8px;padding:3px 3px 3px 13px;border-radius:999px;background:var(--surface);color:var(--fg);border:1px solid var(--line);
   box-shadow:0 10px 26px -10px rgba(0,0,0,.5);overflow:hidden;transform-origin:left center;animation:pvIn .6s cubic-bezier(.3,1.4,.5,1) both;
   transition:background .35s var(--ease),border-color .35s var(--ease),color .35s var(--ease)}
