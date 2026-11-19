@@ -338,9 +338,7 @@ body.gdrag,body.gdrag *{-webkit-user-select:none;user-select:none}
 @keyframes pubPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 45%,transparent)}50%{box-shadow:0 0 0 7px transparent}}
 @media (prefers-reduced-motion:reduce){.dv-pub{animation:none}}
 /* plan sin publicar */
-.unpub{display:inline-block;vertical-align:2px;margin-left:4px;padding:1px 7px;border-radius:999px;font:700 .58rem/1.55 var(--body);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#a86a06;background:color-mix(in srgb,#e2ab4f 20%,transparent);border:1px solid color-mix(in srgb,#e2ab4f 55%,transparent);white-space:nowrap}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .unpub{color:#f0c46e}}
-:root[data-theme=dark] .unpub{color:#f0c46e}
+.draftb.unpub{align-self:flex-start;margin:6px 0 1px;font-style:normal}
 .dv-head{flex-wrap:wrap}
 .dv-pub{order:9;flex:1 0 100%;display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;margin-top:4px;padding:0 18px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink,#fff);font:700 .92rem var(--body);cursor:pointer;position:relative;overflow:hidden;animation:pubIn .55s var(--grow) both,pubPulse 2.6s var(--ease) .6s infinite}
 .dv-pub svg{width:20px;height:20px}
@@ -1654,7 +1652,7 @@ function renderGroups(){
   $("grpList").innerHTML=H.join("")}
 function grpHead(id,g,op){const np=accPdfs(g).length+accDel(g).length,L=g.lectura||{},rd=readingNow.has(id)||L.estado==="pendiente";
   const st=rd?t("reading"):!g.pdf?t("metaNone"):L.estado==="ok"?t("metaOk").replace("{d}",fmtDM(new Date(L.desde+"T00:00:00"))):L.estado==="error"?t("metaErr"):t("pdfN").replace("{n}",np);
-  return `<div class="gbox-h"><button type="button" class="gbox-tog rp" data-gt="${esc(id)}" aria-expanded="${!!op}"><span class="gi" aria-hidden="true">${esc(ini(g.nombre))}</span><span class="dv-gt"><b>${esc(g.nombre||"—")}${g.borrador?` <i class="unpub" title="${esc(t("unpubTip"))}">${esc(t("unpubTag"))}</i>`:""}</b><small>${esc(grpN(grpCount(id)))} · ${esc(st)}</small></span>${CHEV}</button>
+  return `<div class="gbox-h"><button type="button" class="gbox-tog rp" data-gt="${esc(id)}" aria-expanded="${!!op}"><span class="gi" aria-hidden="true">${esc(ini(g.nombre))}</span><span class="dv-gt"><b>${esc(g.nombre||"—")}</b><small>${esc(grpN(grpCount(id)))} · ${esc(st)}</small>${g.borrador?`<i class="draftb unpub" title="${esc(t("unpubTip"))}">${esc(t("draftTag"))}</i>`:""}</span>${CHEV}</button>
     ${L.estado==="error"&&!rd&&g.pdf?`<button type="button" class="ib2 rp" data-greread="${esc(id)}" aria-label="${esc(t("retry"))}" title="${esc(t("retry"))}">↻</button>`:""}
     ${np?`<button type="button" class="ib2 rp" data-gpdfs="${esc(id)}" aria-label="${esc(t("grpPdfs"))}" title="${esc(t("grpPdfs"))}">${LISTI}</button>`:""}
     <button type="button" class="ib2 rp" data-gedit="${esc(id)}" aria-label="${esc(t("grpEditL"))}" title="${esc(t("grpEditL"))}">${PEN}</button>
@@ -1685,7 +1683,7 @@ function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length+accAntr
     const dia=((L2.estado==="ok"||L2.estado==="revisar")&&!rd)||gok||gs.some(g=>((grps[g]||{}).lectura||{}).estado==="revisar"),fo=openFiles.has(ok);
     return `<article class="arow${op?" open":""}${gs.length?" has-g":""}${a.oculta?" is-hidden":""}${dia?" has-dia":""}" style="--i:${Math.min(i,10)}${gs.length?`;--ring:${ring}`:""}">
     <button type="button" class="arow-h rp" data-tog="${esc(ok)}" aria-expanded="${op}"><i class="av" aria-hidden="true">${esc(ini(a.nombre))}<i class="dot ${st[0]}"></i></i>
-      <span class="arow-t"><b>${esc(a.nombre||"—")}${!a.oculta&&(a.borrador||gs.some(g=>grps[g].borrador))?` <i class="unpub" title="${esc(t("unpubTip"))}">${esc(t("unpubTag"))}</i>`:""}</b><small>${a.oculta?`<span class="htag">${LOCK_C}${esc(t("hiddenTag"))}</span> · `:""}${gs.length?gs.map(g=>`<span class="gname" style="color:${esc(gcol(g))}">${esc(grps[g].nombre)}</span>`).join(", ")+" · ":""}${esc(st[1])}</small></span>${CHEV}</button>
+      <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${a.oculta?`<span class="htag">${LOCK_C}${esc(t("hiddenTag"))}</span> · `:""}${gs.length?gs.map(g=>`<span class="gname" style="color:${esc(gcol(g))}">${esc(grps[g].nombre)}</span>`).join(", ")+" · ":""}${esc(st[1])}</small>${!a.oculta&&(a.borrador||gs.some(g=>grps[g].borrador))?`<i class="draftb unpub" title="${esc(t("unpubTip"))}">${esc(t("draftTag"))}</i>`:""}</span>${CHEV}</button>
     ${dia?`<button type="button" class="arow-dia a-cal rp" data-diary="${esc(id)}" aria-label="${esc(t("seeDiary"))}" title="${esc(t("seeDiary"))}">${CAL_A}</button>`:""}
     <div class="arow-b"><div class="arow-in">
       <div class="kv"><span class="k">${esc(t("pass"))}</span><code>${shown.has(id)?esc(a.clave):"•".repeat(Math.max(6,Math.min(12,String(a.clave||"").length)))}</code>
