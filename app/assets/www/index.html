@@ -310,7 +310,6 @@ body.pv #btnHome{display:none}
 .act:hover{color:var(--fg)}
 .act-l{max-width:100%;overflow-wrap:normal;-webkit-hyphens:manual;hyphens:manual}
 .act-n{position:absolute;top:-3px;right:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--fg);color:var(--bg);font:700 .6rem/17px var(--body)}
-.act.a-eye .act-i{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
 .act.busy{pointer-events:none}.act.busy .act-i svg{opacity:.15}
 .act.busy .act-i::after{content:"";position:absolute;inset:11px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
 /* cuentas ocultas: recuadro semitransparente */
@@ -319,14 +318,24 @@ body.pv #btnHome{display:none}
 .htag{display:inline-flex;align-items:center;gap:3px;font-weight:600;color:var(--fg)}
 .htag svg{width:13px;height:13px}
 .act.a-hid .act-i{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
-/* el ojo de «Diario»: parpadea y mira al abrir la cuenta, y al pasar por encima */
-.eyea .lid,.eyea .pupil{transform-box:view-box;transform-origin:12px 12px}
-.arow.open .a-eye .lid{animation:blink 3.6s .5s var(--ease) infinite}
-.arow.open .a-eye .pupil{animation:look 3.6s .5s var(--ease) infinite}
-.a-eye:hover .lid,.a-eye:active .lid{animation:blink .45s var(--ease)}
-@keyframes blink{0%,6%,100%{transform:none}3%{transform:scaleY(.08)}}
-@keyframes look{0%,14%,100%{transform:none}22%,36%{transform:translateX(-2.2px)}48%,62%{transform:translateX(2.2px)}72%{transform:none}}
-@media (prefers-reduced-motion:reduce){.arow.open .a-eye .lid,.arow.open .a-eye .pupil{animation:none}}
+/* «Diario»: el calendario del menú «Plan semanal»; sus puntos aparecen uno a uno al abrir la cuenta y al pasar o pulsar */
+.cala .cdot,.cala .cpin,.lck .shk{transform-box:fill-box;transform-origin:center}
+.act.a-cal .act-i{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.arow.open .a-cal .cdot{animation:calDot .45s var(--grow) both;animation-delay:calc(var(--d) * 60ms + .3s)}
+.arow.open .a-cal .cpin{animation:calPin .5s var(--ease) .25s}
+.a-cal:hover .cdot,.a-cal:active .cdot{animation:calDot2 .45s var(--grow) both;animation-delay:calc(var(--d) * 50ms)}
+@keyframes calDot2{from{opacity:0;transform:scale(0)}}
+/* candado: se cierra (Ocultar) o se abre (Mostrar) con un pequeño golpe del arco */
+.lck .shk{transform-origin:16px 10.6px;transform-box:view-box}
+.arow.open .a-lock .lck:not(.open) .shk{animation:lockShut .6s var(--grow) .35s both}
+.arow.open .a-lock .lck.open .shk{animation:lockOpen .6s var(--grow) .35s both}
+.a-lock:hover .lck:not(.open) .shk,.a-lock:active .lck:not(.open) .shk{animation:lockShut2 .5s var(--grow)}
+.a-lock:hover .lck.open .shk,.a-lock:active .lck.open .shk{animation:lockOpen2 .5s var(--grow)}
+@keyframes lockShut{from{transform:translateY(-2.4px)}}
+@keyframes lockShut2{40%{transform:translateY(-2.4px)}}
+@keyframes lockOpen{from{transform:none}40%{transform:rotate(-14deg)}}
+@keyframes lockOpen2{40%{transform:rotate(-14deg)}}
+@media (prefers-reduced-motion:reduce){.arow.open .a-cal .cdot,.arow.open .a-cal .cpin,.arow.open .a-lock .shk{animation:none}}
 .pill-b{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg);font:600 .86rem var(--body);transition:background .2s,transform .2s var(--ease)}
 .pill-b svg{width:16px;height:16px}.pill-b:hover{background:var(--sunk)}.pill-b:active{transform:scale(.95)}
 .pill-b.hi{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -1235,7 +1244,9 @@ function mergeWeek(a,b){const D={};for(const x of a.days||[])D[x.d]={...x};
   for(const x of b.days||[]){const o=D[x.d]||{};for(const[k,v]of Object.entries(x))o[k]=k==="eu"&&v&&typeof v==="object"?{...(o.eu||{}),...v}:v;D[x.d]=o}
   const{days,...rest}=b;return{...a,...rest,days:Object.keys(D).map(Number).sort((x,y)=>x-y).map(k=>D[k])}}
 const grpOk=g=>!!g&&((grps[g]||{}).lectura||{}).estado==="ok";
-const EYE_A='<svg class="eyea" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="lid"><path d="M2.6 12s3.4-6.3 9.4-6.3 9.4 6.3 9.4 6.3-3.4 6.3-9.4 6.3S2.6 12 2.6 12z"/><g class="pupil"><circle cx="12" cy="12" r="3"/><circle class="glint" cx="13.1" cy="10.9" r=".8" fill="currentColor" stroke="none"/></g></g></svg>';
+const CAL_A='<svg class="cala" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.2"/><path d="M3.5 9.8h17"/><path class="cpin" d="M8 3v3.6M16 3v3.6"/>'+[[8,13.6],[12,13.6],[16,13.6],[8,17.2],[12,17.2]].map(([x,y],i)=>`<circle class="cdot" style="--d:${i}" cx="${x}" cy="${y}" r="1.15" fill="currentColor" stroke="none"/>`).join("")+'</svg>';
+const LOCK_C='<svg class="lck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shk" d="M8 10.6V8a4 4 0 0 1 8 0v2.6"/><rect x="5" y="10.6" width="14" height="10" rx="2.6"/><path d="M12 14.6v2"/></svg>';
+const LOCK_O='<svg class="lck open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shk" d="M8 10.6V8a4 4 0 0 1 7.7-1.5"/><rect x="5" y="10.6" width="14" height="10" rx="2.6"/><path d="M12 14.6v2"/></svg>';
 const EYE_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 5.9A9.6 9.6 0 0 1 12 5.7c6 0 9.4 6.3 9.4 6.3a16 16 0 0 1-2.6 3.4M6.2 7.6C3.9 9.3 2.6 12 2.6 12s3.4 6.3 9.4 6.3c1.6 0 3-.4 4.3-1"/><path d="M9.9 10a3 3 0 0 0 4.2 4.2"/><path class="slash" d="M3.5 3.5l17 17"/></svg>';
 const SHOW_I='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.6 12s3.4-6.3 9.4-6.3 9.4 6.3 9.4 6.3-3.4 6.3-9.4 6.3S2.6 12 2.6 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 const INFO_I='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.4"/><circle cx="12" cy="7.9" r=".9" fill="currentColor" stroke="none"/></svg>';
@@ -1519,12 +1530,12 @@ function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length+accAntr
     const st=rd?["warn",t("reading")]:!a.pdf?(gok?["ok",t("metaGrp")]:["",t("metaNone")]):L2.estado==="ok"?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:L2.estado==="error"?["err",t("metaErr")]:["",t("pdfN").replace("{n}",n)];
     return `<article class="arow${op?" open":""}${gs.length?" has-g":""}${a.oculta?" is-hidden":""}" style="--i:${Math.min(i,10)}${gs.length?`;--ring:${ring}`:""}">
     <button type="button" class="arow-h rp" data-tog="${esc(ok)}" aria-expanded="${op}"><i class="av" aria-hidden="true">${esc(ini(a.nombre))}<i class="dot ${st[0]}"></i></i>
-      <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${a.oculta?`<span class="htag">${EYE_OFF}${esc(t("hiddenTag"))}</span> · `:""}${gs.length?gs.map(g=>`<span class="gname" style="color:${esc(gcol(g))}">${esc(grps[g].nombre)}</span>`).join(", ")+" · ":""}${esc(st[1])}</small></span>${CHEV}</button>
+      <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${a.oculta?`<span class="htag">${LOCK_C}${esc(t("hiddenTag"))}</span> · `:""}${gs.length?gs.map(g=>`<span class="gname" style="color:${esc(gcol(g))}">${esc(grps[g].nombre)}</span>`).join(", ")+" · ":""}${esc(st[1])}</small></span>${CHEV}</button>
     <div class="arow-b"><div class="arow-in">
       <div class="kv"><span class="k">${esc(t("pass"))}</span><code>${shown.has(id)?esc(a.clave):"•".repeat(Math.max(6,Math.min(12,String(a.clave||"").length)))}</code>
         <button type="button" class="ib2 rp" data-eye="${esc(id)}" aria-label="${esc(t(shown.has(id)?"hide":"show"))}" aria-pressed="${shown.has(id)}">${EYE}</button>
         <button type="button" class="ib2 rp" data-copy="${esc(id)}" aria-label="${esc(t("copy"))}">${COPY}</button></div>
-      <div class="acts">${(L2.estado==="ok"&&a.pdf&&!rd)||gok?act("diary",id,EYE_A,t("actDiary"),t("seeDiary")," a-eye"):""}${act("up",id,UP_I,t("actPlan"),t("upShort"))}${act("info",id,INFO_I,t("infoBtn"),t("upInfo"))}${act("antro",id,BODY_I,t("antroBtn"),t("upAntro"))}${n?act("pdfs",id,DOCS_I,t("actPdfs"),t("pdfsShort").replace("{n}",n),"",n):""}${a.pdf&&!rd?act("reread",id,REREAD_I,t(L2.estado==="error"?"actRetry":"actReread"),t(L2.estado==="error"?"retry":"reread")):""}${a.oculta?act("hide",id,SHOW_I,t("actShow"),t("showTip")," a-hid"):act("hide",id,EYE_OFF,t("actHide"),t("hideTip"))}${act("edit",id,PEN,t("editShort"),t("editShort"))}</div>
+      <div class="acts">${(L2.estado==="ok"&&a.pdf&&!rd)||gok?act("diary",id,CAL_A,t("actDiary"),t("seeDiary")," a-cal"):""}${act("up",id,UP_I,t("actPlan"),t("upShort"))}${act("info",id,INFO_I,t("infoBtn"),t("upInfo"))}${act("antro",id,BODY_I,t("antroBtn"),t("upAntro"))}${n?act("pdfs",id,DOCS_I,t("actPdfs"),t("pdfsShort").replace("{n}",n),"",n):""}${a.pdf&&!rd?act("reread",id,REREAD_I,t(L2.estado==="error"?"actRetry":"actReread"),t(L2.estado==="error"?"retry":"reread")):""}${a.oculta?act("hide",id,LOCK_O,t("actShow"),t("showTip")," a-hid a-lock"):act("hide",id,LOCK_C,t("actHide"),t("hideTip")," a-lock")}${act("edit",id,PEN,t("editShort"),t("editShort"))}</div>
     </div></div></article>`}
 $("dpSearch").oninput=renderDevPage;
 $("grpNew").onclick=()=>editGroup(null);
