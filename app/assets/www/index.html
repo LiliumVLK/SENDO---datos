@@ -949,7 +949,7 @@ function mkCanvas(W,H,dpr,ink){const cv=document.createElement("canvas");cv.widt
   const g=cv.getContext("2d");g.scale(dpr,dpr);g.strokeStyle=ink;g.lineCap="round";g.lineJoin="round";return[cv,g]}
 /* ===== Entrada al diario: «Semillas» =====
    El logotipo se carga y estalla en gotas de savia; las gotas vuelan como semillas hasta su sitio en el diario
-   y, al posarse, germinan: brota un tallo con dos hojas, echa raicillas y cada pieza del diario crece desde ese punto. */
+   y, al posarse, cada pieza del diario crece desde ese punto. */
 const SV={
   R:(a,b)=>a+Math.random()*(b-a),cl:(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),lerp:(a,b,t)=>a+(b-a)*t,
   eOut:t=>1-Math.pow(1-Math.max(0,Math.min(1,t)),3),eIO:t=>{t=Math.max(0,Math.min(1,t));return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2},
@@ -994,7 +994,6 @@ const SV={
       U=SV.units(H);const n=U.length;if(!n){END=BOOM+900;return}
       const D=Math.min(120,1000/Math.max(1,n-1));
       U.forEach((u,i)=>{u.tl=1300+i*D;u.L=u.k==="btn"?8:u.k==="tabs"?13:15;u.bend=SV.R(-4,4);u.sp=u.k!=="card";
-        u.roots=[0,1,2].map(()=>SV.twig(u.x,u.y,Math.PI/2+SV.R(-.8,.8),SV.R(8,u.k==="btn"?12:20)));
         const lx=u.x-u.b.left,ly=u.y-u.b.top,R=Math.hypot(Math.max(lx,u.b.width-lx),Math.max(ly,u.b.height-ly))+30;u.c0=`circle(0px at ${lx}px ${ly}px)`;u.c1=`circle(${R}px at ${lx}px ${ly}px)`;
         u.el.style.clipPath=u.c0});
       document.body.classList.remove("sapping");
@@ -1017,22 +1016,14 @@ const SV={
         for(const p of P){let x,y,lv=2,r=p.r;
           if(!p.tl||t<p.tf){[x,y]=ex(p,t);if(t<BOOM+120)r*=1.6}
           else if(t<p.tl){const k=SV.eIO((t-p.tf)/p.fd),a=1-k;x=a*a*p.fx+2*a*k*p.cx+k*k*p.tx;y=a*a*p.fy+2*a*k*p.cy+k*k*p.ty}
-          else{const f=(t-p.tl)/(p.seed?420:240);if(f>=1)continue;x=p.tx;y=p.ty;lv=f<.4?2:f<.75?1:0;if(p.seed)r*=1+.6*Math.sin(f*3.14)}
+          else{const f=(t-p.tl)/240;if(f>=1)continue;x=p.tx;y=p.ty;lv=f<.4?2:f<.75?1:0}
           B[(t>p.ct?3:0)+lv].push(x,y,r)}
         B.forEach((b,i)=>{if(!b.length)return;fx.fillStyle=i<3?INK:ACC;fx.globalAlpha=[.35,.65,.95][i%3];fx.beginPath();for(let j=0;j<b.length;j+=3){fx.moveTo(b[j]+b[j+2],b[j+1]);fx.arc(b[j],b[j+1],b[j+2],0,6.283)}fx.fill()})}
-      // germinación: anillo, tallo con dos hojas y raicillas; la pieza crece desde la semilla
+      // germinación: la pieza crece desde la semilla
       if(U)for(const u of U){const d=t-u.tl;if(d<0)continue;
         if(!u.go){u.go=1;try{const an=u.el.animate([{clipPath:u.c0},{clipPath:u.c1}],{duration:u.k==="card"?900:680,easing:"cubic-bezier(.2,.75,.25,1)",fill:"forwards"});
           an.onfinish=()=>{u.el.style.clipPath="";an.cancel()};u.an=an}catch(e){u.el.style.clipPath=""}}
-        const a=1-SV.cl((d-560)/380);if(a<=0)continue;
-        const rg=SV.cl(d/520);if(rg<1){fx.globalAlpha=a*(1-rg)*.6;fx.strokeStyle=ACC;fx.lineWidth=1.2;fx.beginPath();fx.arc(u.x,u.y,4+22*SV.eOut(rg),0,6.283);fx.stroke()}
-        if(!u.sp)continue;
-        const g=SV.eOut(d/420),L=u.L*g,bx=u.x+u.bend*g,by=u.y-L;
-        fx.globalAlpha=a*.55;fx.strokeStyle=INK;fx.lineWidth=.9;fx.beginPath();u.roots.forEach(r=>part(r,SV.eOut(d/520)));fx.stroke();
-        fx.globalAlpha=a;fx.strokeStyle=ACC;fx.lineWidth=1.6;fx.lineCap="round";fx.beginPath();fx.moveTo(u.x,u.y);fx.quadraticCurveTo(u.x,u.y-L*.6,bx,by);fx.stroke();
-        const lf=SV.eOut((d-150)/300)*u.L*.55;if(lf>.5){fx.fillStyle=ACC;
-          fx.beginPath();fx.ellipse(bx-lf*.5,by-lf*.15,lf*.55,lf*.24,.5,0,6.283);fx.fill();
-          fx.beginPath();fx.ellipse(bx+lf*.5,by-lf*.15,lf*.55,lf*.24,-.5,0,6.283);fx.fill()}}
+      }
       fx.globalAlpha=1;SV.grow(bg,veins,t,"rgba(0,0,0,.26)");
       if(U&&!dimmed&&t>END-700){dimmed=1;cv.classList.add("dim")}
       if(t<END)requestAnimationFrame(frame);
