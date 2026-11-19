@@ -231,8 +231,18 @@ body.pv #btnHome{display:none}
 .chip{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 .8rem var(--body);cursor:pointer;transition:background .2s,border-color .2s,color .2s}
 .chip i{width:9px;height:9px;border-radius:50%;background:var(--gc)}
 .chip[aria-pressed=true]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
-.arow.has-g .av{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--gc)}
-.arow-t small .gname{color:var(--gc);font-weight:600}
+.gbox{--gc:var(--accent);display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:24px;border:1px solid color-mix(in srgb,var(--gc) 32%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--gc) 10%,var(--surface)),color-mix(in srgb,var(--gc) 3%,var(--bg)) 120px)}
+.gbox.none{--gc:var(--muted);border-style:dashed;background:none}
+.gbox-h{display:flex;align-items:center;gap:12px;padding:2px 2px 2px 4px}
+.gbox-h .gi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--gc) 18%,var(--surface));color:var(--gc);font:700 .9rem var(--body)}
+.gbox.none .gi{background:var(--sunk);color:var(--muted)}
+.gbox-h .ib2{width:38px;height:38px}.gbox-h .ib2 svg{width:17px;height:17px}
+.gbox-l{display:flex;flex-direction:column;gap:8px}
+.gbox-l .dp-empty{margin:0;padding:6px 6px 8px;font-size:.85rem}
+.arow.has-g .av{position:relative}
+.arow.has-g .av::after{content:"";position:absolute;inset:-5px;border-radius:50%;background:var(--ring);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px));pointer-events:none}
+.arow-t small .gname{font-weight:600}
+.gpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
 .gcols{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
 .gc{width:34px;height:34px;border-radius:50%;border:0;background:var(--gc);cursor:pointer;box-shadow:0 0 0 2px var(--surface),0 0 0 3px transparent;transition:box-shadow .2s,transform .2s var(--grow)}
 .gc[aria-pressed=true]{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--gc);transform:scale(1.06)}
@@ -728,12 +738,12 @@ const S={
   pdfsN:["PDFs subidos · {n}","Igotako PDFak · {n}"],current:["Plan actual","Uneko plana"],
   accWord1:["cuenta","kontu"],accWordN:["cuentas","kontu"],
   groupsH:["Grupos","Taldeak"],newGrp:["Nuevo grupo","Talde berria"],editGrp:["Editar grupo","Taldea editatu"],grpName:["Nombre del grupo","Taldearen izena"],grpColor:["Color","Kolorea"],
-  grpNone:["Sin grupo","Talderik gabe"],grpField:["Grupo","Taldea"],allAcc:["Todas","Guztiak"],grpEmpty:["Todavía no hay grupos. Crea uno para dar el mismo plan a varias cuentas.","Oraindik ez dago talderik. Sortu bat hainbat konturi plan bera emateko."],
+  grpNone:["Sin grupo","Talderik gabe"],grpField:["Grupos","Taldeak"],grpBoxEmpty:["No hay cuentas en este grupo.","Ez dago konturik talde honetan."],allAcc:["Todas","Guztiak"],grpEmpty:["Todavía no hay grupos. Crea uno para dar el mismo plan a varias cuentas.","Oraindik ez dago talderik. Sortu bat hainbat konturi plan bera emateko."],
   grpN1:["1 cuenta","Kontu 1"],grpN:["{n} cuentas","{n} kontu"],grpSub:["Sus PDFs dan el plan a todas las cuentas del grupo.","Bere PDFek taldeko kontu guztiei ematen diete plana."],upGrp:["Subir PDF de plan para el grupo","Taldearentzako plan PDFa igo"],
   grpPdfs:["PDFs del grupo","Taldearen PDFak"],grpEditL:["Editar grupo","Taldea editatu"],delGrp:["Borrar grupo","Taldea ezabatu"],
   delGrpConfirm:["¿Borrar el grupo «{n}»? Sus cuentas se quedan sin grupo y dejan de tener el plan de sus PDFs.","«{n}» taldea ezabatu? Bere kontuak talderik gabe geratuko dira eta ez dute bere PDFen plana izango."],
   grpSaved:["Grupo guardado","Taldea gordeta"],grpDeleted:["Grupo borrado","Taldea ezabatuta"],dupGrp:["Ya hay un grupo con ese nombre","Badago izen hori duen talde bat"],needGrpName:["Escribe el nombre del grupo","Idatzi taldearen izena"],
-  metaGrp:["Plan del grupo","Taldearen plana"],grpHint:["La cuenta recibe el plan de los PDFs de su grupo. Si cambia de grupo, deja el plan del anterior y pasa a tener el del nuevo. Su plan propio manda sobre el del grupo.","Kontuak bere taldearen PDFen plana jasotzen du. Taldez aldatzen bada, aurrekoaren plana utzi eta berriarena izango du. Bere plan propioa taldearenaren gainetik dago."],
+  metaGrp:["Plan del grupo","Taldearen plana"],grpHint:["Puede estar en varios grupos: recibe el plan de los PDFs de todos ellos. Si sale de un grupo, deja de tener su plan. Su plan propio manda sobre el de los grupos.","Hainbat taldetan egon daiteke: guztien PDFen plana jasotzen du. Talde batetik ateratzen bada, ez du haren plana izango. Bere plan propioa taldeenaren gainetik dago."],
   rmGrpTxt:["Se quitará «{n}» y el plan que venía de él desaparecerá de todas las cuentas del grupo.","«{n}» kenduko da, eta hortik zetorren plana taldeko kontu guztietatik desagertuko da."],
   metaOk:["Diario desde el {d}","Egunkaria: {d}(e)tik"],metaNone:["Sin plan todavía","Planik ez oraindik"],metaErr:["No se ha podido leer el PDF","Ezin izan da PDFa irakurri"],
   pdfN:["{n} PDF","{n} PDF"],upShort:["Subir plan","Plana igo"],pdfsShort:["PDFs · {n}","PDFak · {n}"],editShort:["Editar","Editatu"],diaryK:["Diario","Egunkaria"],
@@ -1023,7 +1033,7 @@ const SV={
     return U.sort((a,b)=>a.y-b.y||(a.k==="card"?-1:1))},
   /* las mismas piezas en la página de desarrollador de SENDO Dev */
   devUnits(H){const pg=$("devPage");try{pg.getAnimations({subtree:true}).forEach(a=>a.finish())}catch(e){}
-    const U=[];document.querySelectorAll(".corner button,#devPage .dv-head,#devPage .dv-gen,#devPage .dv-gh,#devPage .dp-empty,#devPage .dv-search,#dpFilter,#dpList .arow,#dpExit").forEach(el=>{
+    const U=[];document.querySelectorAll(".corner button,#devPage .dv-head,#devPage .dv-gen,#devPage .dv-gh,#grpList .dp-empty,#devPage .dv-search,#dpFilter,#dpList .gbox,#dpList .arow,#dpList>.dp-empty,#dpExit").forEach(el=>{
       if(getComputedStyle(el).display==="none")return;const b=el.getBoundingClientRect();if(!b.width||b.bottom<0||b.top>H)return;
       const btn=el.matches(".corner button");U.push({el,k:btn?"btn":"row",b,x:btn?b.left+b.width/2:b.left+Math.min(38,b.width/2),y:b.top+Math.min(b.height/2,30)})});
     return U.sort((a,b)=>a.y-b.y)},
@@ -1154,8 +1164,13 @@ let unsubPlan=null,shown=new Set(),loginName="",gens={},assets=null,upTarget=nul
 /* grupos de cuentas: cada grupo tiene sus PDFs de plan, que valen para todas sus cuentas */
 let grps={},grpFilter="";
 const GCOL=["#6b5cf0","#f06b8a","#3fa8f0","#f2b33d","#12a08f","#e0703a"];
-const grpOf=a=>a&&a.grupo&&grps[a.grupo]?a.grupo:"",gcol=g=>(grps[g]&&grps[g].color)||GCOL[0];
-const grpCount=g=>Object.values(accounts).filter(a=>a.grupo===g).length,grpN=n=>n===1?t("grpN1"):t("grpN").replace("{n}",n);
+const grpList=a=>!a?[]:Array.isArray(a.grupos)?a.grupos:a.grupo?[a.grupo]:[];
+const grpsOf=a=>grpList(a).filter(g=>grps[g]),gcol=g=>(grps[g]&&grps[g].color)||GCOL[0];
+const grpCount=g=>Object.values(accounts).filter(a=>grpList(a).includes(g)).length,grpN=n=>n===1?t("grpN1"):t("grpN").replace("{n}",n);
+/* juntar dos semanas día a día y campo a campo (lo de b manda), igual que al publicar en GitHub */
+function mergeWeek(a,b){const D={};for(const x of a.days||[])D[x.d]={...x};
+  for(const x of b.days||[]){const o=D[x.d]||{};for(const[k,v]of Object.entries(x))o[k]=k==="eu"&&v&&typeof v==="object"?{...(o.eu||{}),...v}:v;D[x.d]=o}
+  const{days,...rest}=b;return{...a,...rest,days:Object.keys(D).map(Number).sort((x,y)=>x-y).map(k=>D[k])}}
 const grpOk=g=>!!g&&((grps[g]||{}).lectura||{}).estado==="ok";
 const PLUS='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
 const PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1-4.2L15.6 5.2a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.2 19 4 20z"/><path d="M13.8 7l3.2 3.2"/></svg>';
@@ -1340,13 +1355,14 @@ function watchPlan(uid){
   if(unsubPlan){try{unsubPlan()}catch(e){}unsubPlan=null}
   plans={};client=uid||null;canEdit=editing&&!preview&&!!client;if(inside())renderWeek();
   if(!db||!client)return;
-  const gid=grpOf(accounts[client]);let own={},gw={};
-  const mix=()=>{const ids=new Set(accPdfs(grps[gid]).map(x=>x.id)),G={};
-    for(const[k,w]of Object.entries(gw))if(w&&(w.pdf?ids.has(w.pdf):!(w.fuente==="pdf"&&!ids.size)))G[k]={...w,_g:1};
-    plans={...G,...own};if(inside())renderWeek()};
-  const u=db.collection(`planes/${client}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});own=o;mix()},()=>{});
-  const u2=gid?db.collection(`gplanes/${gid}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});gw=o;mix()},()=>{}):null;
-  unsubPlan=()=>{[u,u2].forEach(f=>{if(typeof f==="function")try{f()}catch(e){}})}}
+  const gl=grpsOf(accounts[client]);let own={};const gw={};
+  const mix=()=>{const G={};
+    for(const gid of gl){const ids=new Set(accPdfs(grps[gid]).map(x=>x.id));
+      for(const[k,w]of Object.entries(gw[gid]||{}))if(w&&(w.pdf?ids.has(w.pdf):!(w.fuente==="pdf"&&!ids.size))){const{pdf,fuente,...c}=w;G[k]=G[k]?mergeWeek(G[k],c):{...c}}}
+    for(const k in G)G[k]._g=1;plans={...G,...own};if(inside())renderWeek()};
+  const U=[db.collection(`planes/${client}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});own=o;mix()},()=>{})];
+  for(const gid of gl)U.push(db.collection(`gplanes/${gid}/semanas`).onSnapshot(q=>{const o={};q.docs.forEach(d=>{o[d.id]=d.data()});gw[gid]=o;mix()},()=>{}));
+  unsubPlan=()=>{U.forEach(f=>{if(typeof f==="function")try{f()}catch(e){}})}}
 function leaveInside(){document.body.classList.remove("inside","arrive");document.body.classList.add("home");["devSec","docSec","weekSec","nutSec"].forEach(id=>$(id).hidden=true);const rb=$("rootsBg");if(rb)rb.remove()}
 function show(a){
   if(a==="pdfs"&&!pdfView)a="dev";
@@ -1398,14 +1414,14 @@ $("btnDev").onclick=()=>{if(isDev)show("dev");else toast(t("devOnly"))};
 /* ---------- página de cuentas ---------- */
 function renderGroups(){
   $("grpH").textContent=t("groupsH");$("grpNew").innerHTML=PLUS+esc(t("newGrp"));
-  const G=Object.entries(grps).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es"));
-  $("grpList").innerHTML=G.length?G.map(([id,g])=>{const np=accPdfs(g).length,L=g.lectura||{},rd=readingNow.has(id)||L.estado==="pendiente";
-    const st=rd?t("reading"):!g.pdf?t("metaNone"):L.estado==="ok"?t("metaOk").replace("{d}",fmtDM(new Date(L.desde+"T00:00:00"))):L.estado==="error"?t("metaErr"):t("pdfN").replace("{n}",np);
-    return `<div class="dv-gen dv-grp" style="--gc:${esc(gcol(id))}"><span class="dv-gi gi" aria-hidden="true">${esc(ini(g.nombre))}</span><div class="dv-gt"><b>${esc(g.nombre||"—")}</b><small>${esc(grpN(grpCount(id)))} · ${esc(st)}</small></div>
-      ${L.estado==="error"&&!rd&&g.pdf?`<button type="button" class="ib2 rp" data-greread="${esc(id)}" aria-label="${esc(t("retry"))}" title="${esc(t("retry"))}">↻</button>`:""}
-      ${np?`<button type="button" class="ib2 rp" data-gpdfs="${esc(id)}" aria-label="${esc(t("grpPdfs"))}" title="${esc(t("grpPdfs"))}">${LISTI}</button>`:""}
-      <button type="button" class="ib2 rp" data-gedit="${esc(id)}" aria-label="${esc(t("grpEditL"))}" title="${esc(t("grpEditL"))}">${PEN}</button>
-      <button type="button" class="ib2 hi rp" data-gup="${esc(id)}" aria-label="${esc(t("upGrp"))}" title="${esc(t("upGrp"))}">${UPL}</button></div>`}).join(""):`<p class="dp-empty">${esc(t("grpEmpty"))}</p>`}
+  $("grpList").innerHTML=Object.keys(grps).length?"":`<p class="dp-empty">${esc(t("grpEmpty"))}</p>`}
+function grpHead(id,g){const np=accPdfs(g).length,L=g.lectura||{},rd=readingNow.has(id)||L.estado==="pendiente";
+  const st=rd?t("reading"):!g.pdf?t("metaNone"):L.estado==="ok"?t("metaOk").replace("{d}",fmtDM(new Date(L.desde+"T00:00:00"))):L.estado==="error"?t("metaErr"):t("pdfN").replace("{n}",np);
+  return `<div class="gbox-h"><span class="gi" aria-hidden="true">${esc(ini(g.nombre))}</span><div class="dv-gt"><b>${esc(g.nombre||"—")}</b><small>${esc(grpN(grpCount(id)))} · ${esc(st)}</small></div>
+    ${L.estado==="error"&&!rd&&g.pdf?`<button type="button" class="ib2 rp" data-greread="${esc(id)}" aria-label="${esc(t("retry"))}" title="${esc(t("retry"))}">↻</button>`:""}
+    ${np?`<button type="button" class="ib2 rp" data-gpdfs="${esc(id)}" aria-label="${esc(t("grpPdfs"))}" title="${esc(t("grpPdfs"))}">${LISTI}</button>`:""}
+    <button type="button" class="ib2 rp" data-gedit="${esc(id)}" aria-label="${esc(t("grpEditL"))}" title="${esc(t("grpEditL"))}">${PEN}</button>
+    <button type="button" class="ib2 hi rp" data-gup="${esc(id)}" aria-label="${esc(t("upGrp"))}" title="${esc(t("upGrp"))}">${UPL}</button></div>`}
 function renderFilter(){
   const box=$("dpFilter"),G=Object.entries(grps).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es"));
   if(!G.length){box.hidden=true;box.innerHTML="";grpFilter="";return}
@@ -1417,25 +1433,34 @@ function renderDevPage(){
   const L=Object.entries(accounts).sort((a,b)=>String(a[1].nombre).localeCompare(String(b[1].nombre),"es")),q=norm($("dpSearch").value);
   if(!$("devPage").classList.contains("stagger"))$("dpNum").textContent=L.length;$("dpWord").textContent=L.length===1?t("accWord1"):t("accWordN");
   $("dpNew").setAttribute("aria-label",t("newAcc"));$("dpNew").title=t("newAcc");$("dpSearch").placeholder=t("search");
-  const F=L.filter(([,a])=>(!q||norm(a.nombre).includes(q))&&(!grpFilter||(grpFilter==="-"?!grpOf(a):a.grupo===grpFilter)));
+  const F=L.filter(([,a])=>!q||norm(a.nombre).includes(q));
   if(!L.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noAcc"))}</p>`;return}
-  if(!F.length){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noMatch"))}</p>`;return}
-  $("dpList").innerHTML=F.map(([id,a],i)=>{const n=accPdfs(a).length+accInfos(a).length,L2=a.lectura||{},rd=readingNow.has(id)||L2.estado==="pendiente",op=openAcc.has(id),gid=grpOf(a),gok=grpOk(gid);
+  if(!F.length&&(q||!Object.keys(grps).length)){$("dpList").innerHTML=`<p class="dp-empty">${esc(t("noMatch"))}</p>`;return}
+  const G=Object.entries(grps).sort((x,y)=>String(x[1].nombre).localeCompare(String(y[1].nombre),"es"));
+  if(!G.length){$("dpList").innerHTML=F.map(([id,a],i)=>accRow(id,a,i,"")).join("");return}
+  // un recuadro por grupo (una cuenta en varios grupos sale en cada uno) y otro para las cuentas sin grupo
+  const boxes=G.filter(([gid])=>!grpFilter||grpFilter===gid).map(([gid,g])=>{const M=F.filter(([,a])=>grpList(a).includes(gid));if(q&&!M.length)return"";
+    return `<section class="gbox" style="--gc:${esc(gcol(gid))}">${grpHead(gid,g)}<div class="gbox-l">${M.length?M.map(([id,a],i)=>accRow(id,a,i,gid)).join(""):`<p class="dp-empty">${esc(t("grpBoxEmpty"))}</p>`}</div></section>`});
+  if(!grpFilter||grpFilter==="-"){const M=F.filter(([,a])=>!grpsOf(a).length);
+    if(M.length||grpFilter==="-")boxes.push(`<section class="gbox none"><div class="gbox-h"><span class="gi" aria-hidden="true">—</span><div class="dv-gt"><b>${esc(t("grpNone"))}</b><small>${esc(grpN(M.length))}</small></div></div><div class="gbox-l">${M.length?M.map(([id,a],i)=>accRow(id,a,i,"-")).join(""):`<p class="dp-empty">${esc(t("noMatch"))}</p>`}</div></section>`)}
+  const h=boxes.join("");$("dpList").innerHTML=h||`<p class="dp-empty">${esc(t("noMatch"))}</p>`}
+function accRow(id,a,i,box){const n=accPdfs(a).length+accInfos(a).length,L2=a.lectura||{},rd=readingNow.has(id)||L2.estado==="pendiente",ok=box+"|"+id,op=openAcc.has(ok),gs=grpsOf(a),gok=gs.some(grpOk);
+    const ring=gs.length===1?gcol(gs[0]):`conic-gradient(${gs.map((g,j)=>`${gcol(g)} ${j/gs.length*100}% ${(j+1)/gs.length*100}%`).join(",")})`;
     const st=rd?["warn",t("reading")]:!a.pdf?(gok?["ok",t("metaGrp")]:["",t("metaNone")]):L2.estado==="ok"?["ok",t("metaOk").replace("{d}",fmtDM(new Date(L2.desde+"T00:00:00")))]:L2.estado==="error"?["err",t("metaErr")]:["",t("pdfN").replace("{n}",n)];
-    return `<article class="arow${op?" open":""}${gid?" has-g":""}" style="--i:${Math.min(i,10)}${gid?`;--gc:${esc(gcol(gid))}`:""}">
-    <button type="button" class="arow-h rp" data-tog="${esc(id)}" aria-expanded="${op}"><i class="av" aria-hidden="true">${esc(ini(a.nombre))}<i class="dot ${st[0]}"></i></i>
-      <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${gid?`<span class="gname">${esc(grps[gid].nombre)}</span> · `:""}${esc(st[1])}</small></span>${CHEV}</button>
+    return `<article class="arow${op?" open":""}${gs.length?" has-g":""}" style="--i:${Math.min(i,10)}${gs.length?`;--ring:${ring}`:""}">
+    <button type="button" class="arow-h rp" data-tog="${esc(ok)}" aria-expanded="${op}"><i class="av" aria-hidden="true">${esc(ini(a.nombre))}<i class="dot ${st[0]}"></i></i>
+      <span class="arow-t"><b>${esc(a.nombre||"—")}</b><small>${gs.length?gs.map(g=>`<span class="gname" style="color:${esc(gcol(g))}">${esc(grps[g].nombre)}</span>`).join(", ")+" · ":""}${esc(st[1])}</small></span>${CHEV}</button>
     <div class="arow-b"><div class="arow-in">
       <div class="kv"><span class="k">${esc(t("pass"))}</span><code>${shown.has(id)?esc(a.clave):"•".repeat(Math.max(6,Math.min(12,String(a.clave||"").length)))}</code>
         <button type="button" class="ib2 rp" data-eye="${esc(id)}" aria-label="${esc(t(shown.has(id)?"hide":"show"))}" aria-pressed="${shown.has(id)}">${EYE}</button>
         <button type="button" class="ib2 rp" data-copy="${esc(id)}" aria-label="${esc(t("copy"))}">${COPY}</button></div>
       ${(a.pdf&&!rd)||gok?`<div class="kv"><span class="k">${esc(t("diaryK"))}</span>${L2.estado==="ok"||gok?`<button type="button" class="tl" data-diary="${esc(id)}">${esc(t("seeDiary"))}</button>`:""}${a.pdf&&!rd?`<button type="button" class="tl" data-reread="${esc(id)}">${esc(t(L2.estado==="error"?"retry":"reread"))}</button>`:""}</div>`:""}
       <div class="arow-act"><button type="button" class="pill-b hi rp" data-up="${esc(id)}">${UPL}${esc(t("upShort"))}</button><button type="button" class="pill-b hi rp" data-info="${esc(id)}" title="${esc(t("upInfo"))}">${UPL}${esc(t("infoBtn"))}</button>${n?`<button type="button" class="pill-b rp" data-pdfs="${esc(id)}">${LISTI}${esc(t("pdfsShort").replace("{n}",n))}</button>`:""}<button type="button" class="pill-b rp" data-edit="${esc(id)}">${esc(t("editShort"))}</button></div>
-    </div></div></article>`}).join("")}
+    </div></div></article>`}
 $("dpSearch").oninput=renderDevPage;
 $("grpNew").onclick=()=>editGroup(null);
 $("dpFilter").addEventListener("click",e=>{const b=e.target.closest("[data-gf]");if(!b)return;grpFilter=b.dataset.gf;renderDevPage()});
-$("grpList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+$("dpList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
   if(b.dataset.gup){pickPdf({kind:"grp",id:b.dataset.gup},b);return}
   if(b.dataset.gpdfs){pdfView={kind:"grp",id:b.dataset.gpdfs};show("pdfs");return}
   if(b.dataset.greread){readPlanPdf(b.dataset.greread,null,"grp");return}
@@ -1463,23 +1488,24 @@ function genPass(){const S="ba be bi bo bu da de di do ka ke ki ko ku la le li l
   let s="";for(let i=0;i<3;i++)s+=S[r(S.length)];return s+String(10+r(90))}
 function editAccount(id){
   const a=id?accounts[id]:null,G=Object.entries(grps).sort((x,y)=>String(x[1].nombre).localeCompare(String(y[1].nombre),"es"));
-  const g0=a?grpOf(a):(grpFilter&&grpFilter!=="-"&&grps[grpFilter]?grpFilter:"");
+  const g0=a?grpsOf(a):(grpFilter&&grpFilter!=="-"&&grps[grpFilter]?[grpFilter]:[]);
   const card=sheet(a?t("editAcc"):t("newAcc"),`<label class="f">${esc(t("yourName"))}<input id="aN" maxlength="60" autocomplete="off" value="${esc(a?a.nombre:"")}"></label>
     <label class="f">${esc(t("pass"))}<span class="pwrow"><input id="aP" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(a?a.clave:genPass())}"><button type="button" class="ghost" id="aG">${esc(t("gen"))}</button></span></label>
-    ${G.length?`<label class="f">${esc(t("grpField"))}<select id="aGrp"><option value="">${esc(t("grpNone"))}</option>${G.map(([k,g])=>`<option value="${esc(k)}"${k===g0?" selected":""}>${esc(g.nombre)}</option>`).join("")}</select><span class="f-hint">${esc(t("grpHint"))}</span></label>`:""}`,
+    ${G.length?`<div class="f"><span>${esc(t("grpField"))}</span><div class="gpick" id="aGrp">${G.map(([k,g])=>`<button type="button" class="chip" data-g="${esc(k)}" style="--gc:${esc(gcol(k))}" aria-pressed="${g0.includes(k)}"><i></i>${esc(g.nombre)}</button>`).join("")}</div><span class="f-hint">${esc(t("grpHint"))}</span></div>`:""}`,
     async c=>{const n=c.querySelector("#aN").value.trim().replace(/\s+/g," "),p=c.querySelector("#aP").value.trim();
       if(!n){toast(t("needName"));c.querySelector("#aN").focus();return false}
       if(Object.entries(accounts).some(([k,x])=>k!==id&&norm(x.nombre)===norm(n))){toast(t("dupName"));return false}
       if(p.length<4){toast(t("shortPw"));return false}
       const nid=id||("c"+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
-      const gs=c.querySelector("#aGrp"),gv=gs?gs.value:"",d={...(a||{}),nombre:n.slice(0,60),clave:p.slice(0,40),alta:a&&a.alta||new Date().toISOString()};
-      if(gv&&grps[gv])d.grupo=gv;else delete d.grupo;
+      const gv=[...c.querySelectorAll("#aGrp [data-g][aria-pressed=true]")].map(x=>x.dataset.g).filter(g=>grps[g]),d={...(a||{}),nombre:n.slice(0,60),clave:p.slice(0,40),alta:a&&a.alta||new Date().toISOString()};
+      const keep=grpList(a).filter(g=>gv.includes(g)),gl=[...keep,...gv.filter(g=>!keep.includes(g))];delete d.grupo;if(gl.length)d.grupos=gl;else delete d.grupos;
       try{await db.doc("cuentas/"+nid).set(d);shown.add(nid);toast(t("accSaved"))}
       catch(e){toast(t("saveErr"));return false}},
     a?()=>{setTimeout(()=>sheet(t("delAcc"),`<p style="margin:0">${esc(t("delConfirm").replace("{n}",a.nombre))}</p>`,
       async()=>{try{await db.doc("cuentas/"+id).delete();shown.delete(id);if(assets)for(const f of [...accPdfs(a),...accInfos(a)])if(f&&f.id)try{await assets.delete(f.id)}catch(e){}toast(t("accDeleted"))}catch(e){toast(t("saveErr"))}},null,null,{save:t("delAcc")}),240)}:null,
     "#aN",{clear:t("delAcc")});
-  card.querySelector("#aG").onclick=()=>{card.querySelector("#aP").value=genPass()}}
+  card.querySelector("#aG").onclick=()=>{card.querySelector("#aP").value=genPass()};
+  card.querySelectorAll("#aGrp [data-g]").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",String(b.getAttribute("aria-pressed")!=="true")))}
 
 function editGroup(id){
   const g=id?grps[id]:null,used=new Set(Object.values(grps).map(x=>x.color));let col=g&&g.color||GCOL.find(c=>!used.has(c))||GCOL[Object.keys(grps).length%GCOL.length];
@@ -1493,7 +1519,7 @@ function editGroup(id){
       try{await db.doc("grupos/"+nid).set({...(g||{}),nombre:n.slice(0,40),color:col,alta:g&&g.alta||new Date().toISOString()});toast(t("grpSaved"))}
       catch(e){toast(t("saveErr"));return false}},
     g?()=>{setTimeout(()=>sheet(t("delGrp"),`<p style="margin:0">${esc(t("delGrpConfirm").replace("{n}",g.nombre))}</p>`,
-      async()=>{try{for(const[k,a]of Object.entries(accounts))if(a.grupo===id){const n={...a};delete n.grupo;await db.doc("cuentas/"+k).set(n)}
+      async()=>{try{for(const[k,a]of Object.entries(accounts))if(grpList(a).includes(id)){const n={...a},l=grpList(a).filter(x=>x!==id);delete n.grupo;if(l.length)n.grupos=l;else delete n.grupos;await db.doc("cuentas/"+k).set(n)}
           try{const W=await weeksOnce(id,"gplanes");for(const k of Object.keys(W))await db.doc(`gplanes/${id}/semanas/${k}`).delete()}catch(e){}
           await db.doc("grupos/"+id).delete();if(assets)for(const f of accPdfs(g))if(f&&f.id)try{await assets.delete(f.id)}catch(e){}
           if(grpFilter===id)grpFilter="";toast(t("grpDeleted"))}catch(e){toast(t("saveErr"))}},null,null,{save:t("delGrp")}),240)}:null,
