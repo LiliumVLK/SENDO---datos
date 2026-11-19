@@ -377,6 +377,8 @@ body.gdrag,body.gdrag *{-webkit-user-select:none;user-select:none}
 @keyframes fanOut{from{opacity:0;transform:translate(var(--fx,0),var(--fy,0)) scale(.35) rotate(-25deg)}60%{opacity:1}}
 @keyframes fanIn{to{opacity:0;transform:translate(var(--fx,0),var(--fy,0)) scale(.35) rotate(-25deg)}}
 .fpan .fo-i .act-l{transition:none}
+/* el botón crece con su texto (antes medía 62px y recortaba «Antropometría») */
+.fpan .act{width:auto;min-width:62px;padding-inline:5px}.fpan .act-l{white-space:nowrap}
 @media (max-width:420px){.fpan-row{margin-left:4px}}
 @media (prefers-reduced-motion:reduce){.fpan.fan .fo-i,.fpan.closing .fo-i{animation:none}.fpan,.fpan.closing{transition:none}}
 /* cuentas ocultas: recuadro semitransparente */
