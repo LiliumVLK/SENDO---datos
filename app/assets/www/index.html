@@ -217,7 +217,7 @@ body.pv #btnHome{display:none}
 .dv-mark.draw{animation:markIn 1.4s var(--ease) both}
 @keyframes markIn{from{clip-path:circle(0% at 48% 6%);opacity:.3}to{clip-path:circle(150% at 48% 6%);opacity:1}}
 .dv-tt{flex:1;min-width:0}
-.dv-kick{margin:0;font:500 .64rem var(--round);letter-spacing:.16em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;color:var(--muted)}
+.dv-kick{margin:0;font:500 .64rem var(--round);letter-spacing:.16em;white-space:nowrap;overflow:visible;position:relative;z-index:1;text-transform:uppercase;color:var(--muted)}
 .dv-tt h1{margin:4px 0 0;font:700 2.1rem/1 var(--display);display:flex;align-items:baseline;gap:8px}
 #dpNum{font-variant-numeric:tabular-nums}
 #dpWord{font-weight:600;font-size:1.25rem;color:var(--muted)}
