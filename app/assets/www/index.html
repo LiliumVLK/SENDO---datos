@@ -986,12 +986,19 @@ function intro(){
     if(document.body.classList.contains("inside")||cv.offsetParent===null){raf=0;return}
     const e=(now-t0)/1000,g=Math.min(1,Math.max(0,(e-.5)/2.6));fr++;
     if(e<3.3)gG.setAttribute("r",Math.max(.01,640*(1-(1-g)**3)).toFixed(1));
-    if(e>1.3&&!cv.classList.contains("ready"))cv.classList.add("ready");
+    if(e>1.3&&!cv.classList.contains("ready")){cv.classList.add("ready");warmInside()}
     const c=e-3.4;if(c>0&&fr%2===0){const p=(c%8)/3.6,v=p<1?Math.max(.01,580*(1-(1-p)**2)).toFixed(0):"0.01";if(v!==sap){sap=v;sG.setAttribute("r",v)}}
     if(Math.abs(tx-px)>.004||Math.abs(ty-py)>.004){px+=(tx-px)*.08;py+=(ty-py)*.08;
       lT.setAttribute("transform",`translate(${(px*7).toFixed(1)} ${(py*4).toFixed(1)})`);lM.setAttribute("transform",`translate(${(-px*6).toFixed(1)} ${(-py*4).toFixed(1)})`)}
     raf=requestAnimationFrame(step)};
   raf=requestAnimationFrame(step)}
+/* Preparación en ratos libres en la portada: la primera vez que se abría la app, las letras del diario
+   (otros pesos) se descargaban justo durante la animación y la página se recolocaba a mitad. */
+function warmInside(){if(warmInside.done)return;warmInside.done=1;
+  const idle=f=>(window.requestIdleCallback?requestIdleCallback(f,{timeout:1500}):setTimeout(f,300));
+  idle(()=>{try{if(document.fonts&&document.fonts.load)['500 1em "Barlow"','600 1em "Barlow"','400 1em "Barlow"','600 1em "Barlow Semi Condensed"','700 1em "Barlow Semi Condensed"','500 1em "Barlow Semi Condensed"'].forEach(f=>document.fonts.load(f).catch(()=>{}))}catch(e){}});
+  idle(()=>{try{const lr=$("logo").getBoundingClientRect();if(lr.width)SV.logoPts(lr,innerWidth*innerHeight>500000?560:420)}catch(e){}});
+  idle(()=>{try{const c=document.createElement("canvas");c.width=c.height=8;const g=c.getContext("2d");g.beginPath();g.arc(4,4,2,0,6.283);g.fill();g.createRadialGradient(4,4,0,4,4,4)}catch(e){}})}
 /* si la portada vuelve a verse (por ejemplo al salir de SENDO Dev), el bucle sigue */
 function resumeIntro(){if(!raf&&!RM.matches&&$("cover").offsetParent!==null&&!document.body.classList.contains("inside"))intro()}
 $("cover").addEventListener("pointermove",ev=>{const r=$("cover").getBoundingClientRect();tx=(ev.clientX-r.left)/r.width*2-1;ty=(ev.clientY-r.top)/r.height*2-1});
@@ -1208,7 +1215,10 @@ const SV={
     for(let i=0;i<n;i++){let d=Math.atan2(ty-y,tx-x)-a;d=Math.atan2(Math.sin(d),Math.cos(d));a+=d*.3+SV.R(-.34,.34);x+=Math.cos(a)*st;y+=Math.sin(a)*st;pts.push([x,y])}return pts},
   twig(x,y,a,len){const pts=[[x,y]],n=4;for(let i=0;i<n;i++){a+=SV.R(-.35,.35);x+=Math.cos(a)*len/n;y+=Math.sin(a)*len/n;pts.push([x,y])}return pts},
   /* puntos del logotipo tal y como se ve: se dibujan sus trazos reales y se muestrean los píxeles */
-  logoPts(lr,N){const s=lr.width/823,W=Math.max(1,Math.ceil(lr.width)),H=Math.max(1,Math.ceil(lr.height)),oc=document.createElement("canvas");oc.width=W;oc.height=H;const o=oc.getContext("2d");
+  logoPts(lr,N){const key=[lr.width,lr.height,N].map(v=>Math.round(v)).join(),L=lr.left,T=lr.top;
+    if(!SV.lp||SV.lp.key!==key)SV.lp={key,pts:SV.logoPts0({left:0,top:0,width:lr.width,height:lr.height},N)};
+    return SV.lp.pts.map(q=>[q[0]+L,q[1]+T])},
+  logoPts0(lr,N){const s=lr.width/823,W=Math.max(1,Math.ceil(lr.width)),H=Math.max(1,Math.ceil(lr.height)),oc=document.createElement("canvas");oc.width=W;oc.height=H;const o=oc.getContext("2d");
     const off=g=>{try{const t=g&&g.transform.baseVal.consolidate();return t?[t.matrix.e,t.matrix.f]:[0,0]}catch(e){return[0,0]}};
     const draw=(ps,g)=>{const[e,f]=off(g);o.setTransform(s,0,0,s,(30+e)*s,(30+f)*s);ps.forEach(p=>o.fill(new Path2D(p)))};
     draw(LOGO_T,$("lgT"));draw([LOGO_M],$("lgM"));
@@ -1236,11 +1246,11 @@ const SV={
     const fxc=document.createElement("canvas");fxc.className="saviafx";fxc.width=W;fxc.height=H;document.body.append(fxc);const fx=fxc.getContext("2d",{alpha:true,desynchronized:true});
     const LP=SV.logoPts(lr,BIG?560:420);logo.style.willChange="transform";
     // el logotipo coge aire (se encoge y brilla) antes de estallar
-    const BOOM=380;let pre=null;try{pre=logo.animate([{transform:"scale(1)"},{transform:"scale(.92)",offset:.6},{transform:"scale(1.07)"}],{duration:BOOM,easing:"cubic-bezier(.5,0,.8,.4)",fill:"forwards"})}catch(e){}
+    const BOOM=380;let pre=null;const pre0=()=>{try{pre=logo.animate([{transform:"scale(1)"},{transform:"scale(.92)",offset:.6},{transform:"scale(1.07)"}],{duration:BOOM,easing:"cubic-bezier(.5,0,.8,.4)",fill:"forwards"})}catch(e){}};
     const TAU=240,P=LP.map(([x,y])=>{let a=Math.atan2(y-oy,x-ox)+SV.R(-.55,.55);const sp=SV.R(.3,1.35);
       return{sx:x,sy:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-.12,r:SV.R(.8,1.9),ct:BOOM+SV.R(120,650),tl:0}});
     const ex=(p,t)=>{const d=Math.max(0,t-BOOM),k=TAU*(1-Math.exp(-d/TAU))+d*.06;return[p.sx+p.vx*k,p.sy+p.vy*k+d*d*.00004]};
-    let U=null,veins=[],END=1e9,dimmed=0;const t0=performance.now();
+    let U=null,veins=[],END=1e9,dimmed=0,t0=0;
     // raíces de fondo: salen de donde estaba el logotipo hacia los bordes, muy finas
     for(let i=0;i<12;i++){const a=i/12*Math.PI*2+SV.R(0,.4),L=Math.hypot(W,H)*.6;veins.push({pts:SV.vein(ox,oy,ox+Math.cos(a)*L,oy+Math.sin(a)*L),w0:.9,w1:.25,t0:BOOM+SV.R(0,220),dur:SV.R(1100,1600),done:0})}
     const build=()=>{
@@ -1261,7 +1271,7 @@ const SV={
     document.body.classList.add("sapping","svkeep");(o.show||(()=>showInside(false)))();build();ACC=getComputedStyle(document.body).getPropertyValue("--accent").trim()||ACC;
     const unkeep=()=>{document.body.classList.remove("svkeep");["position","top","left","width","height","minHeight","margin","zIndex"].forEach(k=>cs[k]="")};
     const part=(pts,f)=>{const N=pts.length-1,e=f*N;fx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<=Math.ceil(e);i++){const q=i<=e?pts[i]:SV.at({pts},e);fx.lineTo(q[0],q[1])}};
-    const frame=now=>{const t=now-t0;
+    const frame=now=>{if(!t0){t0=now;pre0()}const t=now-t0;
       if(!frame.laid&&t>=560){frame.laid=1;unkeep()}
       if(t>=BOOM&&!frame.boom){frame.boom=1;logo.style.opacity="0"}
       fx.clearRect(0,0,W,H);
