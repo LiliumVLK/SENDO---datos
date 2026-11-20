@@ -1257,7 +1257,7 @@ const SV={
       U=(o.units||SV.units)(H);const n=U.length;if(!n){END=BOOM+900;return}
       const D=Math.min(120,1000/Math.max(1,n-1));
       U.forEach((u,i)=>{u.tl=1300+i*D;u.L=u.k==="btn"?8:u.k==="tabs"?13:15;u.bend=SV.R(-4,4);u.sp=u.k!=="card";
-        const st=u.el.style;st.transformOrigin=`${u.x-u.b.left}px ${u.y-u.b.top}px`;st.opacity="0";st.willChange="transform,opacity"});
+        const st=u.el.style;st.transformOrigin=`${u.x-u.b.left}px ${u.y-u.b.top}px`;st.opacity=".004";st.willChange="transform,opacity"});
       document.body.classList.remove("sapping");
       // cada gota elige su pieza: unas cuantas forman la semilla, el resto se siembra por la pieza
       const area=U.map(u=>Math.max(1,(Math.min(H,u.b.bottom)-Math.max(0,u.b.top))*u.b.width*(u.k==="card"?.35:1))),tot=area.reduce((a,b)=>a+b,0);
@@ -1271,7 +1271,7 @@ const SV={
     document.body.classList.add("sapping","svkeep");(o.show||(()=>showInside(false)))();build();ACC=getComputedStyle(document.body).getPropertyValue("--accent").trim()||ACC;
     const unkeep=()=>{document.body.classList.remove("svkeep");["position","top","left","width","height","minHeight","margin","zIndex"].forEach(k=>cs[k]="")};
     const part=(pts,f)=>{const N=pts.length-1,e=f*N;fx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<=Math.ceil(e);i++){const q=i<=e?pts[i]:SV.at({pts},e);fx.lineTo(q[0],q[1])}};
-    const frame=now=>{if(!t0){t0=now;pre0()}const t=now-t0;
+    let warm=0;const frame=now=>{if(warm<2){warm++;requestAnimationFrame(frame);return}if(!t0){t0=now;pre0()}const t=now-t0;
       if(!frame.laid&&t>=560){frame.laid=1;unkeep()}
       if(t>=BOOM&&!frame.boom){frame.boom=1;logo.style.opacity="0"}
       fx.clearRect(0,0,W,H);
@@ -1287,7 +1287,7 @@ const SV={
         B.forEach((b,i)=>{if(!b.length)return;fx.fillStyle=i<3?INK:ACC;fx.globalAlpha=[.35,.65,.95][i%3];fx.beginPath();for(let j=0;j<b.length;j+=3){fx.moveTo(b[j]+b[j+2],b[j+1]);fx.arc(b[j],b[j+1],b[j+2],0,6.283)}fx.fill()})}
       // germinación: la pieza crece desde la semilla
       if(U)for(const u of U){const d=t-u.tl;if(d<0)continue;
-        if(!u.go){u.go=1;const s0=u.k==="card"?.94:u.k==="row"?.82:.6;try{const an=u.el.animate([{opacity:0,transform:`scale(${s0})`},{opacity:1,transform:"scale(1)"}],{duration:u.k==="card"?700:560,easing:"cubic-bezier(.2,.8,.25,1.08)",fill:"forwards"});
+        if(!u.go){u.go=1;const s0=u.k==="card"?.94:u.k==="row"?.82:.6;try{const an=u.el.animate([{opacity:.004,transform:`scale(${s0})`},{opacity:1,transform:"scale(1)"}],{duration:u.k==="card"?700:560,easing:"cubic-bezier(.2,.8,.25,1.08)",fill:"forwards"});
           an.onfinish=()=>{u.el.style.opacity="";an.cancel()};u.an=an}catch(e){u.el.style.opacity=""}}
       }
       fx.globalAlpha=1;SV.grow(bg,veins,t,"rgba(0,0,0,.26)");
