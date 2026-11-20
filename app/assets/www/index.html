@@ -485,10 +485,11 @@ html.jvt::view-transition-new(root){animation:jSweep .95s cubic-bezier(.45,0,.25
 html.jvt::view-transition-group(*){animation-duration:.01s}
 html.jvt::view-transition-old(*),html.jvt::view-transition-new(*){mix-blend-mode:normal;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .jfb{background-color:var(--surface)!important}
-@keyframes jOutA{to{transform:perspective(700px) translateY(-6px) rotateX(90deg)}}
-@keyframes jInA{0%{transform:perspective(700px) translateY(-6px) rotateX(-90deg)}68%{transform:perspective(700px) translateY(3px) rotateX(9deg)}100%{transform:perspective(700px) translateY(0) rotateX(0)}}
-@keyframes jOutB{to{transform:perspective(700px) translateY(6px) rotateX(-90deg)}}
-@keyframes jInB{0%{transform:perspective(700px) translateY(6px) rotateX(90deg)}68%{transform:perspective(700px) translateY(-3px) rotateX(-9deg)}100%{transform:perspective(700px) translateY(0) rotateX(0)}}
+/* cada cara se apaga justo antes de quedar de canto: si no, de canto se veía como una raya en medio del recuadro */
+@keyframes jOutA{75%{opacity:1}to{transform:perspective(700px) translateY(-6px) rotateX(88deg);opacity:0}}
+@keyframes jInA{0%{transform:perspective(700px) translateY(-6px) rotateX(-88deg);opacity:0}22%{opacity:1}68%{transform:perspective(700px) translateY(3px) rotateX(9deg)}100%{transform:perspective(700px) translateY(0) rotateX(0);opacity:1}}
+@keyframes jOutB{75%{opacity:1}to{transform:perspective(700px) translateY(6px) rotateX(-88deg);opacity:0}}
+@keyframes jInB{0%{transform:perspective(700px) translateY(6px) rotateX(88deg);opacity:0}22%{opacity:1}68%{transform:perspective(700px) translateY(-3px) rotateX(-9deg)}100%{transform:perspective(700px) translateY(0) rotateX(0);opacity:1}}
 .tswipe{position:fixed;inset:-60vh 0 0 0;z-index:90;pointer-events:none;background:linear-gradient(to bottom,var(--to) 0,var(--to) 62%,transparent 100%);transform:translateY(-100%);animation:tsDown .7s cubic-bezier(.55,0,.2,1) forwards;transition:opacity .5s}
 .tswipe.out{opacity:0}
 @keyframes tsDown{to{transform:translateY(0)}}
