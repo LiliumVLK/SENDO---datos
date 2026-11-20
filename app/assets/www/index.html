@@ -485,6 +485,7 @@ html.jvt::view-transition-new(root){animation:jSweep .95s cubic-bezier(.45,0,.25
 html.jvt::view-transition-group(*){animation-duration:.01s}
 html.jvt::view-transition-old(*),html.jvt::view-transition-new(*){mix-blend-mode:normal;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .jfb{background-color:var(--surface)!important}
+html.jvt *::after,html.jvt *::before{animation-play-state:paused}html.jvt .dv-pub::after,html.jvt .col i::after,html.jvt .pv-dot::after{opacity:0;animation:none}
 /* cada cara se apaga justo antes de quedar de canto: si no, de canto se veía como una raya en medio del recuadro */
 @keyframes jOutA{75%{opacity:1}to{transform:perspective(700px) translateY(-6px) rotateX(88deg);opacity:0}}
 @keyframes jInA{0%{transform:perspective(700px) translateY(-6px) rotateX(-88deg);opacity:0}22%{opacity:1}68%{transform:perspective(700px) translateY(3px) rotateX(9deg)}100%{transform:perspective(700px) translateY(0) rotateX(0);opacity:1}}
@@ -1355,7 +1356,13 @@ let swiping=false;
 /* bloques a la vista que se dan la vuelta: los de la lista y cualquier recuadro redondeado con fondo propio */
 const JSEL=".wkrow,.lg,.arow,.gbox,.mealc,.ncard,.dcard,.pf-item";
 function jacobBlocks(){const H=innerHeight,W=innerWidth,C=new Set();
-  const vis=(e,r)=>r.bottom>0&&r.top<H&&r.right>0&&r.left<W&&r.width>=18&&r.height>=18&&r.height<H*.75&&e.offsetParent!==null;
+  /* fuera también lo que está escondido dentro de algo cerrado (las cuentas de un grupo plegado): si no, se pintaba encima como un fantasma */
+  const clip=(e,r)=>{for(let a=e.parentElement;a&&a!==document.body;a=a.parentElement){const s=getComputedStyle(a);
+      if(s.overflowX==="visible"&&s.overflowY==="visible"&&s.display!=="contents")continue;const q=a.getBoundingClientRect();
+      if(s.overflowX==="visible"&&s.overflowY==="visible")continue;
+      const h=Math.min(r.bottom,q.bottom)-Math.max(r.top,q.top),w=Math.min(r.right,q.right)-Math.max(r.left,q.left);
+      if(h<r.height*.9||w<r.width*.9)return true}return false};
+  const vis=(e,r)=>r.bottom>0&&r.top<H&&r.right>0&&r.left<W&&r.width>=18&&r.height>=18&&r.height<H*.75&&e.offsetParent!==null&&!clip(e,r)&&!e.closest("[hidden],[inert],[aria-hidden=true]");
   document.querySelectorAll(JSEL).forEach(e=>{if(vis(e,e.getBoundingClientRect()))C.add(e)});
   /* todos los recuadros a la vista: esquinas redondeadas y fondo o borde propios */
   const root=document.querySelector(".dpage:not([hidden])")||document.body;
