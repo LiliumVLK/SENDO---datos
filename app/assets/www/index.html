@@ -1355,15 +1355,17 @@ let swiping=false;
 /* bloques a la vista que se dan la vuelta: los de la lista y cualquier recuadro redondeado con fondo propio */
 const JSEL=".wkrow,.lg,.arow,.gbox,.mealc,.ncard,.dcard,.pf-item";
 function jacobBlocks(){const H=innerHeight,W=innerWidth,C=new Set();
-  const ok=e=>{const r=e.getBoundingClientRect();return r.bottom>0&&r.top<H&&r.width>W*.45&&r.height>=26&&r.height<H*.6&&e.offsetParent!==null};
-  document.querySelectorAll(JSEL).forEach(e=>{if(ok(e))C.add(e)});
+  const vis=(e,r)=>r.bottom>0&&r.top<H&&r.right>0&&r.left<W&&r.width>=18&&r.height>=18&&r.height<H*.75&&e.offsetParent!==null;
+  document.querySelectorAll(JSEL).forEach(e=>{if(vis(e,e.getBoundingClientRect()))C.add(e)});
+  /* todos los recuadros a la vista: esquinas redondeadas y fondo o borde propios */
   const root=document.querySelector(".dpage:not([hidden])")||document.body;
-  for(const e of root.querySelectorAll("div,section,article,li,button,a")){if(C.size>60)break;if(!ok(e))continue;
-    const s=getComputedStyle(e);if(s.position==="fixed"||s.position==="sticky"||parseFloat(s.borderTopLeftRadius)<8)continue;
-    if(s.backgroundColor==="rgba(0, 0, 0, 0)"&&s.backgroundImage==="none")continue;C.add(e)}
-  let L=[...C];L=L.filter(e=>!L.some(o=>o!==e&&e.contains(o)));
-  L.sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top);L=L.slice(0,36);
-  L.forEach(e=>{if(getComputedStyle(e).backgroundColor==="rgba(0, 0, 0, 0)")e.classList.add("jfb")});return L}
+  for(const e of root.querySelectorAll("div,section,article,li,button,a,span,label,nav>*")){if(C.size>=90)break;if(C.has(e))continue;
+    if(e.closest(".tabs,.cover-corner,.tswipe"))continue;const r=e.getBoundingClientRect();if(!vis(e,r))continue;
+    const s=getComputedStyle(e);if(s.position==="fixed"||s.position==="sticky"||s.position==="absolute"||s.visibility==="hidden"||+s.opacity<.2||parseFloat(s.borderTopLeftRadius)<6)continue;
+    const fondo=!(s.backgroundColor==="rgba(0, 0, 0, 0)"&&s.backgroundImage==="none"),borde=parseFloat(s.borderTopWidth)>0&&s.borderTopStyle!=="none";
+    if(fondo||borde)C.add(e)}
+  const L=[...C].sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top);
+  L.forEach(e=>{if(e.matches(JSEL)&&getComputedStyle(e).backgroundColor==="rgba(0, 0, 0, 0)")e.classList.add("jfb")});return L}
 $("btnTheme").onclick=()=>{
   if(swiping)return;
   const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches,next=dark?"light":"dark";
@@ -1372,7 +1374,10 @@ $("btnTheme").onclick=()=>{
   if(document.startViewTransition){swiping=true;
     let s=$("vtMask");if(!s){s=document.createElement("style");s.id="vtMask";document.head.append(s)}
     const B=jacobBlocks(),H=innerHeight,css=[];
-    B.forEach((e,i)=>{const n="jb"+i,y=Math.min(1,Math.max(0,(e.getBoundingClientRect().top+30)/H)),dl=(.06+y*.66).toFixed(3),k=i%2?"B":"A";
+    /* los recuadros de dentro de otro giran con él y hacia el mismo lado; los demás alternan como la escalera */
+    const dir=new Map();let alt=0;
+    B.forEach((e,i)=>{const n="jb"+i,par=B.slice(0,i).reverse().find(o=>o.contains(e)),k=par?dir.get(par):(alt++%2?"B":"A");dir.set(e,k);
+      const ry=(par||e).getBoundingClientRect().top,y=Math.min(1,Math.max(0,(ry+30)/H)),dl=(.06+y*.66).toFixed(3);
       e.style.viewTransitionName=n;
       css.push(`html.jvt::view-transition-old(${n}){animation:jOut${k} .2s cubic-bezier(.55,0,.9,.45) ${dl}s both}html.jvt::view-transition-new(${n}){animation:jIn${k} .36s cubic-bezier(.2,.75,.3,1) ${(+dl+.2).toFixed(3)}s both}`)});
     s.textContent=css.join("");r.classList.add("jvt");
