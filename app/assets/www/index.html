@@ -342,6 +342,8 @@ body.gdrag,body.gdrag *{-webkit-user-select:none;user-select:none}
 /* plan sin publicar */
 .draftb.unpub{align-self:flex-start;margin:6px 0 1px;font-style:normal}
 .dv-head{flex-wrap:wrap}
+/* GitHub y + a la altura de «N cuentas», no del bloque entero */
+.dv-head .dv-add{top:15px}
 .dv-pub{order:9;flex:1 0 100%;display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;margin-top:4px;padding:0 18px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink,#fff);font:700 .92rem var(--body);cursor:pointer;position:relative;animation:pubIn .55s var(--grow) both}
 .dv-pub::after{content:"";position:absolute;inset:0;border-radius:inherit;border:2px solid var(--accent);pointer-events:none;animation:pubRing 2.6s var(--ease) .6s infinite}
 @keyframes pubRing{0%{transform:scale(1);opacity:.6}60%,100%{transform:scale(1.06,1.35);opacity:0}}
