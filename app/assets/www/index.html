@@ -489,6 +489,7 @@ html.jvt::view-transition-old(*),html.jvt::view-transition-new(*){mix-blend-mode
 .jfb{background-color:var(--surface)!important}
 html.jvt *::after,html.jvt *::before{animation-play-state:paused}html.jvt .dv-pub::after,html.jvt .col i::after,html.jvt .pv-dot::after{opacity:0;animation:none}
 /* cada cara se apaga justo antes de quedar de canto: si no, de canto se veía como una raya en medio del recuadro */
+@keyframes jcOut{to{opacity:0}}@keyframes jcIn{from{opacity:0}}
 @keyframes jOutA{75%{opacity:1}to{transform:perspective(700px) translateY(-6px) rotateX(88deg);opacity:0}}
 @keyframes jInA{0%{transform:perspective(700px) translateY(-6px) rotateX(-88deg);opacity:0}22%{opacity:1}68%{transform:perspective(700px) translateY(3px) rotateX(9deg)}100%{transform:perspective(700px) translateY(0) rotateX(0);opacity:1}}
 @keyframes jOutB{75%{opacity:1}to{transform:perspective(700px) translateY(6px) rotateX(-88deg);opacity:0}}
@@ -1406,8 +1407,12 @@ $("btnTheme").onclick=()=>{
       const ry=(par||e).getBoundingClientRect().top,y=Math.min(1,Math.max(0,(ry+30)/H)),dl=(.06+y*.66).toFixed(3);
       e.style.viewTransitionName=n;
       css.push(`html.jvt::view-transition-old(${n}){animation:jOut${k} .2s cubic-bezier(.55,0,.9,.45) ${dl}s both}html.jvt::view-transition-new(${n}){animation:jIn${k} .36s cubic-bezier(.2,.75,.3,1) ${(+dl+.2).toFixed(3)}s both}`)});
+    /* el menú de arriba y los botones fijos van en su propia capa, por encima de los bloques que giran
+       (si no, los días que pasaban por debajo del menú se pintaban delante de él) */
+    const CH=[...document.querySelectorAll(".tabs,.corner,#dvTabs")].filter(e=>e.offsetParent!==null||getComputedStyle(e).position==="fixed").filter(e=>{const q=e.getBoundingClientRect();return q.height>0&&q.bottom>0&&q.top<H});
+    CH.forEach((e,i)=>{const n="jc"+i;e.style.viewTransitionName=n;css.push(`html.jvt::view-transition-old(${n}){animation:none;opacity:1}html.jvt::view-transition-new(${n}){animation:jcIn .4s ease both}`)});
     s.textContent=css.join("");r.classList.add("jvt");
-    const done=()=>{swiping=false;r.classList.remove("jvt");s.textContent="";B.forEach(e=>{e.style.viewTransitionName="";e.classList.remove("jfb")})};
+    const done=()=>{swiping=false;r.classList.remove("jvt");s.textContent="";CH.forEach(e=>{e.style.viewTransitionName=""});B.forEach(e=>{e.style.viewTransitionName="";e.classList.remove("jfb")})};
     try{document.startViewTransition(apply).finished.finally(done)}catch(e){apply();done()}
     return}
   swiping=true;const ov=document.createElement("div");ov.className="tswipe";
