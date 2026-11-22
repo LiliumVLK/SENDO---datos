@@ -961,7 +961,9 @@ const NUT=[
  {k:"naranja",c:"#ea7a1e",n:["Naranja","Laranja"],f:["Más hidratos: unos 300 g de patata o boniato, o 70 g de arroz o pasta, con su proteína y una fruta.","Karbohidrato gehiago: 300 g patata edo batata inguru, edo 70 g arroz edo pasta, proteinarekin eta fruta batekin."],
   w:["Días de entreno, para recuperar o llegar con energía al día siguiente.","Entrenamendu egunak, berreskuratzeko edo hurrengo egunera indarrez iristeko."]},
  {k:"rojo",c:"#d93a2b",n:["Rojo","Gorria"],f:["Mucho hidrato fácil de digerir: unos 150 g de arroz o pasta blancos, poca fibra y un plátano.","Erraz digeritzeko karbohidrato asko: 150 g arroz edo pasta zuri inguru, zuntz gutxi eta platano bat."],
-  w:["La víspera de una carrera o de un entreno muy duro.","Lasterketa edo entrenamendu oso gogor baten bezperan."]}];
+  w:["La víspera de una carrera o de un entreno muy duro.","Lasterketa edo entrenamendu oso gogor baten bezperan."]},
+ {k:"lila",c:"#a65fcf",n:["Lila","Morea"],f:["Elige entre las opciones lilas que te ha dado Andoni.","Aukeratu Andonik eman dizkizun aukera moreen artean."],
+  w:["Los días que lo marque tu plan.","Zure planak adierazten dituen egunetan."]}];
 const NUTK=Object.fromEntries(NUT.map(n=>[n.k,n]));
 const MEALS=["desayuno","mediamanana","comida","merienda","cena"];
 const MEAL_IC={desayuno:"☕",mediamanana:"🍎",comida:"🍽️",merienda:"🥪",cena:"🌙",intra:"⚡",post:"🥤"};
@@ -1060,10 +1062,10 @@ function renderWeek(){
     if(open.has(k))wk.append(food(day,key,i))}
   box.append(wk);
 }
-const OPT_RE=/^\s*(?:(\d+)\s*)?opci(?:o|ó)n(?:es)?\s*(?:de\s+(?:color\s+|men(?:u|ú)\s+)?)?(gris(?:es)?|verdes?|naranjas?|roj[oa]s?)\b[\s.,;:–-]*/i;
-function optOf(v,col){const m=String(v||"").match(OPT_RE);if(!m)return null;const w=m[2].toLowerCase(),k=w.startsWith("gris")?"gris":w.startsWith("verde")?"verde":w.startsWith("naranja")?"naranja":"rojo";
+const OPT_RE=/^\s*(?:(\d+)\s*)?opci(?:o|ó)n(?:es)?\s*(?:de\s+(?:color\s+|men(?:u|ú)\s+)?)?(gris(?:es)?|verdes?|naranjas?|roj[oa]s?|lilas?|morad[oa]s?)\b[\s.,;:–-]*/i;
+function optOf(v,col){const m=String(v||"").match(OPT_RE);if(!m)return null;const w=m[2].toLowerCase(),k=w.startsWith("gris")?"gris":w.startsWith("verde")?"verde":w.startsWith("naranja")?"naranja":(w.startsWith("lila")||w.startsWith("morad"))?"lila":"rojo";
   return{n:m[1]?+m[1]:0,c:NUTK[k],rest:String(v).slice(m[0].length).trim()}}
-const OPT_N={gris:["grises","Grisa"],verde:["verdes","Berdea"],naranja:["naranjas","Laranja"],rojo:["rojas","Gorria"]};
+const OPT_N={gris:["grises","Grisa"],verde:["verdes","Berdea"],naranja:["naranjas","Laranja"],rojo:["rojas","Gorria"],lila:["lilas","Morea"]};
 const optName=(c,n)=>LANG==="eu"?`${OPT_N[c.k][1]} aukera${n===1?"":"k"}`:(n===1?`Opción ${c.n[0].toLowerCase()}`:`Opciones ${OPT_N[c.k][0]}`);
 const optHead=o=>o.n?`<b>${o.n}</b><i aria-hidden="true"></i>`:"";
 const MTN=`<svg class="wkmtn" viewBox="0 0 400 90" preserveAspectRatio="none" aria-hidden="true"><path class="m3" d="M0 90V52L60 30l60 20 70-30 70 28 70-22 70 26v38Z"/><path class="m2" d="M0 90V62l80-22 70 20 80-26 70 24 100 4v28Z"/><path class="m1" d="M0 90V74l90-18 80 16 90-22 80 20 60 4v16Z"/></svg>`;
@@ -1483,7 +1485,7 @@ function planPrompt(text,mon,today,img){return `Eres el asistente de SENDO, un d
 
 Cómo leer el PDF:
 - Los planes suelen venir en tablas: una columna por día (lunes a domingo) y una fila por comida o por apartado. Lee cada columna de arriba abajo y no mezcles columnas: cada celda va SOLO al día de su columna. ${img?"Fíate de las imágenes para saber a qué columna pertenece cada celda; el texto extraído puede venir desordenado.":"El texto extraído puede venir desordenado: ten mucho cuidado con a qué día pertenece cada celda."}
-- El color de fondo de cada celda de comida es el color del menú: verde, naranja, rojo o gris (gris claro). Si la celda tiene color pero no tiene texto, esa comida es «Opciones verdes», «Opciones naranjas», «Opciones rojas» u «Opciones grises» según su color. Si una celda tiene «-» o está vacía sin color, esa comida no existe ese día.
+- El color de fondo de cada celda de comida es el color del menú: verde, naranja, rojo, gris (gris claro) o lila (lila o morado claro). Si la celda tiene color pero no tiene texto, esa comida es «Opciones verdes», «Opciones naranjas», «Opciones rojas», «Opciones grises» u «Opciones lilas» según su color. Una celda de color sin texto NO es una comida vacía: inclúyela siempre. Si una celda tiene «-» o está vacía sin color, esa comida no existe ese día.
 - Si hay una tabla aparte de entrenamiento, úsala para el entreno de cada día; si hay una tabla de lo que se toma durante el entreno (intra-entreno) por minutos, resúmela en "intra" con una línea por tiempo (por ejemplo «20': trago de isotónico») y una línea final con los gramos de hidratos si aparecen.
 - Si las filas de durante y post-entreno están antes de la comida, el entreno es por la mañana ("when":"am"); si están después de la merienda, por la tarde ("pm").
 - Ignora la información general (presentación, recomendaciones, tablas de equivalencias, grupos de fruta): solo interesa lo de cada día.
@@ -1505,7 +1507,7 @@ Campos de cada día:
 - detail: solo las indicaciones extra del entreno (series, ritmos, distancias…). No repitas el título, la zona ni lo de intra/post. Si no hay nada más, omítelo.
 - zone: la intensidad o zona tal como aparece (por ejemplo «Suave (Z1-Z2)»). min: minutos totales solo si el PDF los dice.
 - desayuno, mediamanana, comida, merienda, cena: el plato tal como aparece, o «Opciones <color>» si solo hay color. intra y post: lo que se toma durante y después del entreno.
-- desayunoCol, mediamananaCol, comidaCol, meriendaCol, cenaCol: el color de esa comida (gris, verde, naranja o rojo) si la celda tiene color.
+- desayunoCol, mediamananaCol, comidaCol, meriendaCol, cenaCol: el color de esa comida (gris, verde, naranja, rojo o lila) si la celda tiene color.
 - Omite los campos que no aparezcan.
 ${text?`
 Texto extraído del PDF:
