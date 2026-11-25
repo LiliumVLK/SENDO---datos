@@ -19,6 +19,7 @@ public class MainActivity extends Activity {
         web.setBackgroundColor(Color.BLACK);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
+        s.setSupportZoom(false); s.setBuiltInZoomControls(false); s.setDisplayZoomControls(false);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
