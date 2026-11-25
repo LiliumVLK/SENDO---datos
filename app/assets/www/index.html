@@ -1773,7 +1773,7 @@ function loginFly(go,name){
       const s=(1+(S-1)*k)*(1-.14*Math.sin(pre*Math.PI)*(1-seg(p,.12,.3))),sx=s*(1+amp*Math.sin(q*24)),sy=s*(1-amp*Math.sin(q*24+.9));
       K.push({offset:i/N,transform:`translate(${((c1x-c0x)*k).toFixed(2)}px,${((c1y-c0y)*k).toFixed(2)}px) scale(${sx.toFixed(4)},${sy.toFixed(4)})`})}
     box.animate(K,{duration:D*1000,easing:"linear",fill:"forwards"});
-    const hi=document.createElement("div");hi.className="lghi";hi.textContent=(LANG==="eu"?"Kaixo, ":"Hola, ")+String(name||"").trim();
+    const hi=document.createElement("div");hi.className="lghi";hi.textContent=(LANG==="eu"?"Kaixo, ":"Hola, ")+(String(name||"").trim().split(/\s+/)[0]||"");  // solo el nombre, sin apellidos
     hi.style.top=(r1.bottom+22)+"px";hi.style.color=`color-mix(in srgb,${getComputedStyle($("cover")).getPropertyValue("--cink").trim()||ink} 85%,transparent)`;document.body.append(hi);
     hi.animate([{opacity:0,transform:"translateY(12px)"},{opacity:1,transform:"none"}],{duration:500,delay:800,easing:"cubic-bezier(.2,.8,.3,1)",fill:"both"});
     setTimeout(()=>{hi.animate([{opacity:1},{opacity:0}],{duration:300,fill:"forwards"}).onfinish=()=>hi.remove();
