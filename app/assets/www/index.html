@@ -465,6 +465,11 @@ body.gdrag,body.gdrag *{-webkit-user-select:none;user-select:none}
 .cover{padding-bottom:104px}
 .cover .acc-dev{opacity:0;transition:opacity 1s var(--ease),color .2s}
 .cover.ready .acc-dev{opacity:1}
+/* entrada tras el login: mientras el logo vuela, la portada espera sin su contenido */
+.lgfly{position:fixed;z-index:60;pointer-events:none;transform-origin:50% 50%;will-change:transform}
+.lgfly svg{width:100%;height:100%;display:block;fill:var(--cink)}
+.lghi{position:fixed;left:0;right:0;z-index:60;pointer-events:none;text-align:center;font:300 1.65rem var(--round);letter-spacing:.04em;color:color-mix(in srgb,var(--cink) 85%,transparent);opacity:0}
+body.lgwait .cover h1,body.lgwait .cover .tag,body.lgwait .cover .enter,body.lgwait .cover .acc-dev{opacity:0!important;transition:none!important}
 .cover.exiting .acc-dev{opacity:0;transition:opacity .25s}
 
 /* ===== transición de entrada: raíces que invaden la pantalla ===== */
@@ -996,20 +1001,21 @@ function buildLogo(){
     <mask id="grow" maskUnits="userSpaceOnUse" x="-60" y="-60" width="900" height="700"><rect x="-60" y="-60" width="900" height="700" fill="url(#growG)"/></mask></defs>
     <g id="lgT">${LOGO_T.map((p,i)=>`<g class="lt" style="transition-delay:${i*95}ms"><path d="${p}"/></g>`).join("")}</g>
     <g id="lgM"><g mask="url(#grow)"><path d="${LOGO_M}"/><path class="sap" d="${LOGO_M}" fill="url(#sapG)"/></g></g>`}
-let raf=0,px=0,py=0,tx=0,ty=0;
+let raf=0,px=0,py=0,tx=0,ty=0,introSkip=false;
 function intro(){
   const svg=$("logo"),cv=$("cover"),gG=$("growG"),sG=$("sapG"),lT=$("lgT"),lM=$("lgM");
   cancelAnimationFrame(raf);svg.classList.remove("on");cv.classList.remove("ready");
   if(RM.matches){gG.setAttribute("r","640");svg.classList.add("on");cv.classList.add("ready");lT.removeAttribute("transform");lM.removeAttribute("transform");return}
-  gG.setAttribute("r","0.01");sG.setAttribute("r","0.01");svg.getBoundingClientRect();
-  requestAnimationFrame(()=>svg.classList.add("on"));
+  const skip=introSkip;introSkip=false;
+  if(skip){gG.setAttribute("r","640");sG.setAttribute("r","0.01");svg.classList.add("on");cv.classList.add("ready")}
+  else{gG.setAttribute("r","0.01");sG.setAttribute("r","0.01");svg.getBoundingClientRect();requestAnimationFrame(()=>svg.classList.add("on"))}
   const t0=performance.now();let sap="",fr=0;
   /* Solo se toca el dibujo cuando cambia algo: el crecimiento al principio, la savia (cada 8 s) y el ratón.
      El vaivén del logo va por CSS (lo mueve la tarjeta gráfica) y el bucle se para si la portada no se ve. */
   const step=now=>{
     if(document.body.classList.contains("inside")||cv.offsetParent===null){raf=0;return}
     const e=(now-t0)/1000,g=Math.min(1,Math.max(0,(e-.5)/2.6));fr++;
-    if(e<3.3)gG.setAttribute("r",Math.max(.01,640*(1-(1-g)**3)).toFixed(1));
+    if(e<3.3&&!skip)gG.setAttribute("r",Math.max(.01,640*(1-(1-g)**3)).toFixed(1));
     if(e>1.3&&!cv.classList.contains("ready")){cv.classList.add("ready");warmInside()}
     const c=e-3.4;if(c>0&&fr%2===0){const p=(c%8)/3.6,v=p<1?Math.max(.01,580*(1-(1-p)**2)).toFixed(0):"0.01";if(v!==sap){sap=v;sG.setAttribute("r",v)}}
     if(Math.abs(tx-px)>.004||Math.abs(ty-py)>.004){px+=(tx-px)*.08;py+=(ty-py)*.08;
@@ -1728,15 +1734,48 @@ function renderAcc(){
   $("accEye").onclick=()=>{const i=$("accPass"),s=i.type==="password";i.type=s?"text":"password";$("accEye").textContent=t(s?"hide":"show")}}
 function doLogin(){
   if(APP){appLogin();return}
+  entradaPrime();
   const n=norm($("accName").value),pw=$("accPass").value;loginName=$("accName").value;
   if(!n||!pw){toast(t("badLogin"));return}
   const hit=Object.entries(accounts).find(([,a])=>!a.oculta&&norm(a.nombre)===n&&String(a.clave)===pw);
   if(!hit){toast(t("badLogin"));$("accPass").select();return}
-  LS.set("sendo.sess",hit[0]);editing=false;watchPlan(hit[0]);$("accPass").value="";show("app")}
+  LS.set("sendo.sess",hit[0]);editing=false;watchPlan(hit[0]);$("accPass").value="";loginFly(()=>show("app"),hit[1].nombre)}
 $("btnOut").onclick=()=>{if(APP){LS.set("sendo.app","");LS.set("sendo.cache","");appData=null;avisos(null)}LS.set("sendo.sess","");watchPlan(null);show("login");toast(t("loggedOut"))};
 $("acc").addEventListener("focusin",e=>{if(e.target.matches("input")){document.body.classList.add("typing");setTimeout(()=>e.target.scrollIntoView({block:"center",behavior:"smooth"}),300)}});
 $("acc").addEventListener("focusout",()=>setTimeout(()=>{if(!$("acc").contains(document.activeElement)){document.body.classList.remove("typing");scrollTo(0,0)}},120));
 $("btnDev").onclick=()=>{if(isDev)show("dev");else toast(t("devOnly"))};
+
+/* ---------- Entrada tras iniciar sesión: el logo pequeño del login crece hasta el de la portada temblando como una gelatina,
+   saluda «Kaixo/Hola, nombre» y suena un acorde cálido y discreto. ---------- */
+let entradaSnd=null;
+function entradaPrime(){if(RM.matches)return;try{if(!entradaSnd){entradaSnd=new Audio("sendo-entrada.mp3");entradaSnd.preload="auto"}
+  const a=entradaSnd;a.muted=true;const pr=a.play();if(pr&&pr.then)pr.then(()=>{a.pause();a.currentTime=0;a.muted=false}).catch(()=>{a.muted=false})}catch(e){}}
+function entradaPlay(){if(RM.matches||!entradaSnd)return;try{const a=entradaSnd;a.muted=false;a.currentTime=0;a.volume=1;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{})}catch(e){}}
+function loginFly(go,name){
+  const mini=$("miniLogo");
+  if(RM.matches||!mini||mini.offsetParent===null||!mini.getBoundingClientRect().width){go();return}
+  entradaPlay();
+  const r0=mini.getBoundingClientRect(),box=document.createElement("div"),cl=mini.cloneNode(true);
+  cl.removeAttribute("id");cl.setAttribute("aria-hidden","true");box.className="lgfly";box.append(cl);
+  Object.assign(box.style,{left:r0.left+"px",top:r0.top+"px",width:r0.width+"px",height:r0.height+"px"});
+  document.body.append(box);mini.style.visibility="hidden";
+  const acc=$("acc");acc.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(16px)"}],{duration:350,easing:"ease-in",fill:"forwards"});
+  setTimeout(()=>{
+    document.body.classList.add("lgwait");introSkip=true;go();
+    acc.getAnimations().forEach(a=>a.cancel());mini.style.visibility="";
+    const r1=$("logo").getBoundingClientRect();
+    if(!r1.width){box.remove();document.body.classList.remove("lgwait");return}
+    const c0x=r0.left+r0.width/2,c0y=r0.top+r0.height/2,c1x=r1.left+r1.width/2,c1y=r1.top+r1.height/2,S=r1.width/r0.width;
+    const seg=(v,a,b)=>Math.max(0,Math.min(1,(v-a)/(b-a))),ease=x=>x<.5?4*x*x*x:1-(-2*x+2)**3/2,D=2.0,N=80,K=[];
+    for(let i=0;i<=N;i++){const p=i/N*D,pre=seg(p,0,.18),k=ease(seg(p,.12,.75)),q=Math.max(0,p-.6),amp=.16*Math.exp(-q*5.5)*seg(p,.45,.6);
+      const s=(1+(S-1)*k)*(1-.14*Math.sin(pre*Math.PI)*(1-seg(p,.12,.3))),sx=s*(1+amp*Math.sin(q*24)),sy=s*(1-amp*Math.sin(q*24+.9));
+      K.push({offset:i/N,transform:`translate(${((c1x-c0x)*k).toFixed(2)}px,${((c1y-c0y)*k).toFixed(2)}px) scale(${sx.toFixed(4)},${sy.toFixed(4)})`})}
+    box.animate(K,{duration:D*1000,easing:"linear",fill:"forwards"});
+    const hi=document.createElement("div");hi.className="lghi";hi.textContent=(LANG==="eu"?"Kaixo, ":"Hola, ")+String(name||"").trim();
+    hi.style.top=(r1.bottom+22)+"px";document.body.append(hi);
+    hi.animate([{opacity:0,transform:"translateY(12px)"},{opacity:1,transform:"none"}],{duration:500,delay:800,easing:"cubic-bezier(.2,.8,.3,1)",fill:"both"});
+    setTimeout(()=>{hi.animate([{opacity:1},{opacity:0}],{duration:300,fill:"forwards"}).onfinish=()=>hi.remove();
+      document.body.classList.remove("lgwait");requestAnimationFrame(()=>box.remove())},2750)},350)}
 
 /* ---------- página de cuentas ---------- */
 let openGrp=new Set(),gdrag=null;
@@ -1933,11 +1972,12 @@ function avisos(d){const N=window.SendoNative;if(!APP||!N)return;try{if(!d){if(N
 function appApply(d){appData=d;avisos(d);const id=d.id||"yo";accounts={[id]:{nombre:d.nombre||""}};gens={};watchPlan(id);if(inside()){renderDocs();renderWeek()}}
 async function appLogin(){
   const n=$("accName").value,pw=$("accPass").value;loginName=n;if(!norm(n)||!pw){toast(t("badLogin"));return}
+  entradaPrime();
   const g=$("accGo");g.disabled=true;
   try{const K=await appKey(n,pw);let box;try{box=await appFetch(K.id)}catch(e){toast(t("netErr"));return}
     if(!box){toast(t("badLogin"));$("accPass").select();return}
     let d;try{d=await appOpen(K.raw,box)}catch(e){toast(t("badLogin"));return}
-    LS.set("sendo.app",JSON.stringify({id:K.id,k:b64e(K.raw)}));LS.set("sendo.cache",JSON.stringify(box));$("accPass").value="";appApply(d);show("app")}
+    LS.set("sendo.app",JSON.stringify({id:K.id,k:b64e(K.raw)}));LS.set("sendo.cache",JSON.stringify(box));$("accPass").value="";appApply(d);loginFly(()=>show("app"),d.nombre||n)}
   finally{const b=$("accGo");if(b)b.disabled=false}}
 async function appRefresh(first){
   let s=null;try{s=JSON.parse(LS.get("sendo.app")||"null")}catch(e){}
