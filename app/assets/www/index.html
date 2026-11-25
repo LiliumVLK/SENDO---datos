@@ -987,7 +987,42 @@ const fmtDM=d=>`${d.getDate()} ${MONTHS[LANG][d.getMonth()]}`;
 /* ---------- estado ---------- */
 const APP=window.SENDO_APP||null,DEVAPP=window.SENDO_DEV||null;let appData=null;
 let db=null,canEdit=false,isDev=false,editing=false,preview=false,pvMode=false,accounts={},client=null,access="loading",plans={},wkOffset=0;const open=new Set();
-const toast=m=>{const el=$("toast");el.textContent=m;el.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("on"),2400)};
+/* ---------- Sonidos discretos de la interfaz: se generan al momento con el audio del navegador (sin archivos),
+   en la misma tonalidad que el acorde de entrada (La mayor), con ataque suave, cola corta y volumen muy bajo.
+   No suenan con «reducir movimiento» activado ni si se guarda sendo.snd = "off". ---------- */
+const Snd=(()=>{let ac=null,out=null;
+  const ok=()=>!RM.matches&&LS.get("sendo.snd")!=="off";
+  const init=()=>{if(ac)return ac;const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+    try{ac=new C()}catch(e){return null}
+    out=ac.createGain();out.gain.value=2.1;const lp=ac.createBiquadFilter();lp.type="lowpass";lp.frequency.value=3200;
+    const rv=ac.createConvolver(),n=ac.sampleRate*1.1|0,b=ac.createBuffer(2,n,ac.sampleRate);
+    for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.2)}rv.buffer=b;
+    const wet=ac.createGain();wet.gain.value=.2;out.connect(lp);lp.connect(ac.destination);lp.connect(rv);rv.connect(wet);wet.connect(ac.destination);return ac};
+  ["pointerdown","keydown"].forEach(e=>addEventListener(e,()=>{if(!ok())return;const a=init();if(a&&a.state==="suspended")a.resume()},{capture:true,passive:true}));
+  let nb=null;const noise=()=>{if(nb)return nb;const n=ac.sampleRate*1.2|0;nb=ac.createBuffer(1,n,ac.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;return nb};
+  const env=(v,t0,a,g,dur)=>{v.gain.setValueAtTime(0,t0);v.gain.linearRampToValueAtTime(g,t0+a);v.gain.exponentialRampToValueAtTime(.0001,t0+dur)};
+  const tone=(f,t0,dur,g,a=.012)=>{const o=ac.createOscillator(),v=ac.createGain();o.frequency.value=f;env(v,t0,a,g,dur);o.connect(v);v.connect(out);o.start(t0);o.stop(t0+dur+.05)};
+  const note=(f,t0,dur,g)=>{tone(f,t0,dur,g);tone(f*2,t0,dur*.45,g*.16)};
+  const tick=(t0,g,f)=>{const s=ac.createBufferSource(),bp=ac.createBiquadFilter(),v=ac.createGain();s.buffer=noise();bp.type="bandpass";bp.frequency.value=f;bp.Q.value=2.2;
+    env(v,t0,.002,g,.045);s.connect(bp);bp.connect(v);v.connect(out);s.start(t0,Math.random()*.5,.08)};
+  const air=(t0,dur,g)=>{const s=ac.createBufferSource(),bp=ac.createBiquadFilter(),v=ac.createGain();s.buffer=noise();bp.type="bandpass";bp.Q.value=.9;
+    bp.frequency.setValueAtTime(450,t0);bp.frequency.exponentialRampToValueAtTime(1700,t0+dur);v.gain.setValueAtTime(0,t0);v.gain.linearRampToValueAtTime(g,t0+dur*.45);v.gain.linearRampToValueAtTime(0,t0+dur);
+    s.connect(bp);bp.connect(v);v.connect(out);s.start(t0,0,dur+.05)};
+  const pad=(fs,t0,dur,g)=>fs.forEach(f=>{const o=ac.createOscillator(),v=ac.createGain();o.frequency.value=f;v.gain.setValueAtTime(0,t0);v.gain.linearRampToValueAtTime(g,t0+dur*.35);v.gain.exponentialRampToValueAtTime(.0001,t0+dur);o.connect(v);v.connect(out);o.start(t0);o.stop(t0+dur+.05)});
+  const play=fn=>{if(!ok())return;const a=init();if(!a)return;if(a.state==="suspended")a.resume();try{fn(a.currentTime+.015)}catch(e){}};
+  const A3=220,Cs4=277.18,E4=329.63,A4=440,Cs5=554.37,E5=659.25,A5=880;
+  return{
+    open:()=>play(t=>{note(E4,t,.32,.045);note(A4,t+.07,.42,.04)}),          // abrir un día, una cuenta, un grupo
+    close:()=>play(t=>{note(A4,t,.28,.035);note(E4,t+.07,.36,.03)}),         // cerrarlo
+    tab:()=>play(t=>{tick(t,.05,2300);note(A5,t,.16,.014)}),                  // cambiar de pestaña
+    week:()=>play(t=>tick(t,.045,1700)),                                      // semana anterior / siguiente
+    sheet:o=>play(t=>{if(o){note(Cs5,t,.28,.026);note(E5,t+.05,.34,.022)}else note(Cs5,t,.22,.02)}), // abrir / cerrar ventana
+    toast:()=>play(t=>note(A5,t,.45,.016)),                                   // aviso
+    enter:()=>play(t=>pad([A3,Cs4,E4,A4],t,1.5,.016)),                        // entrar al diario
+    home:()=>play(t=>{note(A4,t,.3,.03);note(E4,t+.08,.34,.026);note(Cs4,t+.16,.55,.026)}), // volver a la portada
+    theme:ds=>play(t=>{air(t,1.05,.035);(ds||[]).slice(0,14).forEach((d,i)=>tick(t+d+.2,.032*(1-i/18),i%2?1450:1850))}) // claro/oscuro: soplo + «clac» de cada bloque
+  }})();
+const toast=m=>{Snd.toast();const el=$("toast");el.textContent=m;el.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("on"),2400)};
 
 /* ---------- portada ---------- */
 const LOGO_T=["M26.5 97.0C19.4 95.5 11.6 92.1 7.8 88.9C3.7 85.6 3.3 84.5 5.5 81.6C7.0 79.7 7.0 79.7 9.2 81.6C16.1 87.7 26.0 91.0 37.2 91.0C46.7 91.0 51.3 89.9 56.1 86.7C60.7 83.7 64.3 76.6 63.5 72.0C61.8 62.7 57.3 59.6 38.0 54.5C22.0 50.3 15.7 47.5 11.2 43.0C2.8 34.3 4.9 17.7 15.3 10.0C21.8 5.2 28.5 3.7 40.9 4.2C51.8 4.7 60.3 7.0 65.1 10.9C67.0 12.4 67.1 12.9 66.0 15.1C65.3 16.4 64.6 17.6 64.5 17.8C64.4 17.9 62.3 16.9 59.9 15.6C49.0 9.5 33.4 8.6 23.4 13.5C16.5 16.9 13.6 21.5 13.6 28.7C13.6 38.5 18.4 42.0 39.0 47.5C59.7 53.0 65.2 56.1 69.1 64.5C74.4 76.0 67.4 90.9 54.5 95.4C48.8 97.4 32.5 98.3 26.5 97.0Z", "M162.0 50.5L162.0 4.0L193.0 4.0L224.0 4.0L224.0 7.5L224.0 11.0L196.5 11.0L169.0 11.0L169.0 29.0L169.0 47.0L193.5 47.0L218.0 47.0L218.0 50.0L218.0 53.0L193.5 53.0L169.0 53.0L169.0 72.0L169.0 91.0L197.5 91.0L226.0 91.0L226.0 94.0L226.0 97.0L194.0 97.0L162.0 97.0L162.0 50.5Z", "M318.0 50.5L318.0 4.0L320.9 4.0C323.5 4.0 326.7 7.7 354.7 43.4L385.5 82.9L386.0 43.7L386.5 4.5L390.0 4.5L393.5 4.5L393.8 50.8L394.0 97.0L390.7 97.0C387.4 97.0 386.1 95.5 356.4 57.6L325.5 18.2L325.2 57.6L325.0 97.0L321.5 97.0L318.0 97.0L318.0 50.5Z", "M494.0 50.5L494.0 4.0L514.2 4.0C538.2 4.1 547.2 5.4 556.1 10.1C571.5 18.3 580.0 33.1 580.0 51.3C580.0 72.8 566.5 90.0 545.3 95.5C541.0 96.6 533.8 97.0 516.8 97.0L494.0 97.0L494.0 50.5ZM546.0 88.1C563.1 82.5 572.6 68.7 572.4 50.0C572.2 38.9 569.6 31.9 562.8 24.4C553.0 13.7 544.1 11.0 518.8 11.0L501.0 11.0L501.0 51.1L501.0 91.2L520.2 90.8C536.4 90.4 540.6 89.9 546.0 88.1Z", "M699.0 96.9C681.7 93.5 666.1 77.8 662.9 60.2C658.3 36.2 671.9 13.0 694.7 6.0C701.9 3.8 715.4 3.3 722.9 5.1C746.2 10.4 761.7 33.9 758.1 58.2C753.9 85.5 727.9 102.5 699.0 96.9ZM723.1 89.1C739.6 83.9 749.8 70.7 750.7 53.0C751.3 43.2 749.1 34.9 743.9 27.4C730.2 7.5 699.8 4.8 681.7 21.9C662.3 40.3 666.5 73.4 689.9 85.8C693.1 87.6 697.5 89.4 699.6 89.9C706.4 91.5 716.4 91.1 723.1 89.1Z"];
@@ -1083,8 +1118,8 @@ function toggleDay(k,row,day,key,i){
   const was=open.has(k),box=$("wkBox");open.clear();
   box.querySelectorAll(".wkfood").forEach(collapseFood);
   box.querySelectorAll(".wkrow.open").forEach(r=>{r.classList.remove("open");r.setAttribute("aria-expanded","false")});
-  if(was)return;
-  open.add(k);row.classList.add("open");row.setAttribute("aria-expanded","true");
+  if(was){Snd.close();return}
+  Snd.open();open.add(k);row.classList.add("open");row.setAttribute("aria-expanded","true");
   const f=food(day,key,i);row.after(f);expandFood(f,row)}
 function expandFood(f,row){
   if(RM.matches)return;f.classList.add("opening");
@@ -1102,7 +1137,7 @@ function collapseFood(f){
 /* Cierre bonito para los recuadros desplegables (cuentas, grupos, carpeta de PDFs borrados): lo de dentro se recoge
    de abajo arriba encogiéndose, y después se pliega la caja. Es la vuelta atrás de cómo se abren. */
 function foldOut(inner,close){
-  if(RM.matches||!inner){close();return}
+  Snd.close();if(RM.matches||!inner){close();return}
   const kids=[...inner.children].filter(e=>e.tagName!=="SUMMARY"&&e.offsetParent!==null&&e.getBoundingClientRect().height>0),n=kids.length;
   const an=kids.map((e,j)=>{if(!e.style.transformOrigin)e.style.transformOrigin="24px 50%";
     return e.animate([{opacity:1,transform:"none"},{opacity:0,transform:"scale(.86) translateY(-8px)"}],{duration:240,delay:(n-1-j)*40,easing:"cubic-bezier(.55,0,.8,.3)",fill:"forwards"})});
@@ -1112,7 +1147,7 @@ document.addEventListener("click",e=>{const s=e.target.closest(".pf-del>summary"
   if(d.open){e.preventDefault();if(d._closing)return;d._closing=1;foldOut(d,()=>{d.open=false;d._closing=0})}
   else{foldIn(d);requestAnimationFrame(()=>[...d.children].filter(x=>x.tagName!=="SUMMARY").forEach((x,j)=>{x.style.transformOrigin="24px 50%";
     x.animate([{opacity:0,transform:"scale(.86) translateY(-6px)"},{opacity:1,transform:"none"}],{duration:460,delay:j*55,easing:"cubic-bezier(.2,.8,.25,1.08)",fill:"backwards"})}))}});
-function foldIn(inner){if(inner&&inner._fold){inner._fold.forEach(a=>a.cancel());inner._fold=null}}
+function foldIn(inner){Snd.open();if(inner&&inner._fold){inner._fold.forEach(a=>a.cancel());inner._fold=null}}
 function slideWeek(dir){
   if(RM.matches)return;const E="cubic-bezier(.2,.8,.25,1.08)";
   $("wkBox").animate([{transform:`translateX(${dir*14}px)`,opacity:0},{transform:"none",opacity:1}],{duration:460,easing:E});
@@ -1140,8 +1175,8 @@ function sheet(title,html,onSave,onClear,focusSel,lb){lb=lb||{};
   const ov=document.createElement("div");ov.className="sheet";
   ov.innerHTML=`<div class="sheet-card" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sh-head"><h2>${esc(title)}</h2><button type="button" class="x" aria-label="${t("cancel")}">✕</button></div>${html}
     <div class="sh-foot">${onClear?`<button type="button" class="ghost danger" data-clear>${esc(lb.clear||t("clear"))}</button>`:""}<button type="button" class="ghost" data-cancel>${t("cancel")}</button><button type="button" class="primary" data-save>${esc(lb.save||t("save"))}</button></div></div>`;
-  document.body.append(ov);requestAnimationFrame(()=>ov.classList.add("on"));
-  const close=()=>{ov.classList.remove("on");setTimeout(()=>ov.remove(),220);document.removeEventListener("keydown",kd)};
+  document.body.append(ov);requestAnimationFrame(()=>ov.classList.add("on"));Snd.sheet(1);
+  const close=()=>{Snd.sheet(0);ov.classList.remove("on");setTimeout(()=>ov.remove(),220);document.removeEventListener("keydown",kd)};
   const kd=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",kd);
   ov.addEventListener("click",e=>{if(e.target===ov)close()});ov.querySelector(".x").onclick=close;ov.querySelector("[data-cancel]").onclick=close;
   const card=ov.querySelector(".sheet-card");
@@ -1204,7 +1239,7 @@ function placeInd(stretch,nav){nav=nav||"#tabs";const b=document.querySelector(n
   if(!stretch||RM.matches)i.style.transition="none";
   i.style.setProperty("--x",nl+"px");i.style.width=b.offsetWidth+"px";if(stretch&&!RM.matches&&nl!==L0){i.classList.remove("str");void i.offsetWidth;i.classList.add("str")}
   if(!stretch||RM.matches){void i.offsetWidth;i.style.transition=""}}
-function setTab(x,anim){const prev=tab;tab=x;document.body.dataset.tab=x;
+function setTab(x,anim){const prev=tab;tab=x;document.body.dataset.tab=x;if(anim&&prev!==x)Snd.tab();
   document.querySelectorAll("#tabs [data-tab]").forEach(b=>{b.setAttribute("aria-selected",String(b.dataset.tab===x));b.tabIndex=b.dataset.tab===x?0:-1});
   placeInd(anim);
   if(anim){const b=document.querySelector(`#tabs [data-tab="${x}"]`);b.classList.remove("go");void b.offsetWidth;b.classList.add("go");setTimeout(()=>b.classList.remove("go"),1000);
@@ -1220,7 +1255,7 @@ $("tabs").addEventListener("keydown",e=>{if(e.key!=="ArrowLeft"&&e.key!=="ArrowR
     if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.8){if(dx<0&&tab==="plan")setTab("nut",true);else if(dx>0&&tab==="nut")setTab("plan",true)}},{passive:true})}
 addEventListener("resize",()=>{placeInd();placeInd(false,"#dvTabs")});
 let dvTab=LS.get("sendo.dvtab")==="grp"?"grp":"acc";
-function setDvTab(x,anim){dvTab=x;LS.set("sendo.dvtab",x);document.body.dataset.dt=x;
+function setDvTab(x,anim){if(anim&&dvTab!==x)Snd.tab();dvTab=x;LS.set("sendo.dvtab",x);document.body.dataset.dt=x;
   document.querySelectorAll("#dvTabs [data-dt]").forEach(b=>{b.setAttribute("aria-selected",String(b.dataset.dt===x));b.tabIndex=b.dataset.dt===x?0:-1});
   placeInd(anim,"#dvTabs");
   if(anim){const b=document.querySelector(`#dvTabs [data-dt="${x}"]`);b.classList.remove("go");void b.offsetWidth;b.classList.add("go");setTimeout(()=>b.classList.remove("go"),1000);
@@ -1342,7 +1377,7 @@ const SV={
         logo.style.opacity=logo.style.willChange="";pre&&pre.cancel();done&&done()}};
     requestAnimationFrame(frame)}};
 function goInside(){
-  const c=$("cover");if(c.classList.contains("exiting"))return;
+  const c=$("cover");if(c.classList.contains("exiting"))return;Snd.enter();
   const old=$("rootsBg");if(old)old.remove();
   const lr=$("logo").getBoundingClientRect(),ox=lr.left+lr.width*402/823,oy=lr.top+lr.height*236/616;
   const W=innerWidth,H=innerHeight,dpr=Math.min(2,devicePixelRatio||1),D=Math.hypot(Math.max(ox,W-ox),Math.max(oy,H-oy));
@@ -1365,9 +1400,9 @@ function goInside(){
 /* al salir del diario todo vuelve a como estaba al principio: semana actual, días cerrados, Plan semanal, arriba del todo */
 function resetDiary(){wkOffset=0;open.clear();const sh=document.querySelector(".sheet [data-cancel]");if(sh)sh.click();
   if(tab!=="plan")setTab("plan");document.body.classList.remove("swap","arrive");scrollTo(0,0);try{renderLegend()}catch(e){}}
-function goHome(){resetDiary();const rb=$("rootsBg");if(rb)rb.remove();document.body.classList.remove("inside");document.body.classList.add("home");$("devSec").hidden=true;$("docSec").hidden=true;$("weekSec").hidden=true;$("nutSec").hidden=true;scrollTo(0,0);intro()}
+function goHome(){Snd.home();resetDiary();const rb=$("rootsBg");if(rb)rb.remove();document.body.classList.remove("inside");document.body.classList.add("home");$("devSec").hidden=true;$("docSec").hidden=true;$("weekSec").hidden=true;$("nutSec").hidden=true;scrollTo(0,0);intro()}
 $("btnEnter").onclick=goInside;$("btnHome").onclick=()=>editing?show("dev"):goHome();
-$("wkPrev").onclick=()=>{wkOffset--;open.clear();renderWeek();slideWeek(-1)};$("wkNext").onclick=()=>{wkOffset++;open.clear();renderWeek();slideWeek(1)};$("wkPrev").classList.add("rp");$("wkNext").classList.add("rp");
+$("wkPrev").onclick=()=>{Snd.week();wkOffset--;open.clear();renderWeek();slideWeek(-1)};$("wkNext").onclick=()=>{Snd.week();wkOffset++;open.clear();renderWeek();slideWeek(1)};$("wkPrev").classList.add("rp");$("wkNext").classList.add("rp");
 document.querySelectorAll(".langsw button").forEach(b=>b.onclick=()=>{LANG=b.dataset.lang;LS.set("tpl.lang",LANG);renderAll()});
 /* cambio claro/oscuro: el modo nuevo baja como raíces que crecen de arriba abajo y luego lo llenan todo */
 function rootMask(W,H){
@@ -1423,6 +1458,7 @@ $("btnTheme").onclick=()=>{
        (si no, los días que pasaban por debajo del menú se pintaban delante de él) */
     const CH=[...document.querySelectorAll(".tabs,.corner,#dvTabs")].filter(e=>e.offsetParent!==null||getComputedStyle(e).position==="fixed").filter(e=>{const q=e.getBoundingClientRect();return q.height>0&&q.bottom>0&&q.top<H});
     CH.forEach((e,i)=>{const n="jc"+i;e.style.viewTransitionName=n;css.push(`html.jvt::view-transition-old(${n}){animation:none;opacity:1}html.jvt::view-transition-new(${n}){animation:jcIn .4s ease both}`)});
+    Snd.theme(B.map(e=>{const y=Math.min(1,Math.max(0,(e.getBoundingClientRect().top+30)/H));return .06+y*.66}).filter((v,i,a)=>i===0||Math.abs(v-a[i-1])>.035));
     s.textContent=css.join("");r.classList.add("jvt");
     const done=()=>{swiping=false;r.classList.remove("jvt");s.textContent="";CH.forEach(e=>{e.style.viewTransitionName=""});B.forEach(e=>{e.style.viewTransitionName="";e.classList.remove("jfb")})};
     try{document.startViewTransition(apply).finished.finally(done)}catch(e){apply();done()}
@@ -1812,7 +1848,7 @@ const openFiles=new Set();
 const act=(k,id,ic,lab,tip,cls,badge)=>`<button type="button" class="act rp${cls||""}" data-${k}="${esc(id)}" aria-label="${esc(tip)}" title="${esc(tip)}"><span class="act-i">${ic}${badge?`<b class="act-n">${badge}</b>`:""}</span><span class="act-l">${esc(lab)}</span></button>`;
 /* «Archivos»: las cuatro opciones salen en abanico desde el botón y vuelven a él al cerrarlo */
 function toggleFiles(b){const k=b.dataset.files,art=b.closest(".arow"),pan=art&&art.querySelector(`.fpan[data-fp="${CSS.escape(k)}"]`);if(!pan)return;
-  const op=!openFiles.has(k),items=[...pan.querySelectorAll(".fo-i")];
+  const op=!openFiles.has(k),items=[...pan.querySelectorAll(".fo-i")];op?Snd.open():Snd.close();
   const aim=()=>{const r=b.querySelector(".act-i").getBoundingClientRect();items.forEach(it=>{const q=it.querySelector(".act-i").getBoundingClientRect();
     it.style.setProperty("--fx",(r.left+r.width/2-(q.left+q.width/2)).toFixed(1)+"px");it.style.setProperty("--fy",(r.top+r.height/2-(q.top+q.height/2)).toFixed(1)+"px")})};
   b.setAttribute("aria-expanded",String(op));
