@@ -1,9 +1,13 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%}:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>SENDO</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Poppins:ital,wght@0,300;0,400;0,500;1,300&display=swap">
-<script>try{const m=localStorage.getItem("sendo.theme");if(m==="dark"||m==="light")document.documentElement.dataset.theme=m}catch(e){}</script>
+<script>/* sin zoom: ni pellizco, ni doble toque, ni Ctrl + rueda o teclas */
+(()=>{const no=e=>e.preventDefault();["gesturestart","gesturechange","gestureend"].forEach(n=>document.addEventListener(n,no,{passive:false}));
+addEventListener("wheel",e=>{if(e.ctrlKey||e.metaKey)e.preventDefault()},{passive:false});
+addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&["+","-","=","0","_"].includes(e.key))e.preventDefault()})})();
+try{const m=localStorage.getItem("sendo.theme");if(m==="dark"||m==="light")document.documentElement.dataset.theme=m}catch(e){}</script>
 <style>
 :root{
   --bg:#f3f5f4;--surface:#ffffff;--sunk:#e8ecea;--line:#d5dcd8;
