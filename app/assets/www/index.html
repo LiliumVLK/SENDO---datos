@@ -1757,6 +1757,8 @@ function loginFly(go,name){
   entradaPlay();
   const r0=mini.getBoundingClientRect(),box=document.createElement("div"),cl=mini.cloneNode(true);
   cl.removeAttribute("id");cl.setAttribute("aria-hidden","true");box.className="lgfly";box.append(cl);
+  /* el color del logo solo existe dentro del login y la portada: se copia el de verdad (blanco en modo oscuro) */
+  const ink=getComputedStyle(mini).fill||"currentColor";cl.style.fill=ink;
   Object.assign(box.style,{left:r0.left+"px",top:r0.top+"px",width:r0.width+"px",height:r0.height+"px"});
   document.body.append(box);mini.style.visibility="hidden";
   const acc=$("acc");acc.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(16px)"}],{duration:350,easing:"ease-in",fill:"forwards"});
@@ -1772,7 +1774,7 @@ function loginFly(go,name){
       K.push({offset:i/N,transform:`translate(${((c1x-c0x)*k).toFixed(2)}px,${((c1y-c0y)*k).toFixed(2)}px) scale(${sx.toFixed(4)},${sy.toFixed(4)})`})}
     box.animate(K,{duration:D*1000,easing:"linear",fill:"forwards"});
     const hi=document.createElement("div");hi.className="lghi";hi.textContent=(LANG==="eu"?"Kaixo, ":"Hola, ")+String(name||"").trim();
-    hi.style.top=(r1.bottom+22)+"px";document.body.append(hi);
+    hi.style.top=(r1.bottom+22)+"px";hi.style.color=`color-mix(in srgb,${getComputedStyle($("cover")).getPropertyValue("--cink").trim()||ink} 85%,transparent)`;document.body.append(hi);
     hi.animate([{opacity:0,transform:"translateY(12px)"},{opacity:1,transform:"none"}],{duration:500,delay:800,easing:"cubic-bezier(.2,.8,.3,1)",fill:"both"});
     setTimeout(()=>{hi.animate([{opacity:1},{opacity:0}],{duration:300,fill:"forwards"}).onfinish=()=>hi.remove();
       document.body.classList.remove("lgwait");requestAnimationFrame(()=>box.remove())},2750)},350)}
